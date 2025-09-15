@@ -1,0 +1,5 @@
+lemma one_C0_per_tid [reuse]:
+    "All tid #i #j. C0(tid)@i & C0(tid)@j ==> #i = #j"
+
+lemma one_C1_per_tid [reuse]:
+    "All tid #i #j. C1(tid)@i & C1(tid)@j ==> #i = #j"

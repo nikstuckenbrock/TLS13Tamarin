@@ -1,0 +1,11 @@
+lemma sanity_client_C1:
+    "All tid #i. C1(tid)@i ==> Ex #j. C0(tid)@j & j<i"
+
+lemma sanity_server_S1:
+    "All tid #i. S1(tid)@i ==> (Ex #j. S0(tid)@j & j<i) | (Ex #j. S0_PSK(tid)@j & j<i)"
+
+lemma sanity_server_S2a:
+    "All tid #i. S2a(tid)@i ==> Ex #j. S1(tid)@j & j<i"
+
+lemma sanity_server_C2a:
+    "All tid #i. C2a(tid)@i ==> Ex #j. C1(tid)@j & j<i"
