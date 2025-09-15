@@ -722,3 +722,101 @@ rule client_auth:
             p_cert_req
         )
     ]
+
+rule client_auth_cert:
+    let
+        p_cert_req = '1'
+        p_psk_ke_mode = 'na'
+
+        // Certificate
+        certificateMessage = Certificate('0', pk(~longTermKeyClient))
+        messages = <p_messages, certificateMessage>
+
+        // CertificateVerify
+        signature = sign{<'client_cv', <h(messages)>>}~longTermKeyClient
+        certificateVerifyMessage = CertificateVerify(signature)
+        messages = <messages, certificateVerifyMessage>
+
+        // Finished
+        verify_data = hmac(Expand(Expand(p_handshakeSecret, <'clienthts', <h(messages)>>, '32'), <'fin', '0'>, '32'), h(messages))
+        finishedMessage = Finished(verify_data)
+        messages = <messages, finishedMessage>
+
+        rms = Expand(p_ms, <'rms', <h(messages)>>, '32')
+
+        serverApplicationTrafficKey = Expand(serverApplicationTrafficSecret, <'adke_wk', '0'>, '32')
+        clientApplicationTrafficKey = Expand(clientApplicationTrafficSecret, <'adke_wk', '0'>, '32')
+
+        auth_status = <'auth', 'auth'>
+    in
+    [
+        F_State_C2d(
+            tid,
+            $C,
+            $S,
+            p_res_psk,
+            p_messages,
+            p_nc,
+            p_ns,
+            p_g,
+            p_sg,
+            p_hrr,
+            p_x,
+            p_y,
+            p_gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            p_handshakeSecret,
+            p_masterSecret,
+            p_clientApplicationTrafficSecret,
+            p_serverApplicationTrafficSecret,
+            p_handshakeKeyClient,
+            p_handshakeKeyServer,
+            p_auth_status,
+            p_earlyMasterSecret,
+            p_rms,
+            p_cert_req
+        ),
+        !Ltk($C, ~longTermKeyClient)
+    ]
+    --[
+        C3_cert(tid)
+    ]->
+    [
+        F_State_C3(
+            tid,
+            $C,
+            $S,
+            p_res_psk,
+            p_messages,
+            p_nc,
+            p_ns,
+            p_g,
+            p_sg,
+            p_hrr,
+            p_x,
+            p_y,
+            p_gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            p_handshakeSecret,
+            p_masterSecret,
+            p_clientApplicationTrafficSecret,
+            p_serverApplicationTrafficSecret,
+            p_handshakeKeyClient,
+            p_handshakeKeyServer,
+            p_auth_status,
+            p_earlyMasterSecret,
+            rms,
+            p_cert_req
+        ),
+        Out(senc{<certificateMessage,certificateVerifyMessage,finishedMessage>}p_handshakeKeyClient)
+    ]
