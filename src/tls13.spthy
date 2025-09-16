@@ -12,8 +12,12 @@ functions: Expand/3, Extract/2, hmac/1, mac/1, mask/2, unmask/2
 #include "server.splib"
 #include "serverPsk.splib"
 
+#ifdef reachability
 #include "reachability.splib"
-#include "sanity.splib"
+#endif
+
+#ifdef uniqueness
 #include "uniqueness.splib"
+#endif
 
 end
