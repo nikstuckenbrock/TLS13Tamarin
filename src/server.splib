@@ -3,7 +3,8 @@ rule start_server:
         Fr(tid)
     ]
     --[
-        Start(tid, $S, 'server')
+        Start(tid, $S, 'server'),
+        RIdentity(tid, $S, 'server', <$S>)
     ]->
     [
         F_State_S0(
@@ -91,7 +92,6 @@ rule receive_client_hello:
         )
     ]
     --[
-        Received(clientRandom),
         S0(tid),
         Neq($group1, $group2)
     ]->
@@ -180,6 +180,7 @@ rule hello_retry_request:
     ]
     --[
         S1_retry(tid),
+        Neq(p_g, p_sg),
         Instance(tid, $S, 'server')
     ]->
     [
@@ -267,7 +268,14 @@ rule server_hello:
     ]
     --[
         S1(tid),
-        Instance(tid, $S, 'server')
+        Instance(tid, $S, 'server'),
+        Eq($p_g, p_supported_groups),
+        Neq(p_gx, $p_g),
+        Neq(gxy, $p_g),
+        Instance(tid, $S, 'server'),
+        RNonces(tid, $S, 'server', <p_clientRandom, serverRandom>),
+        DHChal($p_g, some_x, y, p_gx, gy, gxy),
+        DH(tid, $S, y)
     ]->
     [
         Out(message),
@@ -312,6 +320,7 @@ rule server_gen_keys:
         handshakeKeyServer = Expand(Expand(handshakeSecret, <'clienthts', <h(p_messages)>>, '32'), <'kshe_wk', '0'>, '32')
     in
     [
+        DHExp(p_y, tid, $S),
         F_State_S2a(
             tid,
             $S,
@@ -346,7 +355,11 @@ rule server_gen_keys:
     ]
     --[
         S2a(tid),
-        Instance(tid, $S, 'server')
+        Instance(tid, $S, 'server'),
+        Extract('0', handshakeSecret),
+        RHS(tid, $S, 'server', <handshakeSecret>),
+        RMS(tid, $S, 'server', <masterSecret>),
+        DeleteDH(tid, $S, p_y)
     ]->
     [
         F_State_S2b(
@@ -577,7 +590,8 @@ rule certificate_request:
     ]
     --[
         S2c_req(tid),
-        Instance(tid, $S, 'server')
+        Instance(tid, $S, 'server'),
+        RCertReqCtxt(tid, $S, 'server', <certificate_request_context>)
     ]->[
         F_State_S2d(
             tid,
@@ -637,6 +651,7 @@ rule server_auth:
         auth_status = <'auth', '0'>
     in
     [
+        !Ltk($S, ~longTermKeyServer),
         F_State_S2d(
             tid,
             $S,
@@ -667,14 +682,18 @@ rule server_auth:
             p_ems,
             p_rms,
             p_cert_req
-        ),
-        !Ltk($S, ~longTermKeyServer)
+        )
     ]
     --[
         S2d(tid),
-        Instance(tid, $S, 'server')
+        Instance(tid, $S, 'server'),
+        Eq(p_psk_ke_mode, 'na'),
+        UseLtk(~longTermKeyServer, signature),
+        RTranscript(tid, $S, 'server', <messages>)
     ]->
     [
+        Out(senc{<certificateMessage,certificateVerifyMessage,finishedMessage>}p_handshakeKeyServer),
+        SendStream(tid, $S, $C, auth_status, <messages>),
         F_State_S3(
             tid,
             $S,
@@ -705,12 +724,12 @@ rule server_auth:
             earlyMasterSecret,
             p_rms,
             p_cert_req
-        ),
-        Out(senc{<certificateMessage,certificateVerifyMessage,finishedMessage>}p_handshakeKeyServer)
+        )
     ]
 
 rule receive_client_auth:
     let
+        exp_verify_data = hmac(Expand(Expand(p_handshakeSecret, <'clienthts', <h(p_messages)>>, '32'), <'fin', '0'>, '32'), h(p_messages))
         receivedFinished = Finished(verify_data)
         messages = <p_messages, receivedFinished>
         resumptionMasterSecret = Expand(p_masterSecret, <'rms', <h(messages)>>, '32')
@@ -753,9 +772,19 @@ rule receive_client_auth:
     ]
     --[
         S3(tid),
-        Instance(tid, $S, 'server')
+        Instance(tid, $S, 'server'),
+        Eq(verify_data, exp_verify_data),
+        RMode(tid, $S, 'server', <p_psk_ke_mode>),
+        CIdentity(tid, $S, 'server', <$C, p_auth_status>),
+        CHS(tid, $S, 'server', <p_handshakeSecret>),
+        RHSMS(tid, $S, 'server', <p_handshakeSecret, p_masterSecret>),
+        RRMS(tid, $S, 'server', <$C, resumptionMasterSecret, messages>),
+        CTranscript(tid, $S, 'server', <messages>),
+        CNonces(tid, $S, 'server', <p_nc, p_ns>),
+        SessionKey(tid, $S, $C, p_auth_status, <serverApplicationTrafficKey, clientApplicationTrafficKey>)
     ]->
     [
+        RecvStream(tid, $S, $C, p_auth_status, clientApplicationTrafficKey),
         L_State_S4(
             tid,
             $S,
@@ -799,6 +828,8 @@ rule new_session_ticket:
     in
     [
         SendStream(tid, $S, $C, auth_status, serverApplicationTrafficKey),
+        Fr(ticket),
+        Fr(ticket_age_add),
         F_State_S4(
             tid,
             $S,
@@ -829,14 +860,19 @@ rule new_session_ticket:
             p_earlyMasterSecret,
             p_rms,
             p_cert_req
-        ),
-        Fr(ticket),
-        Fr(ticket_age_add)
+        )
     ]
     --[
-        S4_NST(tid)
+        S4_NST(tid),
+        Instance(tid, $S, 'server'),
+        RPostHS(tid, $S, 'server', <p_handshakeSecret, p_rms, $C, auth_status, p_messages>),
+        RNST(tid, $S, 'server', <ticket, ticket_age_add>)
     ]->
     [
+        Out(senc{message}serverApplicationTrafficKey),
+        SendStream(tid, $S, $C, auth_status, serverApplicationTrafficKey),
+        !ServerPSK($S, $C, p_rms, auth_status, message, 'res'),
+        SecretPSK($S, p_rms),
         F_State_S4(
             tid,
             $S,
@@ -867,6 +903,5 @@ rule new_session_ticket:
             p_earlyMasterSecret,
             p_rms,
             p_cert_req
-        ),
-        Out(senc{message}serverApplicationTrafficKey)
+        )
     ]
