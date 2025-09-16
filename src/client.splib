@@ -20,14 +20,14 @@ rule client_hello:
     --[
         C0(clientRandom),
         Start(clientRandom, $C, 'client'),
-        RIdentity(tid, $C, 'client', <$C>),
-        DH(tid, $C, x),
+        RIdentity(clientRandom, $C, 'client', <$C>),
+        DH(clientRandom, $C, x),
         HonestUse(x),
         HonestUse(gx),
         Neq($group1, $group2)
     ]->
     [
-        DHExp(x, tid, $C),
+        DHExp(x, clientRandom, $C),
         F_State_C1(
             clientRandom,
             $C,
@@ -729,7 +729,7 @@ rule client_auth:
     ]->
     [
         Out(senc{finishedMessage}p_handshakeKeyClient),
-        SendStream(tid, $C, $S, auth_status, clientApplicationTrafficKey),
+        SendStream(tid, $C, $S, p_auth_status, clientApplicationTrafficKey),
         L_State_C4(
             tid,
             $C,
@@ -782,10 +782,10 @@ rule client_auth_cert:
         finishedMessage = Finished(verify_data)
         messages = <messages, finishedMessage>
 
-        rms = Expand(p_ms, <'rms', <h(messages)>>, '32')
+        rms = Expand(p_masterSecret, <'rms', <h(messages)>>, '32')
 
-        serverApplicationTrafficKey = Expand(serverApplicationTrafficSecret, <'adke_wk', '0'>, '32')
-        clientApplicationTrafficKey = Expand(clientApplicationTrafficSecret, <'adke_wk', '0'>, '32')
+        serverApplicationTrafficKey = Expand(p_serverApplicationTrafficSecret, <'adke_wk', '0'>, '32')
+        clientApplicationTrafficKey = Expand(p_clientApplicationTrafficSecret, <'adke_wk', '0'>, '32')
 
         auth_status = <'auth', 'auth'>
     in
@@ -917,12 +917,12 @@ rule receive_new_session_ticket:
     --[
         C4_NST(tid),
         Instance(tid, $C, 'client'),
-        RPostHS(tid, C, 'client', <p_handshakeSecret, p_rms, $S, p_auth_status, p_messages>)
+        RPostHS(tid, $C, 'client', <p_handshakeSecret, p_rms, $S, p_auth_status, p_messages>)
     ]->
     [
-        RecvStream(tid, C, S, p_auth_status, serverApplicationTrafficKey),
-        !ClientPSK(C, S, p_rms, p_auth_status, receivedMessage, 'res'),
-        SecretPSK(C, p_rms),
+        RecvStream(tid, $C, $S, p_auth_status, serverApplicationTrafficKey),
+        !ClientPSK($C, $S, p_rms, p_auth_status, receivedMessage, 'res'),
+        SecretPSK($C, p_rms),
         L_State_C4(
             tid,
             $C,

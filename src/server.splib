@@ -180,7 +180,7 @@ rule hello_retry_request:
     ]
     --[
         S1_retry(tid),
-        Neq(p_g, p_sg),
+        Neq(p_group, p_sg),
         Instance(tid, $S, 'server')
     ]->
     [
@@ -824,7 +824,7 @@ rule new_session_ticket:
         ticket_extension = <
             <'46', $max_early_data_size>
         >
-        message = NewSessionTicket($ticket_lifetime, ticket_age_add, ticketm, ticket_extension)
+        message = NewSessionTicket($ticket_lifetime, ticket_age_add, ticket, ticket_extension)
     in
     [
         SendStream(tid, $S, $C, auth_status, serverApplicationTrafficKey),
