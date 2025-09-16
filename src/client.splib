@@ -27,6 +27,7 @@ rule client_hello:
         Neq($group1, $group2)
     ]->
     [
+        DHExp(x, tid, $C),
         F_State_C1(
             clientRandom,
             $C,
@@ -87,6 +88,9 @@ rule receive_hello_retry_request:
         es = Extract(p_res_psk, '0')
     in
     [
+        In(receivedMessage),
+        Fr(x),
+        DHExp(p_x, tid, $C),
         F_State_C1(
             tid,
             $C,
@@ -117,15 +121,19 @@ rule receive_hello_retry_request:
             p_ems,
             p_rms,
             p_cert_req
-        ),
-        In(receivedMessage),
-        Fr(x)
+        )
     ]
     --[
         C1_retry(tid),
-        Instance(tid, $C, 'client')
+        Instance(tid, $C, 'client'),
+        Neq($group1, $group2),
+        Instance(tid, $C, 'client'),
+        DeleteDH(tid, $C, p_x),
+        DH(tid, $C, x)
     ]->
     [
+        Out(message),
+        DHExp(x, tid, $C),
         F_State_C1(
             tid,
             $C,
@@ -156,14 +164,14 @@ rule receive_hello_retry_request:
             p_ems,
             p_rms,
             p_cert_req
-        ),
-        Out(message)
+        )
     ]
 
 rule receive_server_hello:
     let
         serverRandom = new_ns
         gy = new_gy
+        gy = g^new_y
         gxy = gy^p_x
         extensions = <
             ExtensionSignatureSchemeList($supported_signature_algorithms),
@@ -173,6 +181,7 @@ rule receive_server_hello:
         messages = <p_messages, receivedMessage>
     in
     [
+        In(receivedMessage),
         F_State_C1(
             tid,
             $C,
@@ -203,12 +212,15 @@ rule receive_server_hello:
             p_ems,
             p_rms,
             p_cert_req
-        ),
-        In(receivedMessage)
+        )
     ]
     --[
         C1(tid),
-        Instance(tid, $C, 'client')
+        Instance(tid, $C, 'client'),
+        Neq(gy, $g),
+        Neq(gxy, $g),
+        DHChal($g, p_x, new_y, p_gx, gy, gxy),
+        RNonces(tid, $C, 'client', <p_clientRandom,serverRandom>)
     ]->
     [
         F_State_C2a(
@@ -252,6 +264,7 @@ rule client_gen_keys:
         handshakeKeyServer = Expand(Expand(handshakeSecret, <'clienthts', <h(p_messages)>>, '32'), <'kshe_wk', '0'>, '32')
     in
     [
+        DHExp(p_x, tid, $C),
         F_State_C2a(
             tid,
             $C,
@@ -286,7 +299,10 @@ rule client_gen_keys:
     ]
     --[
         C2a(tid),
-        Instance(tid, $C, 'client')
+        Instance(tid, $C, 'client'),
+        RMS(tid, $C, 'client', <masterSecret>),
+        RHS(tid, $C, 'client', <handshakeSecret>),
+        DeleteDH(tid, $C, p_x)
     ]->
     [
         F_State_C2b(
@@ -483,6 +499,7 @@ rule receive_certificate_request:
         messages = <p_messages, receivedMessage>
     in
     [
+        In(senc{receivedMessage}p_handshakeKeyServer),
         F_State_C2c(
             tid,
             $C,
@@ -513,8 +530,7 @@ rule receive_certificate_request:
             p_ems,
             p_rms,
             p_cert_req
-        ),
-        In(senc{receivedMessage}p_handshakeKeyServer)
+        )
     ]
     --[
         C2c_req(tid),
@@ -575,6 +591,7 @@ rule receive_server_auth:
     in
     [
         In(senc{<certificateMessage,receivedCertificateVerifyMessage,finishedMessages>}p_handshakeKeyServer),
+        !Pk($S, pk(~longTermKeyServer)),
         F_State_C2d(
             tid,
             $C,
@@ -605,14 +622,13 @@ rule receive_server_auth:
             p_ems,
             p_rms,
             p_cert_req
-        ),
-        !Pk($S, pk(~longTermKeyServer))
+        )
     ]
     --[
         C2d(tid),
-        Instance(tid, $C, 'client')
     ]->
     [
+        RecvStream(tid, $C, $S, auth_status, serverApplicationTrafficKey),
         F_State_C3(
             tid,
             $C,
