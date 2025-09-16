@@ -576,9 +576,13 @@ rule receive_server_auth:
         // Certificate
         certificateMessage = Certificate('0', pk(~longTermKeyServer))
         messages = <p_messages, certificateMessage>
+        
+        sig_messages = <'server_cv', <h(messages)>>
 
         receivedCertificateVerifyMessage = CertificateVerify(signature)
         messages = <messages, receivedCertificateVerifyMessage>
+
+        exp_verify_data = hmac(Expand(Expand(p_handshakeSecret, <'serverhts', <h(messages)>>, '32'), <'fin', '0'>, '32'), h(messages))
 
         finishedMessage = Finished(verify_data)
         messages = <messages, finishedMessage>
@@ -626,6 +630,15 @@ rule receive_server_auth:
     ]
     --[
         C2d(tid),
+        Instance(tid, $C, 'client'),
+        Eq(p_psk_ke_mode, 'na'),
+        Eq(verify(signature, sig_messages, pk(~longTermKeyServer)), true),
+        Eq(verify_data, exp_verify_data),
+        RMode(tid, $C, 'client', <p_psk_ke_mode>),
+        CIdentity(tid, $C, 'client', <<$S, auth_status>>),
+        CHS(tid, $C, 'client', <p_handshakeSecret>),
+        CTranscript(tid, $C, 'client', <messages>),
+        CNonces(tid, $C, 'client', <p_clientRandom, p_serverRandom>)
     ]->
     [
         RecvStream(tid, $C, $S, auth_status, serverApplicationTrafficKey),
@@ -706,10 +719,17 @@ rule client_auth:
         )
     ]
     --[
-        C3(tid)
+        C3(tid),
+        Instance(tid, $C, 'client'),
+        RTranscript(tid, $C, 'client', <messages>),
+        RHSMS(tid, $C, 'client', <p_handshakeSecret, p_masterSecret>),
+        RRMS(tid, $C, 'client', <$S, resumptionMasterSecret, messages>),
+        RMode(tid, $C, 'client', <p_psk_ke_mode>),
+        SessionKey(tid, $C, $S, p_auth_status, <clientApplicationTrafficKey, serverApplicationTrafficKey>)
     ]->
     [
         Out(senc{finishedMessage}p_handshakeKeyClient),
+        SendStream(tid, $C, $S, auth_status, clientApplicationTrafficKey),
         L_State_C4(
             tid,
             $C,
@@ -770,7 +790,9 @@ rule client_auth_cert:
         auth_status = <'auth', 'auth'>
     in
     [
-        F_State_C2d(
+        RecvStream(tid, $C, $S, p_auth_status, serverApplicationTrafficKey),
+        !Ltk($C, ~longTermKeyClient),
+        F_State_C3(
             tid,
             $C,
             $S,
@@ -800,14 +822,23 @@ rule client_auth_cert:
             p_earlyMasterSecret,
             p_rms,
             p_cert_req
-        ),
-        !Ltk($C, ~longTermKeyClient)
+        )
     ]
     --[
-        C3_cert(tid)
+        C3_cert(tid),
+        Instance(tid, $C, 'client'),
+        UseLtk(~longTermKeyClient, signature),
+        RHSMS(tid, $C, 'client', <p_handshakeSecret, p_masterSecret>),
+        RTranscript(tid, $C, 'client', <messages>),
+        RRMS(tid, $C, 'client', <$S, rms, messages>),
+        RMode(tid, $C, 'client', <p_psk_ke_mode>),
+        SessionKey(tid, $C, $S, auth_status, <clientApplicationTrafficKey, serverApplicationTrafficKey>)
     ]->
     [
-        F_State_C3(
+        SendStream(tid, $C, $S, auth_status, clientApplicationTrafficKey),
+        RecvStream(tid, $C, $S, auth_status, serverApplicationTrafficKey),
+        Out(senc{<certificateMessage,certificateVerifyMessage,finishedMessage>}p_handshakeKeyClient),
+        F_State_C4(
             tid,
             $C,
             $S,
@@ -837,8 +868,7 @@ rule client_auth_cert:
             p_earlyMasterSecret,
             rms,
             p_cert_req
-        ),
-        Out(senc{<certificateMessage,certificateVerifyMessage,finishedMessage>}p_handshakeKeyClient)
+        )
     ]
 
 rule receive_new_session_ticket:
@@ -850,7 +880,7 @@ rule receive_new_session_ticket:
         receivedMessage = NewSessionTicket($ticket_lifetime, ticket_age_add, ticket, ticket_extension)
     in
     [
-        RecvStream(tid, $C, $S, auth_status, serverApplicationTrafficKey),
+        RecvStream(tid, $C, $S, p_auth_status, serverApplicationTrafficKey),
         In(senc{receivedMessage}serverApplicationTrafficKey),
         L_State_C4(
             tid,
@@ -885,9 +915,14 @@ rule receive_new_session_ticket:
         )
     ]
     --[
-        C4_NST(tid)
+        C4_NST(tid),
+        Instance(tid, $C, 'client'),
+        RPostHS(tid, C, 'client', <p_handshakeSecret, p_rms, $S, p_auth_status, p_messages>)
     ]->
     [
+        RecvStream(tid, C, S, p_auth_status, serverApplicationTrafficKey),
+        !ClientPSK(C, S, p_rms, p_auth_status, receivedMessage, 'res'),
+        SecretPSK(C, p_rms),
         L_State_C4(
             tid,
             $C,
