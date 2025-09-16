@@ -20,6 +20,10 @@ rule client_hello:
     --[
         C0(clientRandom),
         Start(clientRandom, $C, 'client'),
+        RIdentity(tid, $C, 'client', <$C>),
+        DH(tid, $C, x),
+        HonestUse(x),
+        HonestUse(gx),
         Neq($group1, $group2)
     ]->
     [
