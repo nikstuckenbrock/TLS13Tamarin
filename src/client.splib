@@ -820,3 +820,83 @@ rule client_auth_cert:
         ),
         Out(senc{<certificateMessage,certificateVerifyMessage,finishedMessage>}p_handshakeKeyClient)
     ]
+
+rule receive_new_session_ticket:
+    let
+        p_rms = Expand(p_ms, <'rms', <h(p_messages)>>, '32')
+        ticket_extension = <
+            <'46', $max_early_data_size>
+        >
+        receivedMessage = NewSessionTicket($ticket_lifetime, ticket_age_add, ticket, ticket_extension)
+    in
+    [
+        RecvStream(tid, $C, $S, auth_status, serverApplicationTrafficKey),
+        In(senc{receivedMessage}serverApplicationTrafficKey),
+        L_State_C4(
+            tid,
+            $C,
+            $S,
+            p_res_psk,
+            p_messages,
+            p_nc,
+            p_ns,
+            p_g,
+            p_sg,
+            p_hrr,
+            p_x,
+            p_y,
+            p_gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            p_handshakeSecret,
+            p_masterSecret,
+            p_clientApplicationTrafficSecret,
+            p_serverApplicationTrafficSecret,
+            p_handshakeKeyClient,
+            p_handshakeKeyServer,
+            p_auth_status,
+            p_earlyMasterSecret,
+            p_rms,
+            p_cert_req
+        )
+    ]
+    --[
+        C4_NST(tid)
+    ]->
+    [
+        L_State_C4(
+            tid,
+            $C,
+            $S,
+            p_rms,
+            p_messages,
+            p_nc,
+            p_ns,
+            p_g,
+            p_sg,
+            p_hrr,
+            p_x,
+            p_y,
+            p_gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            p_handshakeSecret,
+            p_masterSecret,
+            p_clientApplicationTrafficSecret,
+            p_serverApplicationTrafficSecret,
+            p_handshakeKeyClient,
+            p_handshakeKeyServer,
+            p_auth_status,
+            p_earlyMasterSecret,
+            p_rms,
+            p_cert_req
+        )
+    ]

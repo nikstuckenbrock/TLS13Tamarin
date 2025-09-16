@@ -5,6 +5,7 @@ macros:
     // https://datatracker.ietf.org/doc/html/rfc8446#appendix-B.3
     HandshakeMessageTypeClientHello() = '1',
     HandshakeMessageTypeServerHello() = '2',
+    HandshakeMessageTypeNewSessionTicket() = '4',
     HandshakeMessageTypeHelloRetryRequest() = '6',
     HandshakeMessageTypeCertificate() = '11',
     HandshakeMessageTypeCertificateRequest() = '13',
@@ -43,6 +44,6 @@ macros:
     CertificateVerify(signature) = Handshake(HandshakeMessageTypeCertificateVerify(), <signature>),
 
     // https://datatracker.ietf.org/doc/html/rfc8446#section-4.4.4
-    Finished(verify_data) = Handshake(HandshakeMessageTypeFinished(), <verify_data>)
+    Finished(verify_data) = Handshake(HandshakeMessageTypeFinished(), <verify_data>),
 
-    
+    NewSessionTicket(ticket_lifetime, ticket_age_add, ticket, ticket_extension) = Handshake(HandshakeMessageTypeNewSessionTicket(), <ticket_lifetime, ticket_age_add, ticket_nonce, ticket, ticket_extension>)

@@ -788,3 +788,85 @@ rule receive_client_auth:
             p_cert_req
         )
     ]
+
+rule new_session_ticket:
+    let
+        p_rms = Expand(p_ms, <'rms', <h(p_messages)>>, '32')
+        ticket_extension = <
+            <'46', $max_early_data_size>
+        >
+        message = NewSessionTicket($ticket_lifetime, ticket_age_add, ticketm, ticket_extension)
+    in
+    [
+        SendStream(tid, $S, $C, auth_status, serverApplicationTrafficKey),
+        F_State_S4(
+            tid,
+            $S,
+            $C,
+            p_res_psk,
+            p_messages,
+            p_nc,
+            p_ns,
+            p_g,
+            p_sg,
+            p_hrr,
+            p_x,
+            p_y,
+            p_gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            p_handshakeSecret,
+            p_masterSecret,
+            p_clientApplicationTrafficSecret,
+            p_serverApplicationTrafficSecret,
+            p_handshakeKeyClient,
+            p_handshakeKeyServer,
+            p_auth_status,
+            p_earlyMasterSecret,
+            p_rms,
+            p_cert_req
+        ),
+        Fr(ticket),
+        Fr(ticket_age_add)
+    ]
+    --[
+        S4_NST(tid)
+    ]->
+    [
+        F_State_S4(
+            tid,
+            $S,
+            $C,
+            p_rms,
+            p_messages,
+            p_nc,
+            p_ns,
+            p_g,
+            p_sg,
+            p_hrr,
+            p_x,
+            p_y,
+            p_gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            p_handshakeSecret,
+            p_masterSecret,
+            p_clientApplicationTrafficSecret,
+            p_serverApplicationTrafficSecret,
+            p_handshakeKeyClient,
+            p_handshakeKeyServer,
+            p_auth_status,
+            p_earlyMasterSecret,
+            p_rms,
+            p_cert_req
+        ),
+        Out(senc{message}serverApplicationTrafficKey)
+    ]

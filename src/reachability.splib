@@ -75,3 +75,9 @@ lemma exists_S2d_PSK: exists-trace
 
 lemma exists_C2d_PSK: exists-trace
     "Ex tid #i. C2d_PSK(tid)@i"
+
+lemma exists_S4_NST: exists-trace
+    "Ex tid #i. S4_NST(tid)@i"
+
+lemma exists_C4_NST: exists-trace
+    "Ex tid #i. C4_NST(tid)@i"
