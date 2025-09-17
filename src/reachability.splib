@@ -55,6 +55,9 @@ lemma exists_S2d: exists-trace
 lemma exists_S3: exists-trace
     "Ex tid #i. S3(tid)@i"
 
+lemma exists_S3_cert: exists-trace
+    "Ex tid #i. S3_cert(tid)@i"
+
 lemma exists_S0_PSK: exists-trace
     "Ex tid #i. S0_PSK(tid)@i"
 

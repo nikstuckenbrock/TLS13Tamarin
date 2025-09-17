@@ -818,6 +818,117 @@ rule receive_client_auth:
         )
     ]
 
+rule receive_client_auth_cert:
+    let
+        p_cert_req = '1'
+        cert_req = '0'
+        auth_status = <'auth', 'auth'>
+
+        certificateMessage = Certificate('0', pk(longTermKeyClient))
+        messages = <p_messages, certificateMessage>
+
+        sig_messages = <'client_cv', <h(messages)>>
+        certificateVerifyMessage = CertificateVerify(signature)
+        messages = <p_messages, certificateVerifyMessage>
+
+        exp_verify_data = hmac(Expand(Expand(p_handshakeSecret, <'clienthts', <h(messages)>>, '32'), <'fin', '0'>, '32'), h(messages))
+
+        finishedMessage = Finished(verify_data)
+        message = <p_messages, finishedMessage>
+
+        rms = Expand(p_masterSecret, <'rms', <h(messages)>>, '32')
+
+        receivedMessage = <certificateMessage, certificateVerifyMessage, finishedMessage>
+
+        app_keyc = Expand(p_cats, <'adke_wk', '0'>, '32')
+        app_keys = Expand(p_sats, <'adke_wk', '0'>, '32')
+    in
+    [
+        In(senc{receivedMessage},p_handshakeKeyClient),
+        !Pk($C, pk(longTermKeyClient)),
+        SendStream(tid, $S, $C, p_auth_status, app_keys),
+        F_State_S3(
+            tid,
+            $S,
+            $C,
+            p_res_psk,
+            p_messages,
+            p_nc,
+            p_ns,
+            p_g,
+            p_sg,
+            p_hrr,
+            p_x,
+            p_y,
+            p_gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            p_handshakeSecret,
+            p_masterSecret,
+            p_clientApplicationTrafficSecret,
+            p_serverApplicationTrafficSecret,
+            p_handshakeKeyClient,
+            p_handshakeKeyServer,
+            p_auth_status,
+            p_earlyMasterSecret,
+            p_rms,
+            p_cert_req
+        )
+    ]
+    --[
+        S3_cert(tid),
+        Instance(tid, $S, 'server'),
+        Eq(verify(signature, sig_messages, pk(~longTermKeyClient)), true),
+        Eq(verify_data, exp_verify_data),
+        RMode(tid, $S, 'server', <p_psk_ke_mode>),
+        CIdentity(tid, $S, 'server', <$C, auth_status>),
+        CHS(tid, $S, 'server', <p_handshakeSecret>),
+        RHSMS(tid, $S, 'server', <p_handshakeSecret, p_masterSecret>),
+        RRMS(tid, $S, 'server', <$C, rms, messages>),
+        CTranscript(tid, $S, 'server', <messages>),
+        SessionKey(tid, $S, $C, auth_status, <app_keys, app_keyc>),
+        CNonces(tid, $S, 'server', <p_nc,p_ns>)
+    ]->
+    [
+        SendStream(tid, S, C, auth_status, app_keys),
+        RecvStream(tid, S, C, auth_status, app_keyc),
+        L_State_S4(
+            tid,
+            $S,
+            $C,
+            p_res_psk,
+            p_messages,
+            p_nc,
+            p_ns,
+            p_g,
+            p_sg,
+            p_hrr,
+            p_x,
+            p_y,
+            p_gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            p_handshakeSecret,
+            p_masterSecret,
+            p_clientApplicationTrafficSecret,
+            p_serverApplicationTrafficSecret,
+            p_handshakeKeyClient,
+            p_handshakeKeyServer,
+            p_auth_status,
+            p_earlyMasterSecret,
+            rms,
+            cert_req
+        )
+    ]
+
 rule new_session_ticket:
     let
         p_rms = Expand(p_ms, <'rms', <h(p_messages)>>, '32')
