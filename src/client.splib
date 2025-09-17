@@ -171,7 +171,7 @@ rule receive_server_hello:
     let
         serverRandom = new_ns
         gy = new_gy
-        gy = g^new_y
+        gy = $g^new_y
         gxy = gy^p_x
         extensions = <
             ExtensionSignatureSchemeList($supported_signature_algorithms),
@@ -594,7 +594,7 @@ rule receive_server_auth:
         auth_status = <'auth', '0'>
     in
     [
-        In(senc{<certificateMessage,receivedCertificateVerifyMessage,finishedMessages>}p_handshakeKeyServer),
+        In(senc{<certificateMessage,receivedCertificateVerifyMessage,finishedMessage>}p_handshakeKeyServer),
         !Pk($S, pk(~longTermKeyServer)),
         F_State_C2d(
             tid,
@@ -638,7 +638,7 @@ rule receive_server_auth:
         CIdentity(tid, $C, 'client', <<$S, auth_status>>),
         CHS(tid, $C, 'client', <p_handshakeSecret>),
         CTranscript(tid, $C, 'client', <messages>),
-        CNonces(tid, $C, 'client', <p_clientRandom, p_serverRandom>)
+        CNonces(tid, $C, 'client', <p_nc, p_ns>)
     ]->
     [
         RecvStream(tid, $C, $S, auth_status, serverApplicationTrafficKey),
