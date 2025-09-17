@@ -22,7 +22,7 @@ functions: Expand/3, Extract/2, hmac/1, mac/1, mask/2, unmask/2
 #include "uniqueness.splib"
 #endif
 
-#ifdef one_start_per_id
+#ifdef invariants
 #include "invariants.splib"
 #endif
 
