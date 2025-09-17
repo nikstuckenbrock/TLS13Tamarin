@@ -844,7 +844,7 @@ rule receive_client_auth_cert:
         app_keys = Expand(p_sats, <'adke_wk', '0'>, '32')
     in
     [
-        In(senc{receivedMessage},p_handshakeKeyClient),
+        In(senc{receivedMessage}p_handshakeKeyClient),
         !Pk($C, pk(longTermKeyClient)),
         SendStream(tid, $S, $C, p_auth_status, app_keys),
         F_State_S3(
