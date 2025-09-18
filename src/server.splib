@@ -43,17 +43,15 @@ rule start_server:
 rule receive_client_hello:
     let
         psk_ke_mode = 'na'
-        gx = p_gx
-        messages = p_messages
         supported_groups = <$group1, $group2>
         extensions = <
             ExtensionSupportedVersions(),
             ExtensionNamedGroupdList(supported_groups),
             ExtensionSignatureSchemeList($supported_signature_algorithms),
-            ExtensionKeyShareClientHello(KeyShareEntry($group1,gx))
+            ExtensionKeyShareClientHello(KeyShareEntry($new_group,gx))
         >
         receivedMessage = ClientHello(clientRandom, '0', $cipher_suites, '0', extensions)
-        messages = <messages, receivedMessage>
+        messages = <p_messages, receivedMessage>
         serverRandom = ~serverRandom
         group = $new_group
     in
