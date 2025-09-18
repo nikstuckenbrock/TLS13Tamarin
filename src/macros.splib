@@ -7,6 +7,7 @@ macros:
     HandshakeMessageTypeServerHello() = '2',
     HandshakeMessageTypeNewSessionTicket() = '4',
     HandshakeMessageTypeHelloRetryRequest() = '6',
+    HandshakeMessageTypeEncryptedExtensions() = '8',
     HandshakeMessageTypeCertificate() = '11',
     HandshakeMessageTypeCertificateRequest() = '13',
     HandshakeMessageTypeCertificateVerify() = '15',
@@ -33,6 +34,8 @@ macros:
     ServerHello(random, legacy_session_id_echo, cipher_suite, legacy_compression_method, extensions) = Handshake(HandshakeMessageTypeServerHello(), <random, legacy_session_id_echo, cipher_suite, legacy_compression_method, extensions>),
 
     HelloRetryRequest(extensions) = Handshake(HandshakeMessageTypeHelloRetryRequest(), <extensions>),
+
+    EncryptedExtensions(extensions) = Handshake(HandshakeMessageTypeEncryptedExtensions(), <extensions>),
 
     // https://datatracker.ietf.org/doc/html/rfc8446#appendix-B.3.3
     Certificate(certificate_request_context, certificate) = Handshake(HandshakeMessageTypeCertificate(), <certificate_request_context, certificate>),

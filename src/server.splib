@@ -397,7 +397,7 @@ rule server_gen_keys:
 
 rule encrypted_extensions:
     let
-        message = <'8', $encryptedExtensions>
+        message = EncryptedExtensions($encryptedExtensions)
         messages = <p_messages, message>
     in
     [

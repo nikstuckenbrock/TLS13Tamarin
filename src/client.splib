@@ -340,7 +340,7 @@ rule client_gen_keys:
 
 rule receive_encrypted_extensions:
     let
-        receivedMessage = <'8', $encryptedExtensions>
+        receivedMessage = EncryptedExtensions($encryptedExtensions)
         messages = <p_messages, receivedMessage>
     in
     [
