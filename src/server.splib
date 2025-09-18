@@ -840,8 +840,8 @@ rule receive_client_auth_cert:
 
         receivedMessage = <certificateMessage, certificateVerifyMessage, finishedMessage>
 
-        app_keyc = Expand(p_cats, <'adke_wk', '0'>, '32')
-        app_keys = Expand(p_sats, <'adke_wk', '0'>, '32')
+        app_keyc = Expand(p_clientApplicationTrafficSecret, <'adke_wk', '0'>, '32')
+        app_keys = Expand(p_serverApplicationTrafficSecret, <'adke_wk', '0'>, '32')
     in
     [
         In(senc{receivedMessage}p_handshakeKeyClient),
@@ -882,7 +882,7 @@ rule receive_client_auth_cert:
     --[
         S3_cert(tid),
         Instance(tid, $S, 'server'),
-        Eq(verify(signature, sig_messages, pk(~longTermKeyClient)), true),
+        Eq(verify(signature, sig_messages, pk(longTermKeyClient)), true),
         Eq(verify_data, exp_verify_data),
         RMode(tid, $S, 'server', <p_psk_ke_mode>),
         CIdentity(tid, $S, 'server', <$C, auth_status>),
@@ -894,8 +894,8 @@ rule receive_client_auth_cert:
         CNonces(tid, $S, 'server', <p_nc,p_ns>)
     ]->
     [
-        SendStream(tid, S, C, auth_status, app_keys),
-        RecvStream(tid, S, C, auth_status, app_keyc),
+        SendStream(tid, $S, $C, auth_status, app_keys),
+        RecvStream(tid, $S, $C, auth_status, app_keyc),
         L_State_S4(
             tid,
             $S,
