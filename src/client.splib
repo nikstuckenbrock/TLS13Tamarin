@@ -12,6 +12,7 @@ rule client_hello:
         clientRandom = ~clientRandom
         message = ClientHello(clientRandom, '0', $cipher_suites, '0', extensions)
         messages = <messages, message>
+        earlySecret = Extract('0', '0')
     in
     [
         Fr(clientRandom),
@@ -47,7 +48,7 @@ rule client_hello:
             'na',
             '0',
             '0',
-            '0',
+            earlySecret,
             '0',
             '0',
             '0',
