@@ -42,6 +42,7 @@ rule start_server:
 
 rule receive_client_hello:
     let
+        psk_ke_mode = 'na'
         gx = p_gx
         messages = p_messages
         supported_groups = <$group1, $group2>
@@ -112,7 +113,7 @@ rule receive_client_hello:
             gx,
             p_gy,
             p_gxy,
-            p_psk_ke_mode,
+            psk_ke_mode,
             p_psk_id,
             p_edi,
             p_es,
