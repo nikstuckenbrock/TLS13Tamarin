@@ -291,7 +291,7 @@ rule server_hello:
             p_supported_groups,
             p_hrr,
             p_x,
-            p_y,
+            y,
             p_gx,
             gy,
             gxy,
