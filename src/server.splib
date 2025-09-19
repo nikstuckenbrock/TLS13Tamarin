@@ -278,6 +278,7 @@ rule server_hello:
     ]->
     [
         Out(message),
+        DHExp(y, tid, $S),
         F_State_S2a(
             tid,
             $S,
