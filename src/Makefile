@@ -1,7 +1,10 @@
-TAMARIN=tamarin-prover +RTS -N16 -H75G -M150G -RTS
+TAMARIN = tamarin-prover +RTS -N16 -H75G -M150G -RTS
+STATES = C0
 
-reachability:
-	$(TAMARIN) -Dreachability --heuristic=S --prove tls13.spthy --output=../proofs/reachability.spthy
+reachability: $(STATES:%=../proofs/reachability.exists_%.spthy)
+
+../proofs/reachability.exists_%.spthy: tls13.spthy
+	$(TAMARIN) -Dreachability --heuristic=S --prove=exists_$* tls13.spthy --output=$@
 
 uniqueness:
 	$(TAMARIN) -Duniqueness --heuristic=S --prove tls13.spthy --output=../proofs/uniqueness.spthy
