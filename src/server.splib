@@ -317,7 +317,7 @@ rule server_gen_keys:
         handshakeSecret = Extract(p_gxy, p_es)
         masterSecret = Extract('0', handshakeSecret)
         handshakeKeyClient = Expand(Expand(handshakeSecret, <'clienthts', <h(p_messages)>>, '32'), <'kshe_wk', '0'>, '32')
-        handshakeKeyServer = Expand(Expand(handshakeSecret, <'clienthts', <h(p_messages)>>, '32'), <'kshe_wk', '0'>, '32')
+        handshakeKeyServer = Expand(Expand(handshakeSecret, <'serverhts', <h(p_messages)>>, '32'), <'kshe_wk', '0'>, '32')
     in
     [
         DHExp(p_y, tid, $S),
