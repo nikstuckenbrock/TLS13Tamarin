@@ -221,7 +221,6 @@ rule server_hello:
     let
         y = ~y
         gy = $p_g^y
-        p_gx = $p_g^some_x
         gxy = p_gx^y
         extensions = <
             ExtensionSignatureSchemeList($supported_signature_algorithms),
@@ -298,7 +297,7 @@ rule server_hello:
             p_psk_ke_mode,
             p_psk_id,
             p_edi,
-            p_es,
+            earlySecret,
             p_hs,
             p_ms,
             p_cats,
