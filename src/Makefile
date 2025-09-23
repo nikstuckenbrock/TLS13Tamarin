@@ -14,6 +14,6 @@ invariants:
 	$(TAMARIN) -Dinvariants --heuristic=S --prove=tid_invariant tls13.spthy --output=../proofs/invariants.tid_invariant.spthy
 
 authHelpers:
-	$(TAMARIN) -DauthHelpers --prove=matching --heuristic=S --output=../proofs/auth_helpers.matching.spthy
-	$(TAMARIN) -DauthHelpers --prove=consistent --heuristic=S --output=../proofs/auth_helpers.consistent.spthy
-	$(TAMARIN) -DauthHelpers --prove=invariant --heuristic=S --output=../proofs/auth_helpers.invariant.spthy
+	$(TAMARIN) -DauthHelpers --prove=matching tls13.spthy --heuristic=S --output=../proofs/auth_helpers.matching.spthy
+	$(TAMARIN) -DauthHelpers --prove=consistent tls13.spthy --heuristic=S --output=../proofs/auth_helpers.consistent.spthy
+	$(TAMARIN) -DauthHelpers --prove=invariant tls13.spthy --heuristic=S --output=../proofs/auth_helpers.invariant.spthy
