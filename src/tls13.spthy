@@ -7,6 +7,11 @@ functions: Expand/3, Extract/2, hmac/1, mac/1, mask/2, unmask/2
 
 #include "restrictions.splib"
 
+#ifdef reachability
+#include "one_per_tid.splib"
+#include "at_most_of.splib"
+#endif
+
 #include "publicKeyInfrastructure.splib"
 #include "macros.splib"
 #include "client.splib"
