@@ -12,3 +12,6 @@ uniqueness:
 invariants:
 	$(TAMARIN) -Dinvariants --heuristic=SC --prove=one_start_per_tid tls13.spthy --output=../proofs/invariants.one_start_per_tid.spthy
 	$(TAMARIN) -Dinvariants --heuristic=S --prove=tid_invariant tls13.spthy --output=../proofs/invariants.tid_invariant.spthy
+
+authHelpers:
+	$(TAMARIN) -DauthHelpers --prove={matching,consistent,invariant} --heuristic=S --output=../proofs/auth_helpers.spthy
