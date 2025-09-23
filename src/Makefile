@@ -1,5 +1,5 @@
 TAMARIN = tamarin-prover +RTS -N16 -H75G -M150G -RTS
-STATES = C0 S0 C1 S1 C2a S2a S2b C2b S2c S2d
+STATES = C0 S0 C1 S1 S1_retry C2d S2 C3 S3 C1_PSK C0_PSK S0_PSK S1_PSK_DHE S1_PSK C2d_PSK
 
 reachability: $(STATES:%=../proofs/reachability.exists_%.spthy)
 
