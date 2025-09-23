@@ -18,3 +18,9 @@ authHelpers:
 	$(TAMARIN) -DauthHelpers --prove=matching_rms_nonces tls13.spthy --heuristic=S --output=../proofs/auth_helpers.matching_rms_nonces.spthy
 	$(TAMARIN) -DauthHelpers --prove=consistent_nonces tls13.spthy --heuristic=S --output=../proofs/auth_helpers.consistent.spthy
 	$(TAMARIN) -DauthHelpers --prove=invariant_nonces tls13.spthy --heuristic=S --output=../proofs/auth_helpers.invariant_nonces.spthy
+
+dhInj:
+	$(TAMARIN) -DdhInj --prove=dh_exp_invariant tls13.spthy --heuristic=C --output=../proofs/dh_inj.dh_exp_invariant.spthy
+	$(TAMARIN) -DdhInj --prove=one_dh_per_x tls13.spthy --heuristic=C --output=../proofs/dh_inj.one_dh_per_x.spthy
+	$(TAMARIN) -DdhInj --prove=rev_dh_ordering tls13.spthy --heuristic=C --output=../proofs/dh_inj.rev_dh_ordering.spthy
+	$(TAMARIN) -DdhInj --prove=rev_dh_before_hs tls13.spthy --heuristic=C --output=../proofs/dh_inj.rev_dh_before_hs.spthy
