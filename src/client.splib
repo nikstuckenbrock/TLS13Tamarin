@@ -60,7 +60,7 @@ rule client_hello:
             '0',
             '0'
         ),
-        Out(message)
+        MessageOut(message)
     ]
 
 rule receive_hello_retry_request:
@@ -133,7 +133,7 @@ rule receive_hello_retry_request:
         DH(tid, $C, x)
     ]->
     [
-        Out(message),
+        MessageOut(message),
         DHExp(x, tid, $C),
         F_State_C1(
             tid,
@@ -729,7 +729,7 @@ rule client_auth:
         SessionKey(tid, $C, $S, p_auth_status, <clientApplicationTrafficKey, serverApplicationTrafficKey>)
     ]->
     [
-        Out(senc{finishedMessage}p_handshakeKeyClient),
+        MessageOut(senc{finishedMessage}p_handshakeKeyClient),
         SendStream(tid, $C, $S, p_auth_status, clientApplicationTrafficKey),
         L_State_C4(
             tid,
@@ -838,7 +838,7 @@ rule client_auth_cert:
     [
         SendStream(tid, $C, $S, auth_status, clientApplicationTrafficKey),
         RecvStream(tid, $C, $S, auth_status, serverApplicationTrafficKey),
-        Out(senc{<certificateMessage,certificateVerifyMessage,finishedMessage>}p_handshakeKeyClient),
+        MessageOut(senc{<certificateMessage,certificateVerifyMessage,finishedMessage>}p_handshakeKeyClient),
         F_State_C4(
             tid,
             $C,

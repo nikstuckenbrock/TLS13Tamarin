@@ -183,7 +183,7 @@ rule hello_retry_request:
         Instance(tid, $S, 'server')
     ]->
     [
-        Out(message),
+        MessageOut(message),
         F_State_S0(
             tid,
             $S,
@@ -276,7 +276,7 @@ rule server_hello:
         DH(tid, $S, y)
     ]->
     [
-        Out(message),
+        MessageOut(message),
         DHExp(y, tid, $S),
         F_State_S2a(
             tid,
@@ -437,7 +437,7 @@ rule encrypted_extensions:
         Instance(tid, $S, 'server')
     ]->
     [
-        Out(senc{message}p_handshakeKeyServer),
+        MessageOut(senc{message}p_handshakeKeyServer),
         F_State_S2c(
             tid,
             $S,
@@ -623,7 +623,7 @@ rule certificate_request:
             p_rms,
             cert_req
         ),
-        Out(senc{message}p_handshakeKeyServer)
+        MessageOut(senc{message}p_handshakeKeyServer)
     ]
 
 rule server_auth:
@@ -691,7 +691,7 @@ rule server_auth:
         RTranscript(tid, $S, 'server', <messages>)
     ]->
     [
-        Out(senc{<certificateMessage,certificateVerifyMessage,finishedMessage>}p_handshakeKeyServer),
+        MessageOut(senc{<certificateMessage,certificateVerifyMessage,finishedMessage>}p_handshakeKeyServer),
         SendStream(tid, $S, $C, auth_status, <messages>),
         F_State_S3(
             tid,
@@ -979,7 +979,7 @@ rule new_session_ticket:
         RNST(tid, $S, 'server', <ticket, ticket_age_add>)
     ]->
     [
-        Out(senc{message}serverApplicationTrafficKey),
+        MessageOut(senc{message}serverApplicationTrafficKey),
         SendStream(tid, $S, $C, auth_status, serverApplicationTrafficKey),
         !ServerPSK($S, $C, p_rms, auth_status, message, 'res'),
         SecretPSK($S, p_rms),

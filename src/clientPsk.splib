@@ -46,7 +46,7 @@ rule client_hello_psk:
         DH(clientRandom, $C, x)
     ]->
     [
-        Out(message),
+        MessageOut(message),
         F_CachePSK(clientRandom, $S, res_psk, auth_status, <'4', $ticket_lifetime, ticket_age_add, ticket, <<'46',$max_early_data_size>> >,psk_type),
         EarlySendStream(clientRandom, $C, $S, auth_status, ead_keyc, edi),
         DHExp(x, clientRandom, $C),

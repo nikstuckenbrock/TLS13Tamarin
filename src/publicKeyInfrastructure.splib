@@ -9,7 +9,7 @@ rule register_public_key:
     [
         !Ltk($Identity, ~longTermKey),
         !Pk($Identity, pk(~longTermKey)),
-        Out(pk(~longTermKey))
+        MessageOut(pk(~longTermKey))
     ]
 
 rule out_of_band_psk:

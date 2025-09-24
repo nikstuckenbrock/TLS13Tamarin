@@ -184,7 +184,7 @@ rule server_hello_psk:
             p_rms,
             p_cert_req
         ),
-        Out(message)
+        MessageOut(message)
     ]
 
 rule server_hello_psk_dhe:
@@ -274,7 +274,7 @@ rule server_hello_psk_dhe:
             p_rms,
             p_cert_req
         ),
-        Out(message)
+        MessageOut(message)
     ]
 
 rule server_auth_psk:
@@ -355,5 +355,5 @@ rule server_auth_psk:
             p_rms,
             p_cert_req
         ),
-        Out(senc{<'20',verify_data>}p_hs_keys)
+        MessageOut(senc{<'20',verify_data>}p_hs_keys)
     ]
