@@ -127,7 +127,7 @@ rule receive_server_hello_psk:
             p_rms,
             p_cert_req
         ),
-        In(message)
+        F_MessageIn(message)
     ]
     --[
         C1_PSK(tid),
@@ -215,7 +215,7 @@ rule receive_server_hello_psk_dhe:
             p_rms,
             p_cert_req
         ),
-        In(receivedMessage)
+        F_MessageIn(receivedMessage)
     ]
     --[
         C1_PSK_DHE(tid),
@@ -270,7 +270,7 @@ rule receive_server_auth_psk:
         ems = Expand(p_ms, <'ems', <h(messages)>>, '32')
     in
     [
-        In(senc{<'20',verify_data>}p_handshakeKeyServer),
+        F_MessageIn(senc{<'20',verify_data>}p_handshakeKeyServer),
         F_State_C2d(
             tid,
             $C,

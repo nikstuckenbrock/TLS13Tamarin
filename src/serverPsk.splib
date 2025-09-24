@@ -61,7 +61,7 @@ rule receive_client_hello_psk:
             p_rms,
             p_cert_req
         ),
-        In(receivedMessage),
+        F_MessageIn(receivedMessage),
         Fr(serverRandom),
         !ServerPSK($S, $C, pks_res_psk, psk_auth_status, <'4', $ticket_lifetime, ticket_age_add, ticket, <<'46', $max_early_data_size>>>, psk_type)
     ]

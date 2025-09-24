@@ -89,7 +89,7 @@ rule receive_hello_retry_request:
         es = Extract(p_res_psk, '0')
     in
     [
-        In(receivedMessage),
+        F_MessageIn(receivedMessage),
         Fr(x),
         DHExp(p_x, tid, $C),
         F_State_C1(
@@ -182,7 +182,7 @@ rule receive_server_hello:
         messages = <p_messages, receivedMessage>
     in
     [
-        In(receivedMessage),
+        F_MessageIn(receivedMessage),
         F_State_C1(
             tid,
             $C,
@@ -345,7 +345,7 @@ rule receive_encrypted_extensions:
         messages = <p_messages, receivedMessage>
     in
     [
-        In(senc{receivedMessage}p_handshakeKeyServer),
+        F_MessageIn(senc{receivedMessage}p_handshakeKeyServer),
         F_State_C2b(
             tid,
             $C,
@@ -500,7 +500,7 @@ rule receive_certificate_request:
         messages = <p_messages, receivedMessage>
     in
     [
-        In(senc{receivedMessage}p_handshakeKeyServer),
+        F_MessageIn(senc{receivedMessage}p_handshakeKeyServer),
         F_State_C2c(
             tid,
             $C,
@@ -595,7 +595,7 @@ rule receive_server_auth:
         auth_status = <'auth', '0'>
     in
     [
-        In(senc{<certificateMessage,receivedCertificateVerifyMessage,finishedMessage>}p_handshakeKeyServer),
+        F_MessageIn(senc{<certificateMessage,receivedCertificateVerifyMessage,finishedMessage>}p_handshakeKeyServer),
         !Pk($S, pk(~longTermKeyServer)),
         F_State_C2d(
             tid,
@@ -882,7 +882,7 @@ rule receive_new_session_ticket:
     in
     [
         RecvStream(tid, $C, $S, p_auth_status, serverApplicationTrafficKey),
-        In(senc{receivedMessage}serverApplicationTrafficKey),
+        F_MessageIn(senc{receivedMessage}serverApplicationTrafficKey),
         L_State_C4(
             tid,
             $C,

@@ -56,7 +56,7 @@ rule receive_client_hello:
         group = $new_group
     in
     [
-        In(receivedMessage),
+        F_MessageIn(receivedMessage),
         Fr(serverRandom),
         F_State_S0(
             tid,
@@ -736,7 +736,7 @@ rule receive_client_auth:
         serverApplicationTrafficKey = Expand(p_serverApplicationTrafficSecret, <'adke_wk', '0'>, '32')
     in
     [
-        In(senc{receivedFinished}p_handshakeKeyClient),
+        F_MessageIn(senc{receivedFinished}p_handshakeKeyClient),
         F_State_S3(
             tid,
             $S,
@@ -843,7 +843,7 @@ rule receive_client_auth_cert:
         app_keys = Expand(p_serverApplicationTrafficSecret, <'adke_wk', '0'>, '32')
     in
     [
-        In(senc{receivedMessage}p_handshakeKeyClient),
+        F_MessageIn(senc{receivedMessage}p_handshakeKeyClient),
         !Pk($C, pk(longTermKeyClient)),
         SendStream(tid, $S, $C, p_auth_status, app_keys),
         F_State_S3(
