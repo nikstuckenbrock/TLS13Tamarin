@@ -24,3 +24,6 @@ dhInj:
 	$(TAMARIN) -DdhInj --prove=one_dh_per_x tls13.spthy --heuristic=C --output=../proofs/dh_inj.one_dh_per_x.spthy >> ../logs/dh_inj.log 2>&1
 	$(TAMARIN) -DdhInj --prove=rev_dh_ordering tls13.spthy --heuristic=C --output=../proofs/dh_inj.rev_dh_ordering.spthy >> ../logs/dh_inj.log 2>&1
 	$(TAMARIN) -DdhInj --prove=rev_dh_before_hs tls13.spthy --heuristic=C --output=../proofs/dh_inj.rev_dh_before_hs.spthy >> ../logs/dh_inj.log 2>&1
+
+dhCal:
+	$(TAMARIN) -DdhCal --prove=dh_chal_dual --heuristic=cccccccccsssssssssssssssssssss --output=../proofs/dh_chal.spthy >> ../logs/dh_cal.log 2>&1

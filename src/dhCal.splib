@@ -1,0 +1,46 @@
+lemma one_C0_per_tid [reuse]:
+    "All tid #i #j. C0(tid)@i & C0(tid)@j ==> #i = #j"
+
+lemma one_C1_retry_per_tid [reuse]:
+    "All tid #i #j. C1_retry(tid)@i & C1_retry(tid)@j ==> #i = #j"
+
+lemma one_S1_per_tid [reuse]:
+    "All tid #i #j. S1(tid)@i & S1(tid)@j ==> #i = #j"
+
+lemma one_C1_per_tid [reuse]:
+    "All tid #i #j. C1(tid)@i & C1(tid)@j ==> #i = #j"
+
+lemma cert_req_origin [typing]:
+  "All certificate_request_context certificate_extensions keys #i.
+    KU(senc{<'13',certificate_request_context,certificate_extensions>}keys)@i ==> 
+      (Ex #j. KU(certificate_request_context)@j & #j < #i) |
+      (Ex #j tid actor role. RCertReqCtxt(tid, actor, role, <certificate_request_context>)@j & #j < #i)"
+
+lemma nst_source [typing]:
+  "All ticket ticket_age_add tkt_lt tkt_exts app_key #i.
+    KU(senc{<'4',tkt_lt,ticket_age_add,ticket,tkt_exts>}app_key)@i ==>
+      (Ex #j #k. KU(ticket)@j & KU(ticket_age_add)@k & #j < #i & #k < #i) |
+      (Ex tid S #j. RNST(tid, S, 'server', <ticket,ticket_age_add>)@j & #j < #i)"
+
+lemma dh_exp_invariant  [use_induction, reuse]:
+  "All tid actor x #i. RevDHExp(tid, actor, x)@i ==>
+    Ex #j. DH(tid, actor, x)@j & #j < i"
+
+lemma one_dh_per_x  [reuse]:
+  "All tid tid2 x actor actor2 #i #j. 
+    DH(tid, actor, x)@i & DH(tid2, actor2, x)@j ==> #i = #j"
+
+lemma rev_dh_ordering  [reuse, use_induction]:
+  "All tid actor x #j. 
+    DeleteDH(tid, actor, x)@j==>
+      ((Ex #i. DH(tid, actor, x) @ i & i < j) & 
+       (All #r. RevDHExp(tid, actor, x) @ r  ==>  r < j))"
+
+lemma dh_chal_dual [reuse]:
+  "All tid tid2 actor actor2 g x y gx gy gxy #i #j #r.
+      DHChal(g, x, y, gx, gy, gxy)@i & Instance(tid, actor, 'client')@i &
+      DHChal(g, x, y, gx, gy, gxy)@j & Instance(tid2, actor2, 'server')@j &
+      KU(gxy)@r 
+      ==> 
+      (Ex #p. (RevDHExp(tid, actor,  x)@p & #p < #r)) | 
+      (Ex #q. (RevDHExp(tid2, actor2, y)@q & #q < #r))"

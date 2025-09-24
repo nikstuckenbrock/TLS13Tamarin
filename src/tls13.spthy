@@ -51,4 +51,12 @@ rule message_in_to_in:
 #include "authHelpers.splib"
 #endif
 
+#ifdef dhInj
+#include "dhInj.splib"
+#endif
+
+#ifdef dhCal
+#include "dhCal.splib"
+#endif
+
 end
