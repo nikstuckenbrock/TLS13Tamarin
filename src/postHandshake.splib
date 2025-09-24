@@ -203,7 +203,7 @@ rule client_auth_post:
             p_psk_id,
             p_edi,
             p_es,
-            p_handshakeSecret,
+            p_hs,
             p_masterSecret,
             p_cats,
             p_sats,
@@ -246,7 +246,7 @@ rule client_auth_post:
             p_psk_id,
             p_edi,
             p_es,
-            p_handshakeSecret,
+            p_hs,
             p_masterSecret,
             p_cats,
             p_sats,
@@ -322,7 +322,7 @@ rule receive_client_auth_post:
         Eq(verify_data, exp_verify_data),
         CIdentityPost(tid, $S, 'server', <<$C, auth_status>>),
         CTranscriptPost(tid, $S, 'server', <p_messages, certificate_request_context>),
-        CHS(tid, $S, 'server', <hs>),
+        CHS(tid, $S, 'server', <p_hs>),
         RPostHS(tid, $S, 'server', <p_hs, p_rms, $C, auth_status, p_messages>)
     ]->
     [

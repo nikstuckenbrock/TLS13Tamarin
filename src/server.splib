@@ -219,6 +219,7 @@ rule hello_retry_request:
 
 rule server_hello:
     let
+        p_gx = $p_g^some_x
         y = ~y
         gy = $p_g^y
         gxy = p_gx^y
