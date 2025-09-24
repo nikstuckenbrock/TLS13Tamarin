@@ -32,6 +32,8 @@ rule message_in_to_in:
 #include "clientPsk.splib"
 #include "server.splib"
 #include "serverPsk.splib"
+#include "postHandshake.splib"
+#include "keyUpdate.splib"
 
 #ifdef reachability
 #include "reachability.splib"
