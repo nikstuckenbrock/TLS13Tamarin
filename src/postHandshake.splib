@@ -123,7 +123,7 @@ rule receive_certificate_request_post:
         C4_req(tid),
         Neq(certificate_request_context, '0'),
         Instance(tid, $C, 'client'),
-        RPostHS(tid, $C, 'client', <p_handshakeSecret, p_rms, p_auth_status, p_messages)
+        RPostHS(tid, $C, 'client', <p_handshakeSecret, p_rms, p_auth_status, p_messages>)
     ]->
     [
         RecvStream(tid, $C, $S, p_auth_status, app_keys),
@@ -177,7 +177,7 @@ rule client_auth_post:
 
         messagesOut = <certificateMessage, certificateVerifyMessage, finishedMessage>
 
-        auth_status <'auth', p_sas>
+        auth_status = <'auth', p_sas>
     in
     [
         SendStream(tid, $C, $S, p_auth_status, app_keyc),
@@ -278,7 +278,7 @@ rule receive_client_auth_post:
         auth_status = <p_sas, 'auth'>
     in
     [
-        F_MessageIn(senc{receivedMessage}app_keyc)
+        F_MessageIn(senc{receivedMessage}app_keyc),
         RecvStream(tid, $S, $C, p_auth_status, app_keyc),
         !Pk($C, pk(~ltkC)),
         L_ServerCertReq(tid, $S, $C, certificate_request_context),
