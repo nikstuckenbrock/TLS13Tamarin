@@ -678,6 +678,7 @@ rule receive_server_auth:
 
 rule client_auth:
     let
+        p_cert_req = '0'
         verify_data = hmac(Expand(Expand(p_handshakeSecret, <'clienthts', <h(p_messages)>>, '32'), <'fin', '0'>, '32'), h(p_messages))
         finishedMessage = Finished(verify_data)
         messages = <p_messages, finishedMessage>
@@ -736,7 +737,7 @@ rule client_auth:
             $C,
             $S,
             p_res_psk,
-            p_messages,
+            messages,
             p_nc,
             p_ns,
             p_g,
