@@ -699,7 +699,7 @@ rule server_auth:
             $S,
             $C,
             p_res_psk,
-            p_messages,
+            messages,
             p_nc,
             p_ns,
             p_g,
