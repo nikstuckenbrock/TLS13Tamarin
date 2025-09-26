@@ -110,7 +110,7 @@ rule server_hello_psk:
         extensions = <
             ExtensionSignatureSchemeList($supported_signature_algorithms),
             <'41', '0'>,
-            p_edi
+            edi
         >
         message = ServerHello(p_serverRandom, '0', $cipher_suite, '0', extensions)
         messages = <p_messages, message>
@@ -171,7 +171,7 @@ rule server_hello_psk:
             p_gxy,
             psk_ke_mode,
             p_psk_id,
-            p_edi,
+            edi,
             es,
             p_hs,
             p_ms,
