@@ -262,7 +262,8 @@ rule receive_server_auth_psk:
     let
         exp_verify_data = hmac(Expand(Expand(p_hs, <'serverhts', <h(p_messages)>>, '32'), <'fin', '0'>, '32'), h(p_messages))
 
-        messages = <p_messages, <'20',verify_data>>
+        message = Finished(verify_data)
+        messages = <p_messages, message>
 
         cats = Expand(p_ms, <'clientats', <h(messages)>>, '32')
         sats = Expand(p_ms, <'serverats', <h(messages)>>, '32')
@@ -270,7 +271,7 @@ rule receive_server_auth_psk:
         ems = Expand(p_ms, <'ems', <h(messages)>>, '32')
     in
     [
-        F_MessageIn(senc{<'20',verify_data>}p_handshakeKeyServer),
+        F_MessageIn(senc{message}p_handshakeKeyServer),
         F_State_C2d(
             tid,
             $C,
