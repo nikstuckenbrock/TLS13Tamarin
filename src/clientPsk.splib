@@ -69,7 +69,7 @@ rule client_hello_psk:
             psk_ke_mode,
             '0',
             edi,
-            '0',
+            es,
             '0',
             '0',
             '0',
