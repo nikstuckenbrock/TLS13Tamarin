@@ -323,7 +323,10 @@ rule server_auth_psk:
         )
     ]
     --[
-        S2d_PSK(tid)
+        S2d_PSK(tid),
+        Neq(p_psk_ke_mode, 'na'),
+        Instance(tid, $S, 'server'),
+        RTranscript(tid, $S, 'server', <messages>)
     ]->
     [
         F_State_S3(
