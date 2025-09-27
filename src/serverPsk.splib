@@ -117,6 +117,7 @@ rule server_hello_psk:
         messages = <p_messages, message>
     in
     [
+        Fr(y),
         F_State_S1(
             tid,
             $C,
@@ -147,13 +148,17 @@ rule server_hello_psk:
             p_ems,
             p_rms,
             p_cert_req
-        ),
-        Fr(y)
+        )
     ]
     --[
-        S1_PSK(tid)
+        S1_PSK(tid),
+        Instance(tid, $S, 'server'),
+        RNonces(tid, $S, 'server', <p_clientRandom, p_serverRandom>),
+        DH(tid, $S, y)
     ]->
     [
+        DHExp(y, tid, $S),
+        MessageOut(message),
         F_State_S2(
             tid,
             $C,
@@ -184,8 +189,7 @@ rule server_hello_psk:
             p_ems,
             p_rms,
             p_cert_req
-        ),
-        MessageOut(message)
+        )
     ]
 
 rule server_hello_psk_dhe:
@@ -329,6 +333,8 @@ rule server_auth_psk:
         RTranscript(tid, $S, 'server', <messages>)
     ]->
     [
+        MessageOut(senc{message}p_hs_keys),
+        SendStream(tid, $S, $C, p_auth_status, serverApplicationTrafficKey),
         F_State_S3(
             tid,
             $S,
@@ -359,6 +365,5 @@ rule server_auth_psk:
             earlyMasterSecret,
             p_rms,
             p_cert_req
-        ),
-        MessageOut(senc{message}p_hs_keys)
+        )
     ]
