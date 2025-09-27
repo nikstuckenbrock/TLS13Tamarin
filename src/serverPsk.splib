@@ -356,5 +356,5 @@ rule server_auth_psk:
             p_rms,
             p_cert_req
         ),
-        MessageOut(senc{message>}p_hs_keys)
+        MessageOut(senc{message}p_hs_keys)
     ]
