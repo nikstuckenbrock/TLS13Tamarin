@@ -159,7 +159,7 @@ rule server_hello_psk:
     [
         DHExp(y, tid, $S),
         MessageOut(message),
-        F_State_S2(
+        F_State_S2a(
             tid,
             $C,
             $S,
