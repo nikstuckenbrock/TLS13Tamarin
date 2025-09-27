@@ -179,6 +179,8 @@ rule receive_server_hello:
             ExtensionKeyShareServerHello(KeyShareEntry($g, gy))
         >
         receivedMessage = ServerHello(serverRandom, '0', $cipher_suite, '0', extensions)
+        psk_ke_mode = 'na'
+        auth_status = <'0', '0'>
         messages = <p_messages, receivedMessage>
     in
     [
@@ -240,7 +242,7 @@ rule receive_server_hello:
             p_gx,
             gy,
             gxy,
-            p_psk_ke_mode,
+            psk_ke_mode,
             p_psk_id,
             p_edi,
             p_es,
@@ -250,7 +252,7 @@ rule receive_server_hello:
             p_sats,
             p_hs_keyc,
             p_hs_keys,
-            p_auth_status,
+            auth_status,
             p_ems,
             p_rms,
             p_cert_req
