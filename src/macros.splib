@@ -55,4 +55,6 @@ macros:
     KeyUpdateUpdateRequested() = '1',
     KeyUpdate(update_requested) = Handshake(HandshakeMessageTypeKeyUpdate(), <update_requested>),
 
-    NewSessionTicket(ticket_lifetime, ticket_age_add, ticket, ticket_extension) = Handshake(HandshakeMessageTypeNewSessionTicket(), <ticket_lifetime, ticket_age_add, ticket, ticket_extension>)
+    NewSessionTicket(ticket_lifetime, ticket_age_add, ticket, ticket_extension) = Handshake(HandshakeMessageTypeNewSessionTicket(), <ticket_lifetime, ticket_age_add, ticket, ticket_extension>),
+
+    DataRecord(data) = <data, '23'>

@@ -9,13 +9,13 @@ rule send:
     ]->
     [
         SendStream(~tid, $actor, $peer, auth_status, app_key_out),
-        MessageOut(senc{data_record(~data)}app_key_out)
+        MessageOut(senc{DataRecord(~data)}app_key_out)
     ]
 
 rule recv:
     [
         RecvStream(~tid, $actor, $peer, auth_status, app_key_in),
-        F_MessageIn(senc{data_record(data)}app_key_in)
+        F_MessageIn(senc{DataRecord(data)}app_key_in)
     ]
     --[
         Recv(~tid),
