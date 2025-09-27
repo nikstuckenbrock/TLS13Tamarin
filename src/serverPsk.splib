@@ -104,6 +104,7 @@ rule receive_client_hello_psk:
 
 rule server_hello_psk:
     let
+        edi = p_edi
         es = Extract(p_res_psk, '0')
         p_psk_ke_mode = <'0', '1'>
         psk_ke_mode = '0'
