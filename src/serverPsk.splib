@@ -16,6 +16,7 @@ rule receive_client_hello_psk:
         >
         binder_message = ClientHello(clientRandom, '0', $cipher_suites, '0', binder_extensions)
         binder_messages = <p_messages, binder_message>
+        es = Extract(p_res_psk, '0')
         binder = hmac(Expand(Expand(es, <<psk_type, 'pbk'>>, '32'), <binder, '0'>, '32'), h(binder_messages))
         extensions = <
             ExtensionSupportedVersions(),
@@ -27,7 +28,6 @@ rule receive_client_hello_psk:
         >
         receivedMessage = ClientHello(clientRandom, '0', $cipher_suites, '0', extensions)
         messages = <p_messages, receivedMessage>
-        es = Extract(p_res_psk, '0')
     in
     [
         F_State_S0(
