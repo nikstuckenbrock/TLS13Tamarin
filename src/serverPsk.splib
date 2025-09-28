@@ -2,26 +2,31 @@ rule receive_client_hello_psk:
     let
         binder = '0'
         supported_groups = <$group1, $group2>
-        gx = $group1^x
+        gx = $new_group^x
+        clientRandom = new_nc
         psk_ke_mode = <'0', '1'>
-        obfuscated_ticket_age = mask(ticket_age_add, $ticket_age)
+        ticket = ~ticket
+        ticket_age_add = ~ticket_age_add
         identities = <<ticket, obfuscated_ticket_age>>
+        psk_id = ticket
+        ticket_age = unmask(obfuscated_ticket_age, ticket_age_add)
         binder_extensions = <
             ExtensionSupportedVersions(),
             ExtensionNamedGroupdList(supported_groups),
-            ExtensionKeyShareClientHello(KeyShareEntry($group1, gx)),
+            ExtensionKeyShareClientHello(KeyShareEntry($new_group, gx)),
             ExtensionPskKeyExchangeModes(psk_ke_mode),
             ExtensionEarlyDataIndication(),
             ExtensionPreSharedKeyClientHello(identities, binder)
         >
         binder_message = ClientHello(clientRandom, '0', $cipher_suites, '0', binder_extensions)
         binder_messages = <p_messages, binder_message>
-        es = Extract(p_res_psk, '0')
+        res_psk = pks_res_psk
+        es = Extract(res_psk, '0')
         binder = hmac(Expand(Expand(es, <<psk_type, 'pbk'>>, '32'), <binder, '0'>, '32'), h(binder_messages))
         extensions = <
             ExtensionSupportedVersions(),
             ExtensionNamedGroupdList(supported_groups),
-            ExtensionKeyShareClientHello(KeyShareEntry($group1, gx)),
+            ExtensionKeyShareClientHello(KeyShareEntry($new_group, gx)),
             ExtensionPskKeyExchangeModes(psk_ke_mode),
             ExtensionEarlyDataIndication(),
             ExtensionPreSharedKeyClientHello(identities, binder)
@@ -66,14 +71,15 @@ rule receive_client_hello_psk:
         !ServerPSK($S, $C, pks_res_psk, psk_auth_status, <'4', $ticket_lifetime, ticket_age_add, ticket, <<'46', $max_early_data_size>>>, psk_type)
     ]
     --[
-        S0_PSK(tid)
+        S0_PSK(tid),
+        Eq(unmask(obfuscated_ticket_age, ticket_age_add), '1')
     ]->
     [
         F_State_S1(
             tid,
             $S,
             $C,
-            p_res_psk,
+            res_psk,
             messages,
             clientRandom,
             serverRandom,
@@ -86,7 +92,7 @@ rule receive_client_hello_psk:
             p_gy,
             p_gxy,
             psk_ke_mode,
-            ticket,
+            psk_id,
             p_edi,
             es,
             p_hs,
