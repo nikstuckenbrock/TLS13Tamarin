@@ -125,8 +125,8 @@ rule server_hello_psk:
         Fr(y),
         F_State_S1(
             tid,
-            $C,
             $S,
+            $C,
             p_res_psk,
             p_messages,
             p_clientRandom,
@@ -166,8 +166,8 @@ rule server_hello_psk:
         MessageOut(message),
         F_State_S2a(
             tid,
-            $C,
             $S,
+            $C,
             p_res_psk,
             messages,
             p_clientRandom,
