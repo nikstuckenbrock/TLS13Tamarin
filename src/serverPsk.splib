@@ -71,8 +71,7 @@ rule receive_client_hello_psk:
         !ServerPSK($S, $C, pks_res_psk, psk_auth_status, <'4', $ticket_lifetime, ticket_age_add, ticket, <<'46', $max_early_data_size>>>, psk_type)
     ]
     --[
-        S0_PSK(tid),
-        Eq(unmask(obfuscated_ticket_age, ticket_age_add), '1')
+        S0_PSK(tid)
     ]->
     [
         F_State_S1(
