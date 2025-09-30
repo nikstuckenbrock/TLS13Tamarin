@@ -189,7 +189,7 @@ rule hello_retry_request:
             $S,
             $C,
             p_res_psk,
-            p_messages,
+            messages,
             p_clientRandom,
             p_serverRandom,
             g,
