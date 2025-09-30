@@ -932,7 +932,7 @@ rule receive_client_auth_cert:
 
 rule new_session_ticket:
     let
-        p_rms = Expand(p_ms, <'rms', <h(p_messages)>>, '32')
+        p_rms = Expand(p_masterSecret, <'rms', <h(p_messages)>>, '32')
         ticket_extension = <
             <'46', $max_early_data_size>
         >
