@@ -5,7 +5,7 @@ builtins: diffie-hellman, hashing, symmetric-encryption, signing
 
 functions: Expand/3, Extract/2, hmac/1, mac/1, mask/2, unmask/2
 
-#include "restrictions.splib"
+#include "lemmas/restrictions.splib"
 
 #ifdef reachability
 rule message_out_to_in:
@@ -22,42 +22,42 @@ rule message_in_to_in:
 #endif
 
 #ifdef reachability
-#include "onePerTid.splib"
-#include "atMostOf.splib"
+#include "lemmas/onePerTid.splib"
+#include "lemmas/atMostOf.splib"
 #endif
 
-#include "publicKeyInfrastructure.splib"
-#include "macros.splib"
-#include "client.splib"
-#include "clientPsk.splib"
-#include "server.splib"
-#include "serverPsk.splib"
-#include "postHandshake.splib"
-#include "keyUpdate.splib"
-#include "record.splib"
+#include "model/publicKeyInfrastructure.splib"
+#include "model/macros.splib"
+#include "model/client.splib"
+#include "model/clientPsk.splib"
+#include "model/server.splib"
+#include "model/serverPsk.splib"
+#include "model/postHandshake.splib"
+#include "model/keyUpdate.splib"
+#include "model/record.splib"
 
 #ifdef reachability
-#include "reachability.splib"
+#include "lemmas/reachability.splib"
 #endif
 
 #ifdef uniqueness
-#include "uniqueness.splib"
+#include "lemmas/uniqueness.splib"
 #endif
 
 #ifdef invariants
-#include "invariants.splib"
+#include "lemmas/invariants.splib"
 #endif
 
 #ifdef authHelpers
-#include "authHelpers.splib"
+#include "lemmas/authHelpers.splib"
 #endif
 
 #ifdef dhInj
-#include "dhInj.splib"
+#include "lemmas/dhInj.splib"
 #endif
 
 #ifdef dhCal
-#include "dhCal.splib"
+#include "lemmas/dhCal.splib"
 #endif
 
 end
