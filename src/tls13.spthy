@@ -18,7 +18,7 @@ rule message_out_to_out:
     [ MessageOut(message) ] --> [ Out(message) ]
 
 rule message_in_to_in:
-    [ F_MessageIn(message) ] --> [ In(message) ]
+    [ In(message) ] --> [ F_MessageIn(message) ]
 #endif
 
 #ifdef reachability
