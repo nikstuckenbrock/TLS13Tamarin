@@ -5,6 +5,8 @@ builtins: diffie-hellman, hashing, symmetric-encryption, signing
 
 functions: Expand/3, Extract/2, hmac/1, mac/1, mask/2, unmask/2
 
+equations: unmask(mask(x, y), y) = x, unmask(mask(x, y), x) = y
+
 #include "lemmas/restrictions.splib"
 
 #ifdef reachability
