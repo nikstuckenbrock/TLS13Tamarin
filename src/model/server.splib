@@ -44,6 +44,7 @@ rule receive_client_hello:
     let
         psk_ke_mode = 'na'
         supported_groups = <$group1, $group2>
+        gx = $new_group^new_x
         extensions = <
             ExtensionSupportedVersions(),
             ExtensionNamedGroupdList(supported_groups),
