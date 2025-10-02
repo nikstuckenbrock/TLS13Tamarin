@@ -83,6 +83,135 @@ rule client_hello_psk:
         ),
     ]
 
+receive_hello_retry_request_psk:
+    let
+        p_g = $group1
+        p_hrr = '0'
+        p_psk_ke_mode = <'0', '1'>
+
+        res_psk = p_res_psk
+        auth_status = p_auth_status
+        psk_id = ticket
+
+        receivedExtensions = <
+            ExtensionSupportedVersions(),
+            ExtensionKeyShareHelloRetryRequest($group2)
+        >
+        receivedMessage = HelloRetryRequest(receivedExtensions)
+
+        obfuscated_ticket_age = mask(ticket_age_add, $ticket_age)
+        identities = <<ticket, obfuscated_ticket_age>>
+
+        gx = $group2^new_x
+
+        es = Extract(res_psk, '0')
+        binder = '0'
+        edi = ExtensionEarlyDataIndication()
+        binder_extensions = <
+            ExtensionSupportedVersions(),
+            ExtensionNamedGroupdList(supported_groups),
+            ExtensionKeyShareClientHello(KeyShareEntry($group2, gx)),
+            ExtensionPskKeyExchangeModes(psk_ke_mode),
+            edi,
+            ExtensionPreSharedKeyClientHello(identities, binder)
+        >
+        binder_message = ClientHello(clientRandom, '0', $cipher_suites, '0', binder_extensions)
+        binder_messages = <p_messages, binder_message>
+        hmac(Expand(Expand(es, <'32', 'pbk', '0'> , '32'), <'32', '0', '0'> , '32'), h(binder_messages))
+
+        extensions = <
+            ExtensionSupportedVersions(),
+            ExtensionNamedGroupdList(supported_groups),
+            ExtensionKeyShareClientHello(KeyShareEntry($group2, gx)),
+            ExtensionPskKeyExchangeModes(psk_ke_mode),
+            edi,
+            ExtensionPreSharedKeyClientHello(identities, binder)
+        >
+        message = ClientHello(clientRandom, '0', $cipher_suites, '0', extensions)
+        messages = <p_messages, message>
+    in
+    [
+        F_MessageIn(receivedMessage),
+        F_CachePSK(tid, $S, p_res_psk, p_auth_status, <'4', $ticket_lifetime, ticket_age_add, ticket,<<'46',$max_early_data_size>> >,psk_type),
+        Fr(new_nc),
+        Fr(new_x),
+        DHExp(p_x, tid, $C),
+        F_State_C1(
+            tid,
+            $C,
+            $S,
+            p_res_psk,
+            p_messages,
+            p_nc,
+            p_ns,
+            p_g,
+            p_sg,
+            p_hrr,
+            p_x,
+            p_y,
+            p_gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            p_hs,
+            p_ms,
+            p_cats,
+            p_sats,
+            p_hs_keyc,
+            p_hs_keys,
+            p_auth_status,
+            p_ems,
+            p_rms,
+            p_cert_req
+        )
+    ]
+    --[
+        C1_retry_PSK(tid),
+        Neq($group1, $group2),
+        Instance(tid, $C, 'client'),
+        RPSK(tid, $C, 'client', <$S, p_res_psk, p_auth_status>),
+        DeleteDH(tid, $C, p_x),
+        DH(tid, $C, new_x)
+    ]->
+    [
+        MessageOut(message),
+        DHExp(x, tid, C),
+        F_State_C1(
+            tid,
+            $C,
+            $S,
+            res_psk,
+            messages,
+            new_nc,
+            p_ns,
+            $group2,
+            p_sg,
+            p_hrr,
+            new_x,
+            p_y,
+            gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            edi,
+            p_es,
+            p_hs,
+            p_ms,
+            p_cats,
+            p_sats,
+            p_hs_keyc,
+            p_hs_keys,
+            p_auth_status,
+            p_ems,
+            p_rms,
+            p_cert_req
+        )
+    ]
+
 rule receive_server_hello_psk:
     let
         p_psk_ke_mode = <'0', '1'>

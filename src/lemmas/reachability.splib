@@ -22,6 +22,9 @@ lemma exists_C1_PSK: exists-trace
 lemma exists_C1_PSK_DHE: exists-trace
     "Ex tid #i. C1_PSK_DHE(tid)@i"
 
+lemma exists_C1_retry_PSK: exists-trace
+    "Ex tid #i. C1_retry_PSK(tid)@i"
+
 lemma exists_C2a: exists-trace
     "Ex tid #i. C2a(tid)@i"
 

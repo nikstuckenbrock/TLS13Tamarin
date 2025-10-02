@@ -132,11 +132,10 @@ rule receive_client_hello:
 rule hello_retry_request:
     let
         p_hrr = '0'
-        p_sg = $p_sg
 
         hrr = 'hrr'
-        new_g = p_sg
-        g = p_sg
+        new_g = p_supported_groups
+        g = p_supported_groups
 
         extensions = <
             ExtensionSupportedVersions(),
@@ -180,7 +179,7 @@ rule hello_retry_request:
     ]
     --[
         S1_retry(tid),
-        Neq(p_group, p_sg),
+        Neq(p_group, p_supported_groups),
         Instance(tid, $S, 'server')
     ]->
     [
