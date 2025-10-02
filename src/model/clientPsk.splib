@@ -36,7 +36,7 @@ rule client_hello_psk:
     [
         Fr(clientRandom),
         Fr(x),
-        !ClientPSK($C, $S, res_psk, auth_status, <'4',$ticket_lifetime,ticket_age_add,ticket,<<'46',$max_early_data_size>> >, psk_type)
+        !ClientPSK($C, $S, res_psk, auth_status, <'4',$ticket_lifetime, ticket_age_add, ticket,<<'46',$max_early_data_size>> >, psk_type)
     ]
     --[
         C0_PSK(clientRandom),
@@ -54,7 +54,7 @@ rule client_hello_psk:
             clientRandom,
             $C,
             $S,
-            '0',
+            res_psk,
             messages,
             clientRandom,
             '0',
@@ -76,18 +76,20 @@ rule client_hello_psk:
             '0',
             '0',
             '0',
-            <'0', '0'>,
+            auth_status,
             '0',
             '0',
             '0'
         ),
     ]
 
-receive_hello_retry_request_psk:
+rule receive_hello_retry_request_psk:
     let
         p_g = $group1
         p_hrr = '0'
         p_psk_ke_mode = <'0', '1'>
+
+        supported_groups = <$group1, $group2>
 
         res_psk = p_res_psk
         auth_status = p_auth_status
@@ -111,23 +113,23 @@ receive_hello_retry_request_psk:
             ExtensionSupportedVersions(),
             ExtensionNamedGroupdList(supported_groups),
             ExtensionKeyShareClientHello(KeyShareEntry($group2, gx)),
-            ExtensionPskKeyExchangeModes(psk_ke_mode),
+            ExtensionPskKeyExchangeModes(p_psk_ke_mode),
             edi,
             ExtensionPreSharedKeyClientHello(identities, binder)
         >
-        binder_message = ClientHello(clientRandom, '0', $cipher_suites, '0', binder_extensions)
+        binder_message = ClientHello(new_nc, '0', $Fcipher_suites, '0', binder_extensions)
         binder_messages = <p_messages, binder_message>
-        hmac(Expand(Expand(es, <'32', 'pbk', '0'> , '32'), <'32', '0', '0'> , '32'), h(binder_messages))
+        binder = hmac(Expand(Expand(es, <'32', 'pbk', '0'> , '32'), <'32', '0', '0'> , '32'), h(binder_messages))
 
         extensions = <
             ExtensionSupportedVersions(),
             ExtensionNamedGroupdList(supported_groups),
             ExtensionKeyShareClientHello(KeyShareEntry($group2, gx)),
-            ExtensionPskKeyExchangeModes(psk_ke_mode),
+            ExtensionPskKeyExchangeModes(p_psk_ke_mode),
             edi,
             ExtensionPreSharedKeyClientHello(identities, binder)
         >
-        message = ClientHello(clientRandom, '0', $cipher_suites, '0', extensions)
+        message = ClientHello(new_nc, '0', $cipher_suites, '0', extensions)
         messages = <p_messages, message>
     in
     [
@@ -178,7 +180,7 @@ receive_hello_retry_request_psk:
     ]->
     [
         MessageOut(message),
-        DHExp(x, tid, C),
+        DHExp(new_x, tid, $C),
         F_State_C1(
             tid,
             $C,
