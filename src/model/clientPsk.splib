@@ -19,7 +19,7 @@ rule client_hello_psk:
         >
         binder_message = ClientHello(clientRandom, '0', $cipher_suites, '0', binder_extensions)
         binder_messages = <messages, binder_message>
-        binder = hmac(Expand(Expand(es, <<psk_type, 'pbk'>>, '32'), <binder, '0'>, '32'), h(binder_messages))
+        binder = hmac(Expand(Expand(es, <'32', 'pbk', '0'> , '32'), <'32', '0', '0'> , '32'), h(binder_messages))
         extensions = <
             ExtensionSupportedVersions(),
             ExtensionNamedGroupdList(supported_groups),
