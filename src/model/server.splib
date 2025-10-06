@@ -53,14 +53,13 @@ rule receive_client_hello:
         >
         receivedMessage = ClientHello(clientRandom, '0', $cipher_suites, '0', extensions)
         messages = <p_messages, receivedMessage>
-        serverRandom = ~serverRandom
         group = $new_group
     in
     [
         F_MessageIn(receivedMessage),
-        Fr(serverRandom),
+        Fr(~serverRandom),
         F_State_S0(
-            tid,
+            ~tid,
             $S,
             $C,
             p_res_psk,
@@ -92,18 +91,18 @@ rule receive_client_hello:
         )
     ]
     --[
-        S0(tid),
+        S0(~tid),
         Neq($group1, $group2)
     ]->
     [
         F_State_S1(
-            tid,
+            ~tid,
             $S,
             $C,
             p_res_psk,
             messages,
             clientRandom,
-            serverRandom,
+            ~serverRandom,
             group,
             p_supported_groups,
             p_hrr,
@@ -132,7 +131,6 @@ rule receive_client_hello:
 rule hello_retry_request:
     let
         p_hrr = '0'
-        p_supported_groups = $supportedGroups
 
         hrr = 'hrr'
         new_g = p_supported_groups
@@ -147,7 +145,7 @@ rule hello_retry_request:
     in
     [
         F_State_S1(
-            tid,
+            ~tid,
             $S,
             $C,
             p_res_psk,
@@ -179,14 +177,14 @@ rule hello_retry_request:
         )
     ]
     --[
-        S1_retry(tid),
+        S1_retry(~tid),
         Neq(p_group, p_supported_groups),
-        Instance(tid, $S, 'server')
+        Instance(~tid, $S, 'server')
     ]->
     [
         MessageOut(message),
         F_State_S0(
-            tid,
+            ~tid,
             $S,
             $C,
             p_res_psk,
@@ -221,9 +219,8 @@ rule hello_retry_request:
 rule server_hello:
     let
         p_gx = $p_g^some_x
-        y = ~y
-        gy = $p_g^y
-        gxy = p_gx^y
+        gy = $p_g^~y
+        gxy = p_gx^~y
         extensions = <
             ExtensionSignatureSchemeList($supported_signature_algorithms),
             ExtensionKeyShareServerHello(KeyShareEntry($group1, gy))
@@ -233,9 +230,9 @@ rule server_hello:
         messages = <p_messages, message>
     in
     [
-        Fr(y),
+        Fr(~y),
         F_State_S1(
-            tid,
+            ~tid,
             $S,
             $C, 
             p_res_psk,
@@ -267,21 +264,21 @@ rule server_hello:
         )
     ]
     --[
-        S1(tid),
-        Instance(tid, $S, 'server'),
+        S1(~tid),
+        Instance(~tid, $S, 'server'),
         Eq($p_g, p_supported_groups),
         Neq(p_gx, $p_g),
         Neq(gxy, $p_g),
-        Instance(tid, $S, 'server'),
-        RNonces(tid, $S, 'server', <p_clientRandom, serverRandom>),
-        DHChal($p_g, some_x, y, p_gx, gy, gxy),
-        DH(tid, $S, y)
+        Instance(~tid, $S, 'server'),
+        RNonces(~tid, $S, 'server', <p_clientRandom, serverRandom>),
+        DHChal($p_g, some_x, ~y, p_gx, gy, gxy),
+        DH(~tid, $S, ~y)
     ]->
     [
         MessageOut(message),
-        DHExp(y, tid, $S),
+        DHExp(~y, ~tid, $S),
         F_State_S2a(
-            tid,
+            ~tid,
             $S,
             $C,
             p_res_psk,
@@ -292,7 +289,7 @@ rule server_hello:
             p_supported_groups,
             p_hrr,
             p_x,
-            y,
+            ~y,
             p_gx,
             gy,
             gxy,

@@ -2,45 +2,44 @@ rule client_hello:
     let
         messages = '0'
         supported_groups = <$group1, $group2>
-        gx = $group1^x
+        gx = $group1^~x
         extensions = <
             ExtensionSupportedVersions(),
             ExtensionNamedGroupdList(supported_groups),
             ExtensionSignatureSchemeList($supported_signature_algorithms),
             ExtensionKeyShareClientHello(KeyShareEntry($group1, gx))
         >
-        clientRandom = ~clientRandom
-        message = ClientHello(clientRandom, '0', $cipher_suites, '0', extensions)
+        message = ClientHello(~clientRandom, '0', $cipher_suites, '0', extensions)
         messages = <messages, message>
         earlySecret = Extract('0', '0')
     in
     [
-        Fr(clientRandom),
-        Fr(x)
+        Fr(~clientRandom),
+        Fr(~x)
     ]
     --[
-        C0(clientRandom),
-        Start(clientRandom, $C, 'client'),
-        RIdentity(clientRandom, $C, 'client', <$C>),
-        DH(clientRandom, $C, x),
-        HonestUse(x),
+        C0(~clientRandom),
+        Start(~clientRandom, $C, 'client'),
+        RIdentity(~clientRandom, $C, 'client', <$C>),
+        DH(~clientRandom, $C, ~x),
+        HonestUse(~x),
         HonestUse(gx),
         Neq($group1, $group2)
     ]->
     [
-        DHExp(x, clientRandom, $C),
+        DHExp(~x, ~clientRandom, $C),
         F_State_C1(
-            clientRandom,
+            ~clientRandom,
             $C,
             $S,
             '0',
             messages,
-            clientRandom,
+            ~clientRandom,
             '0',
             $group1,
             supported_groups,
             '0',
-            x,
+            ~x,
             '0',
             gx,
             '0',
@@ -71,7 +70,7 @@ rule receive_hello_retry_request:
         supported_groups = <$group1, $group2>
         psk_ke_mode = 'na'
         auth_status = <'0', '0'>
-        gx = $group2^x
+        gx = $group2^~x
         receivedExtensions = <
             ExtensionSupportedVersions(),
             ExtensionKeyShareHelloRetryRequest($group2)
@@ -90,10 +89,10 @@ rule receive_hello_retry_request:
     in
     [
         F_MessageIn(receivedMessage),
-        Fr(x),
-        DHExp(p_x, tid, $C),
+        Fr(~x),
+        DHExp(p_x, ~tid, $C),
         F_State_C1(
-            tid,
+            ~tid,
             $C,
             $S,
             p_res_psk,
@@ -108,7 +107,7 @@ rule receive_hello_retry_request:
             p_gx,
             p_gy,
             p_gxy,
-            psk_ke_mode,
+            p_psk_ke_mode,
             p_psk_id,
             p_edi,
             p_es,
@@ -125,18 +124,18 @@ rule receive_hello_retry_request:
         )
     ]
     --[
-        C1_retry(tid),
-        Instance(tid, $C, 'client'),
+        C1_retry(~tid),
+        Instance(~tid, $C, 'client'),
         Neq($group1, $group2),
-        Instance(tid, $C, 'client'),
-        DeleteDH(tid, $C, p_x),
-        DH(tid, $C, x)
+        Instance(~tid, $C, 'client'),
+        DeleteDH(~tid, $C, p_x),
+        DH(~tid, $C, ~x)
     ]->
     [
         MessageOut(message),
-        DHExp(x, tid, $C),
+        DHExp(~x, ~tid, $C),
         F_State_C1(
-            tid,
+            ~tid,
             $C,
             $S,
             p_res_psk,
@@ -146,7 +145,7 @@ rule receive_hello_retry_request:
             $group2,
             supported_groups,
             hrr,
-            x,
+            ~x,
             p_y,
             gx,
             p_gy,
@@ -170,7 +169,8 @@ rule receive_hello_retry_request:
 
 rule receive_server_hello:
     let
-        serverRandom = new_ns
+        p_x = ~x // TODO: Check if really needed.
+        serverRandom = new_ns // TODO: check if really needed.
         gy = new_gy
         gy = $g^new_y
         gxy = gy^p_x
@@ -186,7 +186,7 @@ rule receive_server_hello:
     [
         F_MessageIn(receivedMessage),
         F_State_C1(
-            tid,
+            ~tid,
             $C,
             $S,
             p_res_psk,
@@ -218,16 +218,16 @@ rule receive_server_hello:
         )
     ]
     --[
-        C1(tid),
-        Instance(tid, $C, 'client'),
+        C1(~tid),
+        Instance(~tid, $C, 'client'),
         Neq(gy, $g),
         Neq(gxy, $g),
         DHChal($g, p_x, new_y, p_gx, gy, gxy),
-        RNonces(tid, $C, 'client', <p_clientRandom,serverRandom>)
+        RNonces(~tid, $C, 'client', <p_clientRandom,serverRandom>)
     ]->
     [
         F_State_C2a(
-            tid,
+            ~tid,
             $C,
             $S,
             p_res_psk,
