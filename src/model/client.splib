@@ -681,17 +681,17 @@ rule receive_server_auth:
 rule client_auth:
     let
         p_cert_req = '0'
-        verify_data = hmac(Expand(Expand(p_handshakeSecret, <'clienthts', <h(p_messages)>>, '32'), <'TLS13finished', '0'>, '32'), h(p_messages))
+        verify_data = hmac(Expand(Expand(p_handshakeSecret, <'32', 'TLS13clienthandshaketrafficsecret', <h(p_messages)>>, '32'), <'TLS13finished', '0'>, '32'), h(p_messages))
         finishedMessage = Finished(verify_data)
         messages = <p_messages, finishedMessage>
 
-        resumptionMasterSecret = Expand(p_masterSecret, <'rms', <h(messages)>>, '32')
-        clientApplicationTrafficKey = Expand(p_clientApplicationTrafficSecret, <'TLS13applicationdatakeyexpansion_key', '0'>, '32')
-        serverApplicationTrafficKey = Expand(p_serverApplicationTrafficSecret, <'TLS13applicationdatakeyexpansion_key', '0'>, '32')
+        resumptionMasterSecret = Expand(p_masterSecret, <'32', 'TLS13resumptionmastersecret', <h(messages)>>, '32')
+        clientApplicationTrafficKey = Expand(p_clientApplicationTrafficSecret, <'32', 'TLS13applicationdatakeyexpansion_key', '0'>, '32')
+        serverApplicationTrafficKey = Expand(p_serverApplicationTrafficSecret, <'32', 'TLS13applicationdatakeyexpansion_key', '0'>, '32')
     in
     [
         F_State_C3(
-            tid,
+            ~tid,
             $C,
             $S,
             p_res_psk,
@@ -723,19 +723,19 @@ rule client_auth:
         )
     ]
     --[
-        C3(tid),
-        Instance(tid, $C, 'client'),
-        RTranscript(tid, $C, 'client', <messages>),
-        RHSMS(tid, $C, 'client', <p_handshakeSecret, p_masterSecret>),
-        RRMS(tid, $C, 'client', <$S, resumptionMasterSecret, messages>),
-        RMode(tid, $C, 'client', <p_psk_ke_mode>),
-        SessionKey(tid, $C, $S, p_auth_status, <clientApplicationTrafficKey, serverApplicationTrafficKey>)
+        C3(~tid),
+        Instance(~tid, $C, 'client'),
+        RTranscript(~tid, $C, 'client', <messages>),
+        RHSMS(~tid, $C, 'client', <p_handshakeSecret, p_masterSecret>),
+        RRMS(~tid, $C, 'client', <$S, resumptionMasterSecret, messages>),
+        RMode(~tid, $C, 'client', <p_psk_ke_mode>),
+        SessionKey(~tid, $C, $S, p_auth_status, <clientApplicationTrafficKey, serverApplicationTrafficKey>)
     ]->
     [
         MessageOut(senc{finishedMessage}p_handshakeKeyClient),
-        SendStream(tid, $C, $S, p_auth_status, clientApplicationTrafficKey),
+        SendStream(~tid, $C, $S, p_auth_status, clientApplicationTrafficKey),
         L_State_C4(
-            tid,
+            ~tid,
             $C,
             $S,
             p_res_psk,
@@ -782,14 +782,14 @@ rule client_auth_cert:
         messages = <messages, certificateVerifyMessage>
 
         // Finished
-        verify_data = hmac(Expand(Expand(p_handshakeSecret, <'clienthts', <h(messages)>>, '32'), <'TLS13finished', '0'>, '32'), h(messages))
+        verify_data = hmac(Expand(Expand(p_handshakeSecret, <'32', 'TLS13clienthandshaketrafficsecret', <h(messages)>>, '32'), <'TLS13finished', '0'>, '32'), h(messages))
         finishedMessage = Finished(verify_data)
         messages = <messages, finishedMessage>
 
-        rms = Expand(p_masterSecret, <'rms', <h(messages)>>, '32')
+        rms = Expand(p_masterSecret, <'32', 'TLS13resumptionmastersecret', <h(messages)>>, '32')
 
-        serverApplicationTrafficKey = Expand(p_serverApplicationTrafficSecret, <'TLS13applicationdatakeyexpansion_key', '0'>, '32')
-        clientApplicationTrafficKey = Expand(p_clientApplicationTrafficSecret, <'TLS13applicationdatakeyexpansion_key', '0'>, '32')
+        serverApplicationTrafficKey = Expand(p_serverApplicationTrafficSecret, <'32', 'TLS13applicationdatakeyexpansion_key', '0'>, '32')
+        clientApplicationTrafficKey = Expand(p_clientApplicationTrafficSecret, <'32', 'TLS13applicationdatakeyexpansion_key', '0'>, '32')
 
         auth_status = <'auth', 'auth'>
     in
@@ -877,17 +877,17 @@ rule client_auth_cert:
 
 rule receive_new_session_ticket:
     let
-        p_rms = Expand(p_masterSecret, <'rms', <h(p_messages)>>, '32')
+        p_rms = Expand(ms, <'32', 'TLS13resumptionmastersecret', <h(p_messages)>>, '32')
         ticket_extension = <
             <'46', $max_early_data_size>
         >
         receivedMessage = NewSessionTicket($ticket_lifetime, ticket_age_add, ticket, ticket_extension)
     in
     [
-        RecvStream(tid, $C, $S, p_auth_status, serverApplicationTrafficKey),
+        RecvStream(~tid, $C, $S, p_auth_status, serverApplicationTrafficKey),
         F_MessageIn(senc{receivedMessage}serverApplicationTrafficKey),
         L_State_C4(
-            tid,
+            ~tid,
             $C,
             $S,
             p_res_psk,
@@ -919,16 +919,16 @@ rule receive_new_session_ticket:
         )
     ]
     --[
-        C4_NST(tid),
-        Instance(tid, $C, 'client'),
-        RPostHS(tid, $C, 'client', <p_handshakeSecret, p_rms, $S, p_auth_status, p_messages>)
+        C4_NST(~tid),
+        Instance(~tid, $C, 'client'),
+        RPostHS(~tid, $C, 'client', <p_handshakeSecret, p_rms, $S, p_auth_status, p_messages>)
     ]->
     [
-        RecvStream(tid, $C, $S, p_auth_status, serverApplicationTrafficKey),
+        RecvStream(~tid, $C, $S, p_auth_status, serverApplicationTrafficKey),
         !ClientPSK($C, $S, p_rms, p_auth_status, receivedMessage, 'res'),
         SecretPSK($C, p_rms),
         L_State_C4(
-            tid,
+            ~tid,
             $C,
             $S,
             p_rms,
