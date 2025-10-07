@@ -117,7 +117,7 @@ rule receive_hello_retry_request_psk:
             edi,
             ExtensionPreSharedKeyClientHello(identities, binder)
         >
-        binder_message = ClientHello(~new_nc, '0', $Fcipher_suites, '0', binder_extensions)
+        binder_message = ClientHello(~new_nc, '0', $cipher_suites, '0', binder_extensions)
         binder_messages = <p_messages, binder_message>
         binder = hmac(Expand(Expand(es, <'32', 'TLS13psk_type_pskbinderkey', '0'> , '32'), <'32', '0', '0'> , '32'), h(binder_messages))
 
