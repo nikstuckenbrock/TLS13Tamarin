@@ -304,6 +304,7 @@ rule receive_server_hello_psk_dhe:
         p_g = $g
         p_psk_ke_mode = <'0', '1'>
         psk_ke_mode = '1'
+        gy = p_g^new_y
         gxy = gy^p_g
         receivedExtensions = <
             ExtensionSignatureSchemeList($supported_signature_algorithms),
@@ -326,13 +327,13 @@ rule receive_server_hello_psk_dhe:
             p_g,
             p_sg,
             p_hrr,
-            p_x,
+            ~p_x,
             p_y,
             p_gx,
             p_gy,
             p_gxy,
             p_psk_ke_mode,
-            p_psk_id,
+            ~ticket,
             p_edi,
             p_es,
             p_hs,
@@ -352,7 +353,7 @@ rule receive_server_hello_psk_dhe:
         C1_PSK_DHE(tid),
         Neq(gy, $g),
         Instance(tid, $C, 'client'),
-        // DHChal($g, p_x, new_y, gx, gy, gxy),
+        DHChal($g, ~p_x, new_y, p_gx, gy, gxy),
         RNonces(tid, $C, 'client', <p_nc, p_ns>)
     ]->
     [
@@ -367,13 +368,13 @@ rule receive_server_hello_psk_dhe:
             p_g,
             p_sg,
             p_hrr,
-            p_x,
+            ~p_x,
             p_y,
             p_gx,
             p_gy,
             gxy,
             psk_ke_mode,
-            p_psk_id,
+            ~ticket,
             edi,
             p_es,
             p_hs,

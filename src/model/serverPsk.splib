@@ -209,8 +209,8 @@ rule server_hello_psk_dhe:
     let
         p_g = $g
         p_psk_ke_mode = <'0', '1'>
-        gy = p_g^y
-        gxy = p_gx^y
+        gy = p_g^~y
+        gxy = p_gx^~y
         psk_ke_mode = '1'
         es = Extract(p_res_psk, '0')
         extensions = <
@@ -219,18 +219,18 @@ rule server_hello_psk_dhe:
             <'41', '0'>,
             p_edi
         >
-        message = ServerHello(p_ns, '0', $cipher_suite, '0', extensions)
+        message = ServerHello(~p_ns, '0', $cipher_suite, '0', extensions)
         messages = <p_messages, message>
     in
     [
         F_State_S1(
-            tid,
+            ~tid,
             $S,
             $C,
             p_res_psk,
             p_messages,
             p_nc,
-            p_ns,
+            ~p_ns,
             p_g,
             p_sg,
             p_hrr,
@@ -240,7 +240,7 @@ rule server_hello_psk_dhe:
             p_gy,
             p_gxy,
             p_psk_ke_mode,
-            p_psk_id,
+            ~ticket,
             p_edi,
             p_es,
             p_hs,
@@ -254,31 +254,31 @@ rule server_hello_psk_dhe:
             p_rms,
             p_cert_req
         ),
-        Fr(y)
+        Fr(~y)
     ]
     --[
-        S1_PSK_DHE(tid),
-        Instance(tid, $S, 'server')
+        S1_PSK_DHE(~tid),
+        Instance(~tid, $S, 'server')
     ]->
     [
         F_State_S2a(
-            tid,
+            ~tid,
             $S,
             $C,
             p_res_psk,
             messages,
             p_nc,
-            p_ns,
+            ~p_ns,
             p_g,
             p_sg,
             p_hrr,
             p_x,
-            y,
+            ~y,
             p_gx,
             gy,
             gxy,
             psk_ke_mode,
-            p_psk_id,
+            ~ticket,
             p_edi,
             es,
             p_hs,
