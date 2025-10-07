@@ -132,6 +132,8 @@ rule hello_retry_request:
     let
         p_hrr = '0'
 
+        p_supported_groups = $supported_group
+
         hrr = 'hrr'
         new_g = p_supported_groups
         g = p_supported_groups
