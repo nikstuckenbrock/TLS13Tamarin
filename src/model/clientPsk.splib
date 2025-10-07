@@ -3,7 +3,7 @@ rule client_hello_psk:
         messages = '0'
         binder = '0'
         supported_groups = <$group1, $group2>
-        gx = $group1^x
+        gx = $group1^~x
         psk_ke_mode = <'0', '1'>
         obfuscated_ticket_age = mask(ticket_age_add, $ticket_age)
         identities = <<ticket, obfuscated_ticket_age>>
@@ -17,9 +17,9 @@ rule client_hello_psk:
             edi,
             ExtensionPreSharedKeyClientHello(identities, binder)
         >
-        binder_message = ClientHello(clientRandom, '0', $cipher_suites, '0', binder_extensions)
+        binder_message = ClientHello(~clientRandom, '0', $cipher_suites, '0', binder_extensions)
         binder_messages = <messages, binder_message>
-        binder = hmac(Expand(Expand(es, <'32', 'pbk', '0'> , '32'), <'32', '0', '0'> , '32'), h(binder_messages))
+        binder = hmac(Expand(Expand(es, <'32', 'TLS13psk_type_pskbinderkey', '0'> , '32'), <'32', '0', '0'> , '32'), h(binder_messages))
         extensions = <
             ExtensionSupportedVersions(),
             ExtensionNamedGroupdList(supported_groups),
@@ -28,46 +28,46 @@ rule client_hello_psk:
             edi,
             ExtensionPreSharedKeyClientHello(identities, binder)
         >
-        message = ClientHello(clientRandom, '0', $cipher_suites, '0', extensions)
+        message = ClientHello(~clientRandom, '0', $cipher_suites, '0', extensions)
         messages = <messages, message>
 
-        ead_keyc = Expand(Expand(es, <'cets', <h(messages)>>, '32'), <'eadke_wk', '0'>, '32')
+        ead_keyc = Expand(Expand(es, <'TLS13clientearlytrafficsecret', <h(messages)>>, '32'), <'TLS13earlyapplicationdatakeyexpansion_key', '0'>, '32')
     in
     [
-        Fr(clientRandom),
-        Fr(x),
+        Fr(~clientRandom),
+        Fr(~x),
         !ClientPSK($C, $S, res_psk, auth_status, <'4',$ticket_lifetime, ticket_age_add, ticket,<<'46',$max_early_data_size>> >, psk_type)
     ]
     --[
-        C0_PSK(clientRandom),
-        Start(clientRandom, $C, 'client'),
-        RPSK(clientRandom, $C, 'client', <$S, res_psk, auth_status>),
+        C0_PSK(~clientRandom),
+        Start(~clientRandom, $C, 'client'),
+        RPSK(~clientRandom, $C, 'client', <$S, res_psk, auth_status>),
         Neq(res_psk, '0'),
-        DH(clientRandom, $C, x)
+        DH(~clientRandom, $C, ~x)
     ]->
     [
         MessageOut(message),
-        F_CachePSK(clientRandom, $S, res_psk, auth_status, <'4', $ticket_lifetime, ticket_age_add, ticket, <<'46',$max_early_data_size>> >,psk_type),
-        EarlySendStream(clientRandom, $C, $S, auth_status, ead_keyc, edi),
-        DHExp(x, clientRandom, $C),
+        F_CachePSK(~clientRandom, $S, res_psk, auth_status, <'4', $ticket_lifetime, ticket_age_add, ticket, <<'46',$max_early_data_size>> >,psk_type),
+        EarlySendStream(~clientRandom, $C, $S, auth_status, ead_keyc, edi),
+        DHExp(~x, ~clientRandom, $C),
         F_State_C1(
-            clientRandom,
+            ~clientRandom,
             $C,
             $S,
             res_psk,
             messages,
-            clientRandom,
+            ~clientRandom,
             '0',
             $group1,
             supported_groups,
             '0',
-            x,
+            ~x,
             '0',
             gx,
             '0',
             '0',
             psk_ke_mode,
-            '0',
+            ticket,
             edi,
             es,
             '0',
@@ -101,10 +101,10 @@ rule receive_hello_retry_request_psk:
         >
         receivedMessage = HelloRetryRequest(receivedExtensions)
 
-        obfuscated_ticket_age = mask(ticket_age_add, $ticket_age)
+        obfuscated_ticket_age = mask(ticket_age_add, '1')
         identities = <<ticket, obfuscated_ticket_age>>
 
-        gx = $group2^new_x
+        gx = $group2^~new_x
 
         es = Extract(res_psk, '0')
         binder = '0'
@@ -117,9 +117,9 @@ rule receive_hello_retry_request_psk:
             edi,
             ExtensionPreSharedKeyClientHello(identities, binder)
         >
-        binder_message = ClientHello(new_nc, '0', $Fcipher_suites, '0', binder_extensions)
+        binder_message = ClientHello(~new_nc, '0', $Fcipher_suites, '0', binder_extensions)
         binder_messages = <p_messages, binder_message>
-        binder = hmac(Expand(Expand(es, <'32', 'pbk', '0'> , '32'), <'32', '0', '0'> , '32'), h(binder_messages))
+        binder = hmac(Expand(Expand(es, <'32', 'TLS13psk_type_pskbinderkey', '0'> , '32'), <'32', '0', '0'> , '32'), h(binder_messages))
 
         extensions = <
             ExtensionSupportedVersions(),
@@ -129,17 +129,17 @@ rule receive_hello_retry_request_psk:
             edi,
             ExtensionPreSharedKeyClientHello(identities, binder)
         >
-        message = ClientHello(new_nc, '0', $cipher_suites, '0', extensions)
+        message = ClientHello(~new_nc, '0', $cipher_suites, '0', extensions)
         messages = <p_messages, message>
     in
     [
         F_MessageIn(receivedMessage),
-        F_CachePSK(tid, $S, p_res_psk, p_auth_status, <'4', $ticket_lifetime, ticket_age_add, ticket,<<'46',$max_early_data_size>> >,psk_type),
-        Fr(new_nc),
-        Fr(new_x),
-        DHExp(p_x, tid, $C),
+        F_CachePSK(~tid, $S, p_res_psk, p_auth_status, <'4', $ticket_lifetime, ticket_age_add, ticket,<<'46',$max_early_data_size>> >,psk_type),
+        Fr(~new_nc),
+        Fr(~new_x),
+        DHExp(p_x, ~tid, $C),
         F_State_C1(
-            tid,
+            ~tid,
             $C,
             $S,
             p_res_psk,
@@ -171,28 +171,28 @@ rule receive_hello_retry_request_psk:
         )
     ]
     --[
-        C1_retry_PSK(tid),
+        C1_retry_PSK(~tid),
         Neq($group1, $group2),
-        Instance(tid, $C, 'client'),
-        RPSK(tid, $C, 'client', <$S, p_res_psk, p_auth_status>),
-        DeleteDH(tid, $C, p_x),
-        DH(tid, $C, new_x)
+        Instance(~tid, $C, 'client'),
+        RPSK(~tid, $C, 'client', <$S, p_res_psk, p_auth_status>),
+        DeleteDH(~tid, $C, p_x),
+        DH(~tid, $C, ~new_x)
     ]->
     [
         MessageOut(message),
-        DHExp(new_x, tid, $C),
+        DHExp(~new_x, ~tid, $C),
         F_State_C1(
-            tid,
+            ~tid,
             $C,
             $S,
             res_psk,
             messages,
-            new_nc,
+            ~new_nc,
             p_ns,
             $group2,
             p_sg,
             p_hrr,
-            new_x,
+            ~new_x,
             p_y,
             gx,
             p_gy,
@@ -221,14 +221,14 @@ rule receive_server_hello_psk:
         extensions = <
             ExtensionSignatureSchemeList($supported_signature_algorithms),
             <'41', '0'>,
-            edi
+            p_edi
         >
         message = ServerHello(serverRandom, '0', $cipher_suite, '0', extensions)
         messages = <p_messages, message>
     in
     [
         F_State_C1(
-            tid,
+            ~tid,
             $C,
             $S,
             p_res_psk,
@@ -261,13 +261,13 @@ rule receive_server_hello_psk:
         F_MessageIn(message)
     ]
     --[
-        C1_PSK(tid),
-        Instance(tid, $C, 'client'),
-        RNonces(tid, $C, 'client', <p_nc ,serverRandom>)
+        C1_PSK(~tid),
+        Instance(~tid, $C, 'client'),
+        RNonces(~tid, $C, 'client', <p_nc ,serverRandom>)
     ]->
     [
         F_State_C2a(
-            tid,
+            ~tid,
             $C,
             $S,
             p_res_psk,
@@ -284,7 +284,7 @@ rule receive_server_hello_psk:
             p_gxy,
             psk_ke_mode,
             p_psk_id,
-            edi,
+            p_edi,
             p_es,
             p_hs,
             p_ms,

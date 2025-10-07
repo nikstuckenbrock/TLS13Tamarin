@@ -504,7 +504,7 @@ rule receive_certificate_request:
     [
         F_MessageIn(senc{receivedMessage}p_handshakeKeyServer),
         F_State_C2c(
-            tid,
+            ~tid,
             $C,
             $S,
             p_res_psk,
@@ -536,16 +536,16 @@ rule receive_certificate_request:
         )
     ]
     --[
-        C2c_req(tid),
-        Instance(tid, $C, 'client')
+        C2c_req(~tid),
+        Instance(~tid, $C, 'client')
     ]->
     [
         F_State_C2d(
-            tid,
+            ~tid,
             $C,
             $S,
             p_res_psk,
-            p_messages,
+            messages,
             p_nc,
             p_ns,
             p_g,

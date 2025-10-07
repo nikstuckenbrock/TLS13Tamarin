@@ -555,7 +555,7 @@ rule certificate_request:
     in
     [
         F_State_S2c(
-            tid,
+            ~tid,
             $S,
             $C,
             p_res_psk,
@@ -587,16 +587,16 @@ rule certificate_request:
         )
     ]
     --[
-        S2c_req(tid),
-        Instance(tid, $S, 'server'),
-        RCertReqCtxt(tid, $S, 'server', <certificate_request_context>)
+        S2c_req(~tid),
+        Instance(~tid, $S, 'server'),
+        RCertReqCtxt(~tid, $S, 'server', <certificate_request_context>)
     ]->[
         F_State_S2d(
-            tid,
+            ~tid,
             $S,
             $C,
             p_res_psk,
-            p_messages,
+            messages,
             p_nc,
             p_ns,
             p_g,
@@ -934,12 +934,12 @@ rule new_session_ticket:
         ticket_extension = <
             <'46', $max_early_data_size>
         >
-        message = NewSessionTicket($ticket_lifetime, ticket_age_add, ticket, ticket_extension)
+        message = NewSessionTicket($ticket_lifetime, ~ticket_age_add, ~ticket, ticket_extension)
     in
     [
         SendStream(tid, $S, $C, auth_status, serverApplicationTrafficKey),
-        Fr(ticket),
-        Fr(ticket_age_add),
+        Fr(~ticket),
+        Fr(~ticket_age_add),
         F_State_S4(
             tid,
             $S,
@@ -976,7 +976,7 @@ rule new_session_ticket:
         S4_NST(tid),
         Instance(tid, $S, 'server'),
         RPostHS(tid, $S, 'server', <p_handshakeSecret, p_rms, $C, auth_status, p_messages>),
-        RNST(tid, $S, 'server', <ticket, ticket_age_add>)
+        RNST(tid, $S, 'server', <~ticket, ~ticket_age_add>)
     ]->
     [
         MessageOut(senc{message}serverApplicationTrafficKey),

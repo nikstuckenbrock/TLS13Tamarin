@@ -22,21 +22,23 @@ rule receive_client_hello_psk:
         binder_messages = <p_messages, binder_message>
         res_psk = psk_res_psk
         es = Extract(res_psk, '0')
-        binder_check = hmac(Expand(Expand(es, <'32', 'pbk', '0'> , '32'), <'32', '0', '0'> , '32'), h(binder_messages))
+        binder_check = hmac(Expand(Expand(es, <'32', 'TLS13psk_type_pskbinderkey', '0'> , '32'), <'32', '0', '0'> , '32'), h(binder_messages))
         extensions = <
             ExtensionSupportedVersions(),
             ExtensionNamedGroupdList(supported_groups),
             ExtensionKeyShareClientHello(KeyShareEntry($new_group, gx)),
             ExtensionPskKeyExchangeModes(psk_ke_mode),
-            ExtensionEarlyDataIndication(),
+            new_edi,
             ExtensionPreSharedKeyClientHello(identities, binder_in)
         >
         receivedMessage = ClientHello(clientRandom, '0', $cipher_suites, '0', extensions)
         messages = <p_messages, receivedMessage>
+
+        ead_keyc = Expand(Expand(es, <'32', 'TLS13clientearlytrafficsecret', <h(messages)>> , '32'), <'32', 'TLS13earlyapplicationdatakeyexpansion_key', '0'> , '32')
     in
     [
         F_State_S0(
-            tid,
+            ~tid,
             $S,
             $C,
             p_res_psk,
@@ -67,26 +69,27 @@ rule receive_client_hello_psk:
             p_cert_req
         ),
         F_MessageIn(receivedMessage),
-        Fr(serverRandom),
+        Fr(~serverRandom),
         !ServerPSK($S, $C, psk_res_psk, psk_auth_status, <'4', $ticket_lifetime, ticket_age_add, ticket, <<'46', $max_early_data_size>>>, psk_type)
     ]
     --[
-        S0_PSK(tid),
+        S0_PSK(~tid),
         Neq($group1, $group2),
         Eq(unmask(obfuscated_ticket_age, ticket_age_add), '1'),
         Eq(binder_check, binder_in),
-        RPSK(tid, $S, 'server', <$C, psk_res_psk, psk_auth_status>),
+        RPSK(~tid, $S, 'server', <$C, psk_res_psk, psk_auth_status>),
         Neq(psk_res_psk, '0')
     ]->
     [
+        EarlyRecvStream(~tid, $S, $C, psk_auth_status, ead_keyc, new_edi),
         F_State_S1(
-            tid,
+            ~tid,
             $S,
             $C,
             res_psk,
             messages,
             clientRandom,
-            serverRandom,
+            ~serverRandom,
             $new_g,
             p_sg,
             p_hrr,
@@ -123,19 +126,19 @@ rule server_hello_psk:
             <'41', '0'>,
             edi
         >
-        message = ServerHello(p_serverRandom, '0', $cipher_suite, '0', extensions)
+        message = ServerHello(~p_serverRandom, '0', $cipher_suite, '0', extensions)
         messages = <p_messages, message>
     in
     [
-        Fr(y),
+        Fr(~y),
         F_State_S1(
-            tid,
+            ~tid,
             $S,
             $C,
             p_res_psk,
             p_messages,
             p_clientRandom,
-            p_serverRandom,
+            ~p_serverRandom,
             p_g,
             p_sg,
             p_hrr,
@@ -145,7 +148,7 @@ rule server_hello_psk:
             p_gy,
             p_gxy,
             p_psk_ke_mode,
-            p_psk_id,
+            ~ticket,
             p_edi,
             p_es,
             p_hs,
@@ -161,32 +164,32 @@ rule server_hello_psk:
         )
     ]
     --[
-        S1_PSK(tid),
-        Instance(tid, $S, 'server'),
-        RNonces(tid, $S, 'server', <p_clientRandom, p_serverRandom>),
-        DH(tid, $S, y)
+        S1_PSK(~tid),
+        Instance(~tid, $S, 'server'),
+        RNonces(~tid, $S, 'server', <p_clientRandom, ~p_serverRandom>),
+        DH(~tid, $S, ~y)
     ]->
     [
-        DHExp(y, tid, $S),
+        DHExp(~y, ~tid, $S),
         MessageOut(message),
         F_State_S2a(
-            tid,
+            ~tid,
             $S,
             $C,
             p_res_psk,
             messages,
             p_clientRandom,
-            p_serverRandom,
+            ~p_serverRandom,
             p_g,
             p_sg,
             p_hrr,
             p_x,
-            y,
+            ~y,
             p_gx,
             p_gy,
             p_gxy,
             psk_ke_mode,
-            p_psk_id,
+            ~ticket,
             edi,
             es,
             p_hs,
