@@ -391,15 +391,15 @@ rule receive_server_hello_psk_dhe:
 
 rule receive_server_auth_psk:
     let
-        exp_verify_data = hmac(Expand(Expand(p_hs, <'serverhts', <h(p_messages)>>, '32'), <'fin', '0'>, '32'), h(p_messages))
+        exp_verify_data = hmac(Expand(Expand(p_hs, <'TLS13serverhandshaketrafficsecret', <h(p_messages)>>, '32'), <'TLS13finished', '0'>, '32'), h(p_messages))
 
         message = Finished(verify_data)
         messages = <p_messages, message>
 
-        cats = Expand(p_ms, <'clientats', <h(messages)>>, '32')
-        sats = Expand(p_ms, <'serverats', <h(messages)>>, '32')
-        app_keys = Expand(sats, <'adke_wk', '0'>, '32')
-        ems = Expand(p_ms, <'ems', <h(messages)>>, '32')
+        cats = Expand(p_ms, <'TLS13clientapplicationtrafficsecret', <h(messages)>>, '32')
+        sats = Expand(p_ms, <'TLS13serverapplicationtrafficsecret', <h(messages)>>, '32')
+        app_keys = Expand(sats, <'TLS13applicationdatakeyexpansion_key', '0'>, '32')
+        ems = Expand(p_ms, <'TLS13exportermastersecret', <h(messages)>>, '32')
     in
     [
         F_MessageIn(senc{message}p_handshakeKeyServer),

@@ -297,14 +297,14 @@ rule server_hello_psk_dhe:
 
 rule server_auth_psk:
     let
-        verify_data = hmac(Expand(Expand(p_hs, <'serverhts', <h(p_messages)>>, '32'), <'fin', '0'>, '32'), h(p_messages))
+        verify_data = hmac(Expand(Expand(p_hs, <'TLS13serverhandshaketrafficsecret', <h(p_messages)>>, '32'), <'TLS13finished', '0'>, '32'), h(p_messages))
         message = Finished(verify_data)
         messages = <p_messages, message>
 
-        clientApplicationTrafficSecret = Expand(p_ms, <'clientats', <h(messages)>>, '32')
-        serverApplicationTrafficSecret = Expand(p_ms, <'serverats', <h(messages)>>, '32')
-        serverApplicationTrafficKey = Expand(serverApplicationTrafficSecret, <'adke_wk', '0'>, '32')
-        earlyMasterSecret = Expand(p_ms, <'ems', <h(messages)>>, '32')
+        clientApplicationTrafficSecret = Expand(p_ms, <'TLS13clientapplicationtrafficsecret', <h(messages)>>, '32')
+        serverApplicationTrafficSecret = Expand(p_ms, <'TLS13serverapplicationtrafficsecret', <h(messages)>>, '32')
+        serverApplicationTrafficKey = Expand(serverApplicationTrafficSecret, <'TLS13applicationdatakeyexpansion_key', '0'>, '32')
+        earlyMasterSecret = Expand(p_ms, <'TLS13exportermastersecret', <h(messages)>>, '32')
     in
     [
         F_State_S2d(

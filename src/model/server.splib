@@ -633,25 +633,25 @@ rule server_auth:
         messages = <p_messages, certificateMessage>
 
         // CertificateVerify
-        signature = sign{<'server_cv', <h(messages)>>}~longTermKeyServer
+        signature = sign{<'TLS13server_CertificateVerify', <h(messages)>>}~longTermKeyServer
         certificateVerifyMessage = CertificateVerify(signature)
         messages = <messages, certificateVerifyMessage>
 
         // Finished
-        verify_data = hmac(Expand(Expand(p_handshakeSecret, <'serverhts', <h(messages)>>, '32'), <'fin', '0'>, '32'), h(messages))
+        verify_data = hmac(Expand(Expand(p_handshakeSecret, <'32', 'TLS13serverhandshaketrafficsecret', <h(messages)>>, '32'), <'TLS13finished', '0'>, '32'), h(messages))
         finishedMessage = Finished(verify_data)
         messages = <messages, finishedMessage>
 
-        earlyMasterSecret = Expand(p_masterSecret, <'ems', <h(messages)>>, '32')
-        clientApplicationTrafficSecret = Expand(p_masterSecret, <'clientats', <h(messages)>>, '32')
-        serverApplicationTrafficSecret = Expand(p_masterSecret, <'serverats', <h(messages)>>, '32')
-        serverApplicationTrafficKey = Expand(serverApplicationTrafficSecret, <'adke_wk', '0'>, '32')
+        earlyMasterSecret = Expand(p_masterSecret, <'32', 'TLS13exportermastersecret', <h(messages)>>, '32')
+        clientApplicationTrafficSecret = Expand(p_masterSecret, <'32', 'TLS13clientapplicationtrafficsecret', <h(messages)>>, '32')
+        serverApplicationTrafficSecret = Expand(p_masterSecret, <'32', 'TLS13serverapplicationtrafficsecret', <h(messages)>>, '32')
+        serverApplicationTrafficKey = Expand(serverApplicationTrafficSecret, <'32', 'TLS13applicationdatakeyexpansion_key', '0'>, '32')
         auth_status = <'auth', '0'>
     in
     [
         !Ltk($S, ~longTermKeyServer),
         F_State_S2d(
-            tid,
+            ~tid,
             $S,
             $C,
             p_res_psk,
@@ -683,17 +683,17 @@ rule server_auth:
         )
     ]
     --[
-        S2d(tid),
-        Instance(tid, $S, 'server'),
+        S2d(~tid),
+        Instance(~tid, $S, 'server'),
         Eq(p_psk_ke_mode, 'na'),
         UseLtk(~longTermKeyServer, signature),
-        RTranscript(tid, $S, 'server', <messages>)
+        RTranscript(~tid, $S, 'server', <messages>)
     ]->
     [
         MessageOut(senc{<certificateMessage,certificateVerifyMessage,finishedMessage>}p_handshakeKeyServer),
-        SendStream(tid, $S, $C, auth_status, <messages>),
+        SendStream(~tid, $S, $C, auth_status, <messages>),
         F_State_S3(
-            tid,
+            ~tid,
             $S,
             $C,
             p_res_psk,
@@ -728,12 +728,12 @@ rule server_auth:
 rule receive_client_auth:
     let
         p_cert_req = '0'
-        exp_verify_data = hmac(Expand(Expand(p_handshakeSecret, <'clienthts', <h(p_messages)>>, '32'), <'fin', '0'>, '32'), h(p_messages))
+        exp_verify_data = hmac(Expand(Expand(p_handshakeSecret, <'clienthts', <h(p_messages)>>, '32'), <'TLS13finished', '0'>, '32'), h(p_messages))
         receivedFinished = Finished(verify_data)
         messages = <p_messages, receivedFinished>
         resumptionMasterSecret = Expand(p_masterSecret, <'rms', <h(messages)>>, '32')
-        clientApplicationTrafficKey = Expand(p_clientApplicationTrafficSecret, <'adke_wk', '0'>, '32')
-        serverApplicationTrafficKey = Expand(p_serverApplicationTrafficSecret, <'adke_wk', '0'>, '32')
+        clientApplicationTrafficKey = Expand(p_clientApplicationTrafficSecret, <'TLS13applicationdatakeyexpansion_key', '0'>, '32')
+        serverApplicationTrafficKey = Expand(p_serverApplicationTrafficSecret, <'TLS13applicationdatakeyexpansion_key', '0'>, '32')
     in
     [
         F_MessageIn(senc{receivedFinished}p_handshakeKeyClient),
@@ -826,11 +826,11 @@ rule receive_client_auth_cert:
         certificateMessage = Certificate('0', pk(longTermKeyClient))
         messages = <p_messages, certificateMessage>
 
-        sig_messages = <'client_cv', <h(messages)>>
+        sig_messages = <'TLS13client_CertificateVerify', <h(messages)>>
         certificateVerifyMessage = CertificateVerify(signature)
         messages = <p_messages, certificateVerifyMessage>
 
-        exp_verify_data = hmac(Expand(Expand(p_handshakeSecret, <'clienthts', <h(messages)>>, '32'), <'fin', '0'>, '32'), h(messages))
+        exp_verify_data = hmac(Expand(Expand(p_handshakeSecret, <'clienthts', <h(messages)>>, '32'), <'TLS13finished', '0'>, '32'), h(messages))
 
         finishedMessage = Finished(verify_data)
         message = <p_messages, finishedMessage>
@@ -839,8 +839,8 @@ rule receive_client_auth_cert:
 
         receivedMessage = <certificateMessage, certificateVerifyMessage, finishedMessage>
 
-        app_keyc = Expand(p_clientApplicationTrafficSecret, <'adke_wk', '0'>, '32')
-        app_keys = Expand(p_serverApplicationTrafficSecret, <'adke_wk', '0'>, '32')
+        app_keyc = Expand(p_clientApplicationTrafficSecret, <'TLS13applicationdatakeyexpansion_key', '0'>, '32')
+        app_keys = Expand(p_serverApplicationTrafficSecret, <'TLS13applicationdatakeyexpansion_key', '0'>, '32')
     in
     [
         F_MessageIn(senc{receivedMessage}p_handshakeKeyClient),

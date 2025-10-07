@@ -1,7 +1,7 @@
 rule update_req_client:
     let
         cats = Expand(p_cats, <'ats', '0'>, '32')
-        app_keyc = Expand(cats, <'adke_wk', '0'>, '32')
+        app_keyc = Expand(cats, <'TLS13applicationdatakeyexpansion_key', '0'>, '32')
         message = KeyUpdate(KeyUpdateUpdateRequested())
     in
     [
@@ -85,8 +85,8 @@ rule receive_update_req_client:
 
         cats = Expand(p_cats, <'ats', '0'>, '32')
         sats = Expand(p_sats, <'ats', '0'>, '32')
-        app_keyc = Expand(cats, <'adke_wk', '0'>, '32')
-        app_keys = Expand(sats, <'adke_wk', '0'>, '32')
+        app_keyc = Expand(cats, <'TLS13applicationdatakeyexpansion_key', '0'>, '32')
+        app_keys = Expand(sats, <'TLS13applicationdatakeyexpansion_key', '0'>, '32')
 
         message = KeyUpdate(KeyUpdateUpdateNotRequested())
     in
@@ -171,7 +171,7 @@ rule receive_update_req_client:
 rule update_fin_client:
     let
         sats = Expand(p_sats, <'ats', '0'>, '32')
-        app_keys = Expand(sats, <'adke_wk', '0'>, '32')
+        app_keys = Expand(sats, <'TLS13applicationdatakeyexpansion_key', '0'>, '32')
 
         receivedMessage = KeyUpdate(KeyUpdateUpdateNotRequested())
     in
@@ -253,7 +253,7 @@ rule update_fin_client:
 rule update_req_server:
     let
         sats = Expand(p_sats, <'ats', '0'>, '32')
-        app_keys = Expand(sats, <'adke_wk', '0'>, '32')
+        app_keys = Expand(sats, <'TLS13applicationdatakeyexpansion_key', '0'>, '32')
         message = KeyUpdate(KeyUpdateUpdateRequested())
     in
     [
@@ -336,8 +336,8 @@ rule receive_update_req_server:
 
         cats = Expand(p_cats, <'ats', '0'>, '32')
         sats = Expand(p_sats, <'ats', '0'>, '32')
-        app_keyc = Expand(cats, <'adke_wk', '0'>, '32')
-        app_keys = Expand(sats, <'adke_wk', '0'>, '32')
+        app_keyc = Expand(cats, <'TLS13applicationdatakeyexpansion_key', '0'>, '32')
+        app_keys = Expand(sats, <'TLS13applicationdatakeyexpansion_key', '0'>, '32')
 
         message = KeyUpdate(KeyUpdateUpdateNotRequested())
     in
@@ -424,7 +424,7 @@ rule update_fin_server:
         receivedMessage = KeyUpdate(KeyUpdateUpdateNotRequested())
 
         cats = Expand(p_cats, <'ats', '0'>, '32')
-        app_keyc = Expand(cats, <'adke_wk', '0'>, '32')
+        app_keyc = Expand(cats, <'TLS13applicationdatakeyexpansion_key', '0'>, '32')
     in
     [
         F_MessageIn(senc{receivedMessage}p_app_keyc),
