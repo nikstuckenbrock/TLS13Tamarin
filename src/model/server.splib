@@ -314,13 +314,13 @@ rule server_gen_keys:
     let
         handshakeSecret = Extract(p_gxy, p_es)
         masterSecret = Extract('0', handshakeSecret)
-        handshakeKeyClient = Expand(Expand(handshakeSecret, <'clienthts', <h(p_messages)>>, '32'), <'kshe_wk', '0'>, '32')
-        handshakeKeyServer = Expand(Expand(handshakeSecret, <'serverhts', <h(p_messages)>>, '32'), <'kshe_wk', '0'>, '32')
+        handshakeKeyClient = Expand(Expand(handshakeSecret, <'32', 'TLS13serverhandshaketrafficsecret', <h(p_messages)>>, '32'), <'32', 'TLS13handshakekeyexpansion_key', '0'>, '32')
+        handshakeKeyServer = Expand(Expand(handshakeSecret, <'32', 'TLS13clienthandshaketrafficsecret', <h(p_messages)>>, '32'), <'32', 'TLS13handshakekeyexpansion_key', '0'>, '32')
     in
     [
-        DHExp(p_y, tid, $S),
+        DHExp(p_y, ~tid, $S),
         F_State_S2a(
-            tid,
+            ~tid,
             $S,
             $C,
             p_res_psk,
@@ -352,16 +352,16 @@ rule server_gen_keys:
         )
     ]
     --[
-        S2a(tid),
-        Instance(tid, $S, 'server'),
+        S2a(~tid),
+        Instance(~tid, $S, 'server'),
         Extract('0', handshakeSecret),
-        RHS(tid, $S, 'server', <handshakeSecret>),
-        RMS(tid, $S, 'server', <masterSecret>),
-        DeleteDH(tid, $S, p_y)
+        RHS(~tid, $S, 'server', <handshakeSecret>),
+        RMS(~tid, $S, 'server', <masterSecret>),
+        DeleteDH(~tid, $S, p_y)
     ]->
     [
         F_State_S2b(
-            tid,
+            ~tid,
             $S,
             $C,
             p_res_psk,
@@ -400,7 +400,7 @@ rule encrypted_extensions:
     in
     [
         F_State_S2b(
-            tid,
+            ~tid,
             $S,
             $C,
             p_res_psk,
@@ -432,13 +432,13 @@ rule encrypted_extensions:
         )
     ]
     --[
-        S2b(tid),
-        Instance(tid, $S, 'server')
+        S2b(~tid),
+        Instance(~tid, $S, 'server')
     ]->
     [
         MessageOut(senc{message}p_handshakeKeyServer),
         F_State_S2c(
-            tid,
+            ~tid,
             $S,
             $C,
             p_res_psk,
@@ -476,7 +476,7 @@ rule skip_certificate_request:
     in
     [
         F_State_S2c(
-            tid,
+            ~tid,
             $S,
             $C,
             p_res_psk,
@@ -508,12 +508,12 @@ rule skip_certificate_request:
         )
     ]
     --[
-        S2c(tid),
-        Instance(tid, $S, 'server')
+        S2c(~tid),
+        Instance(~tid, $S, 'server')
     ]->
     [
         F_State_S2d(
-            tid,
+            ~tid,
             $S,
             $C,
             p_res_psk,

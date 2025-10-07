@@ -263,13 +263,13 @@ rule client_gen_keys:
     let
         handshakeSecret = Extract(p_gxy, p_es)
         masterSecret = Extract('0', handshakeSecret)
-        handshakeKeyClient = Expand(Expand(handshakeSecret, <'clienthts', <h(p_messages)>>, '32'), <'kshe_wk', '0'>, '32')
-        handshakeKeyServer = Expand(Expand(handshakeSecret, <'serverhts', <h(p_messages)>>, '32'), <'kshe_wk', '0'>, '32')
+        handshakeKeyClient = Expand(Expand(handshakeSecret, <'32', 'TLS13clienthandshaketrafficsecret', <h(p_messages)>>, '32'), <'32', 'TLS13handshakekeyexpansion_key', '0'>, '32')
+        handshakeKeyServer = Expand(Expand(handshakeSecret, <'32', 'TLS13serverhandshaketrafficsecret', <h(p_messages)>>, '32'), <'32', 'TLS13handshakekeyexpansion_key', '0'>, '32')
     in
     [
-        DHExp(p_x, tid, $C),
+        DHExp(p_x, ~tid, $C),
         F_State_C2a(
-            tid,
+            ~tid,
             $C,
             $S,
             p_res_psk,
@@ -301,15 +301,15 @@ rule client_gen_keys:
         )
     ]
     --[
-        C2a(tid),
-        Instance(tid, $C, 'client'),
-        RMS(tid, $C, 'client', <masterSecret>),
-        RHS(tid, $C, 'client', <handshakeSecret>),
-        DeleteDH(tid, $C, p_x)
+        C2a(~tid),
+        Instance(~tid, $C, 'client'),
+        RMS(~tid, $C, 'client', <masterSecret>),
+        RHS(~tid, $C, 'client', <handshakeSecret>),
+        DeleteDH(~tid, $C, p_x)
     ]->
     [
         F_State_C2b(
-            tid,
+            ~tid,
             $C,
             $S,
             p_res_psk,
@@ -349,7 +349,7 @@ rule receive_encrypted_extensions:
     [
         F_MessageIn(senc{receivedMessage}p_handshakeKeyServer),
         F_State_C2b(
-            tid,
+            ~tid,
             $C,
             $S,
             p_res_psk,
@@ -381,12 +381,12 @@ rule receive_encrypted_extensions:
         )
     ]
     --[
-        C2b(tid),
-        Instance(tid, $C, 'client')
+        C2b(~tid),
+        Instance(~tid, $C, 'client')
     ]->
     [
         F_State_C2c(
-            tid,
+            ~tid,
             $C,
             $S,
             p_res_psk,
@@ -424,7 +424,7 @@ rule skip_receive_certificate_request:
     in
     [
         F_State_C2c(
-            tid,
+            ~tid,
             $C,
             $S,
             p_res_psk,
@@ -456,12 +456,12 @@ rule skip_receive_certificate_request:
         )
     ]
     --[
-        C2c(tid),
-        Instance(tid, $C, 'client')
+        C2c(~tid),
+        Instance(~tid, $C, 'client')
     ]->
     [
         F_State_C2d(
-            tid,
+            ~tid,
             $C,
             $S,
             p_res_psk,
@@ -580,12 +580,12 @@ rule receive_server_auth:
         certificateMessage = Certificate('0', pk(~longTermKeyServer))
         messages = <p_messages, certificateMessage>
         
-        sig_messages = <'server_cv', <h(messages)>>
+        sig_messages = <'TLS13server_CertificateVerify', <h(messages)>>
 
         receivedCertificateVerifyMessage = CertificateVerify(signature)
         messages = <messages, receivedCertificateVerifyMessage>
 
-        exp_verify_data = hmac(Expand(Expand(p_handshakeSecret, <'serverhts', <h(messages)>>, '32'), <'fin', '0'>, '32'), h(messages))
+        exp_verify_data = hmac(Expand(Expand(p_handshakeSecret, <'TLS13serverhandshaketrafficsecret', <h(messages)>>, '32'), <'fin', '0'>, '32'), h(messages))
 
         finishedMessage = Finished(verify_data)
         messages = <messages, finishedMessage>
