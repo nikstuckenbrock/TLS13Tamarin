@@ -316,8 +316,8 @@ rule server_gen_keys:
     let
         handshakeSecret = Extract(p_gxy, p_es)
         masterSecret = Extract('0', handshakeSecret)
-        handshakeKeyClient = Expand(Expand(handshakeSecret, <'32', 'TLS13clienthandshaketrafficsecret', <h(p_messages)>>, '32'), <'32', 'TLS13handshakekeyexpansion_key', '0'>, '32')
-        handshakeKeyServer = Expand(Expand(handshakeSecret, <'32', 'TLS13serverhandshaketrafficsecret', <h(p_messages)>>, '32'), <'32', 'TLS13handshakekeyexpansion_key', '0'>, '32')
+        handshakeKeyClient = Expand(Expand(handshakeSecret, <'TLS13clienthandshaketrafficsecret', <h(p_messages)>>, '32'), <'TLS13handshakekeyexpansion_key', '0'>, '32')
+        handshakeKeyServer = Expand(Expand(handshakeSecret, <'TLS13serverhandshaketrafficsecret', <h(p_messages)>>, '32'), <'TLS13handshakekeyexpansion_key', '0'>, '32')
     in
     [
         DHExp(p_y, ~tid, $S),
@@ -640,14 +640,14 @@ rule server_auth:
         messages = <messages, certificateVerifyMessage>
 
         // Finished
-        verify_data = hmac(Expand(Expand(p_handshakeSecret, <'32', 'TLS13serverhandshaketrafficsecret', <h(messages)>>, '32'), <'TLS13finished', '0'>, '32'), h(messages))
+        verify_data = hmac(Expand(Expand(p_handshakeSecret, <'TLS13serverhandshaketrafficsecret', <h(messages)>>, '32'), <'TLS13finished', '0'>, '32'), h(messages))
         finishedMessage = Finished(verify_data)
         messages = <messages, finishedMessage>
 
-        earlyMasterSecret = Expand(p_masterSecret, <'32', 'TLS13exportermastersecret', <h(messages)>>, '32')
-        clientApplicationTrafficSecret = Expand(p_masterSecret, <'32', 'TLS13clientapplicationtrafficsecret', <h(messages)>>, '32')
-        serverApplicationTrafficSecret = Expand(p_masterSecret, <'32', 'TLS13serverapplicationtrafficsecret', <h(messages)>>, '32')
-        serverApplicationTrafficKey = Expand(serverApplicationTrafficSecret, <'32', 'TLS13applicationdatakeyexpansion_key', '0'>, '32')
+        earlyMasterSecret = Expand(p_masterSecret, <'TLS13exportermastersecret', <h(messages)>>, '32')
+        clientApplicationTrafficSecret = Expand(p_masterSecret, <'TLS13clientapplicationtrafficsecret', <h(messages)>>, '32')
+        serverApplicationTrafficSecret = Expand(p_masterSecret, <'TLS13serverapplicationtrafficsecret', <h(messages)>>, '32')
+        serverApplicationTrafficKey = Expand(serverApplicationTrafficSecret, <'TLS13applicationdatakeyexpansion_key', '0'>, '32')
         auth_status = <'auth', '0'>
     in
     [
@@ -932,7 +932,7 @@ rule receive_client_auth_cert:
 
 rule new_session_ticket:
     let
-        p_rms = Expand(ms, <'32', 'TLS13resumptionmastersecret', <h(p_messages)>>, '32')
+        p_rms = Expand(ms, <'TLS13resumptionmastersecret', <h(p_messages)>>, '32')
         ticket_extension = <
             <'46', $max_early_data_size>
         >

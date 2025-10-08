@@ -22,7 +22,7 @@ rule receive_client_hello_psk:
         binder_messages = <p_messages, binder_message>
         res_psk = psk_res_psk
         es = Extract(res_psk, '0')
-        binder_check = hmac(Expand(Expand(es, <'32', 'TLS13psk_type_pskbinderkey', '0'> , '32'), <'32', '0', '0'> , '32'), h(binder_messages))
+        binder_check = hmac(Expand(Expand(es, <'TLS13psk_type_pskbinderkey', '0'> , '32'), <'32', '0', '0'> , '32'), h(binder_messages))
         extensions = <
             ExtensionSupportedVersions(),
             ExtensionNamedGroupdList(supported_groups),
@@ -34,7 +34,7 @@ rule receive_client_hello_psk:
         receivedMessage = ClientHello(clientRandom, '0', $cipher_suites, '0', extensions)
         messages = <p_messages, receivedMessage>
 
-        ead_keyc = Expand(Expand(es, <'32', 'TLS13clientearlytrafficsecret', <h(messages)>> , '32'), <'32', 'TLS13earlyapplicationdatakeyexpansion_key', '0'> , '32')
+        ead_keyc = Expand(Expand(es, <'TLS13clientearlytrafficsecret', <h(messages)>> , '32'), <'TLS13earlyapplicationdatakeyexpansion_key', '0'> , '32')
     in
     [
         F_State_S0(
