@@ -15,7 +15,7 @@ rule receive_client_hello_psk:
             ExtensionNamedGroupdList(supported_groups),
             ExtensionKeyShareClientHello(KeyShareEntry($new_group, gx)),
             ExtensionPskKeyExchangeModes(psk_ke_mode),
-            ExtensionEarlyDataIndication(),
+            new_edi,
             ExtensionPreSharedKeyClientHello(identities, binder)
         >
         binder_message = ClientHello(clientRandom, '0', $cipher_suites, '0', binder_extensions)
@@ -100,7 +100,7 @@ rule receive_client_hello_psk:
             p_gxy,
             psk_ke_mode,
             psk_id,
-            p_edi,
+            new_edi,
             es,
             p_hs,
             p_ms,
