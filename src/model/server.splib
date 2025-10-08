@@ -225,7 +225,7 @@ rule server_hello:
         gxy = p_gx^~y
         extensions = <
             ExtensionSignatureSchemeList($supported_signature_algorithms),
-            ExtensionKeyShareServerHello(KeyShareEntry($group1, gy))
+            ExtensionKeyShareServerHello(KeyShareEntry($p_g, gy))
         >
         message = ServerHello(serverRandom, '0', $cipher_suite, '0', extensions)
         earlySecret = Extract(p_res_psk, '0')
