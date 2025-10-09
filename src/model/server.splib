@@ -223,6 +223,7 @@ rule server_hello:
         p_gx = $p_g^some_x
         gy = $p_g^~y
         gxy = p_gx^~y
+        psk_ke_mode = 'na'
         extensions = <
             ExtensionSignatureSchemeList($supported_signature_algorithms),
             ExtensionKeyShareServerHello(KeyShareEntry($p_g, gy))
@@ -295,7 +296,7 @@ rule server_hello:
             p_gx,
             gy,
             gxy,
-            p_psk_ke_mode,
+            psk_ke_mode,
             p_psk_id,
             p_edi,
             earlySecret,
