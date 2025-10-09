@@ -208,6 +208,7 @@ rule server_hello_psk:
 rule server_hello_psk_dhe:
     let
         p_g = $g
+        p_gx = p_g^some_x
         p_psk_ke_mode = <'0', '1'>
         gy = p_g^~y
         gxy = p_gx^~y
@@ -353,7 +354,7 @@ rule server_auth_psk:
             $S,
             $C,
             p_res_psk,
-            p_messages,
+            messages,
             p_nc,
             p_ns,
             p_g,

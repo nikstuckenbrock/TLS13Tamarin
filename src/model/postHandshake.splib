@@ -5,7 +5,7 @@ rule certificate_request_post:
     [
         SendStream(~tid, $S, $C, p_auth_status, app_keys),
         Fr(~certificate_request_context),
-        L_State_S4(
+        F_State_S4(
             ~tid,
             $S,
             $C,
@@ -47,7 +47,7 @@ rule certificate_request_post:
         MessageOut(senc{message}app_keys),
         SendStream(~tid, $S, $C, p_auth_status, app_keys),
         L_ServerCertReq(~tid, $S, $C, ~certificate_request_context),
-        L_State_S4(
+        F_State_S4(
             ~tid,
             $S,
             $C,
@@ -87,7 +87,7 @@ rule receive_certificate_request_post:
     [
         F_MessageIn(senc{receivedMessage}app_keys),
         RecvStream(~tid, $C, $S, p_auth_status, app_keys),
-        L_State_C4(
+        F_State_C4(
             ~tid,
             $C,
             $S,
@@ -123,12 +123,12 @@ rule receive_certificate_request_post:
         C4_req(~tid),
         Neq(certificate_request_context, '0'),
         Instance(~tid, $C, 'client'),
-        RPostHS(~tid, $C, 'client', <p_handshakeSecret, p_rms, p_auth_status, p_messages>)
+        RPostHS(~tid, $C, 'client', <p_handshakeSecret, p_rms, $S, p_auth_status, p_messages>)
     ]->
     [
         RecvStream(~tid, $C, $S, p_auth_status, app_keys),
         L_ClientCertReq(~tid, $C, $S, certificate_request_context),
-        L_State_C4(
+        F_State_C4(
             ~tid,
             $C,
             $S,
@@ -183,7 +183,7 @@ rule client_auth_post:
         SendStream(~tid, $C, $S, p_auth_status, app_keyc),
         !Ltk($C, ~ltkC),
         L_ClientCertReq(~tid, $C, $S, certificate_request_context),
-        L_State_C4(
+        F_State_C4(
             ~tid,
             $C,
             $S,
@@ -226,7 +226,7 @@ rule client_auth_post:
     [
         MessageOut(senc{messagesOut}app_keyc),
         SendStream(~tid, $C, $S, auth_status, app_keyc),
-        L_State_C4(
+        F_State_C4(
             ~tid,
             $C,
             $S,
@@ -264,12 +264,12 @@ rule receive_client_auth_post:
         p_auth_status = <p_sas, p_cas>
         certificate = pk(~ltkC)
 
-        message = CertificateRequest(certificate_request_context, $certificate_extensions)
+        message = CertificateRequest(~certificate_request_context, $certificate_extensions)
         tmp_messages = <p_messages, message>
         sig_messages = <'TLS13client_CertificateVerify', <h(tmp_messages)>>
         exp_verify_data = hmac(Expand(Expand(p_hs, <'TLS13fin_keychandshaketrafficsecret', <h(tmp_messages)>>, '32'), <'TLS13finished', '0'>, '32'), h(tmp_messages))
 
-        certificateMessage = Certificate(certificate_request_context, certificate)
+        certificateMessage = Certificate(~certificate_request_context, certificate)
         certificateVerifyMessage = CertificateVerify(signature)
         finishedMessage = Finished(verify_data)
 
@@ -281,8 +281,8 @@ rule receive_client_auth_post:
         F_MessageIn(senc{receivedMessage}app_keyc),
         RecvStream(tid, $S, $C, p_auth_status, app_keyc),
         !Pk($C, pk(~ltkC)),
-        L_ServerCertReq(tid, $S, $C, certificate_request_context),
-        L_State_S4(
+        L_ServerCertReq(tid, $S, $C, ~certificate_request_context),
+        F_State_S4(
             tid,
             $S,
             $C,
@@ -317,17 +317,17 @@ rule receive_client_auth_post:
     --[
         S4_cert(tid),
         Instance(tid, $S, 'server'),
-        Neq(certificate_request_context, '0'),
+        Neq(~certificate_request_context, '0'),
         Eq(verify(signature, sig_messages, pk(~ltkC)), true),
         Eq(verify_data, exp_verify_data),
         CIdentityPost(tid, $S, 'server', <<$C, auth_status>>),
-        CTranscriptPost(tid, $S, 'server', <p_messages, certificate_request_context>),
+        CTranscriptPost(tid, $S, 'server', <p_messages, ~certificate_request_context>),
         CHS(tid, $S, 'server', <p_hs>),
         RPostHS(tid, $S, 'server', <p_hs, p_rms, $C, auth_status, p_messages>)
     ]->
     [
         RecvStream(tid, $S, $C, auth_status, app_keyc),
-        L_State_S4(
+        F_State_S4(
             tid,
             $S,
             $C,

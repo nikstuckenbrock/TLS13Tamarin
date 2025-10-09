@@ -100,6 +100,7 @@ rule receive_hello_retry_request_psk:
             ExtensionKeyShareHelloRetryRequest($group2)
         >
         receivedMessage = HelloRetryRequest(receivedExtensions)
+        messages = <p_messages, receivedMessage>
 
         obfuscated_ticket_age = mask(ticket_age_add, '1')
         identities = <<ticket, obfuscated_ticket_age>>
@@ -130,7 +131,7 @@ rule receive_hello_retry_request_psk:
             ExtensionPreSharedKeyClientHello(identities, binder)
         >
         message = ClientHello(~new_nc, '0', $cipher_suites, '0', extensions)
-        messages = <p_messages, message>
+        messages = <messages, message>
     in
     [
         F_MessageIn(receivedMessage),
@@ -198,7 +199,7 @@ rule receive_hello_retry_request_psk:
             p_gy,
             p_gxy,
             p_psk_ke_mode,
-            p_psk_id,
+            ticket,
             edi,
             p_es,
             p_hs,
@@ -310,9 +311,9 @@ rule receive_server_hello_psk_dhe:
             ExtensionSignatureSchemeList($supported_signature_algorithms),
             ExtensionKeyShareServerHello(KeyShareEntry(p_g, gy)),
             <'41', '0'>,
-            edi
+            p_edi
         >
-        receivedMessage = ServerHello(p_ns, '0', $cipher_suite, '0', receivedExtensions)
+        receivedMessage = ServerHello(new_ns, '0', $cipher_suite, '0', receivedExtensions)
         messages = <p_messages, receivedMessage>
     in
     [
@@ -354,7 +355,7 @@ rule receive_server_hello_psk_dhe:
         Neq(gy, $g),
         Instance(tid, $C, 'client'),
         DHChal($g, ~p_x, new_y, p_gx, gy, gxy),
-        RNonces(tid, $C, 'client', <p_nc, p_ns>)
+        RNonces(tid, $C, 'client', <p_nc, new_ns>)
     ]->
     [
         F_State_C2a(
@@ -362,9 +363,9 @@ rule receive_server_hello_psk_dhe:
             $C,
             $S,
             p_res_psk,
-            p_messages,
+            messages,
             p_nc,
-            p_ns,
+            new_ns,
             p_g,
             p_sg,
             p_hrr,
@@ -375,7 +376,7 @@ rule receive_server_hello_psk_dhe:
             gxy,
             psk_ke_mode,
             ~ticket,
-            edi,
+            p_edi,
             p_es,
             p_hs,
             p_ms,
@@ -454,7 +455,7 @@ rule receive_server_auth_psk:
             $C,
             $S,
             p_res_psk,
-            p_messages,
+            messages,
             p_nc,
             p_ns,
             p_g,

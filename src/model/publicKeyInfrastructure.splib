@@ -1,15 +1,15 @@
-rule register_public_key:
+rule register_pk:
     [
-        Fr(~longTermKey)
+        Fr(~ltkA)
     ]
     --[
-        GenLtk($Identity, ~longTermKey),
-        HonestUse(~longTermKey)
+        GenLtk($A, ~ltkA),
+        HonestUse(~ltkA)
     ]->
     [
-        !Ltk($Identity, ~longTermKey),
-        !Pk($Identity, pk(~longTermKey)),
-        MessageOut(pk(~longTermKey))
+        !Ltk($A, ~ltkA),
+        !Pk($A, pk(~ltkA)),
+        MessageOut(pk(~ltkA))
     ]
 
 rule out_of_band_psk:

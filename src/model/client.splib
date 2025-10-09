@@ -143,7 +143,7 @@ rule receive_hello_retry_request:
             p_clientRandom,
             p_serverRandom,
             $group2,
-            supported_groups,
+            p_sg,
             hrr,
             ~x,
             p_y,
@@ -577,6 +577,9 @@ rule receive_server_auth:
     let
 
         // Certificate
+
+        p_psk_ke_mode = 'na'
+
         certificateMessage = Certificate('0', pk(~longTermKeyServer))
         messages = <p_messages, certificateMessage>
         
@@ -594,7 +597,7 @@ rule receive_server_auth:
         clientApplicationTrafficSecret = Expand(p_masterSecret, <'TLS13clientapplicationtrafficsecret', <h(messages)>>, '32')
         serverApplicationTrafficSecret = Expand(p_masterSecret, <'TLS13serverapplicationtrafficsecret', <h(messages)>>, '32')
         serverApplicationTrafficKey = Expand(serverApplicationTrafficSecret, <'TLS13applicationdatakeyexpansion_key', '0'>, '32')
-        auth_status = <'auth', '0'>
+        auth_status = <'0', 'auth'>
     in
     [
         F_MessageIn(senc{<certificateMessage,receivedCertificateVerifyMessage,finishedMessage>}p_handshakeKeyServer),
@@ -734,7 +737,7 @@ rule client_auth:
     [
         MessageOut(senc{finishedMessage}p_handshakeKeyClient),
         SendStream(~tid, $C, $S, p_auth_status, clientApplicationTrafficKey),
-        L_State_C4(
+        F_State_C4(
             ~tid,
             $C,
             $S,
@@ -792,6 +795,7 @@ rule client_auth_cert:
         clientApplicationTrafficKey = Expand(p_clientApplicationTrafficSecret, <'TLS13applicationdatakeyexpansion_key', '0'>, '32')
 
         auth_status = <'auth', 'auth'>
+        cert_req = '0'
     in
     [
         RecvStream(tid, $C, $S, p_auth_status, serverApplicationTrafficKey),
@@ -847,7 +851,7 @@ rule client_auth_cert:
             $C,
             $S,
             p_res_psk,
-            p_messages,
+            messages,
             p_nc,
             p_ns,
             p_g,
@@ -868,16 +872,16 @@ rule client_auth_cert:
             p_serverApplicationTrafficSecret,
             p_handshakeKeyClient,
             p_handshakeKeyServer,
-            p_auth_status,
+            auth_status,
             p_earlyMasterSecret,
             rms,
-            p_cert_req
+            cert_req
         )
     ]
 
 rule receive_new_session_ticket:
     let
-        p_rms = Expand(ms, <'TLS13resumptionmastersecret', <h(p_messages)>>, '32')
+        p_rms = Expand(ms, <'TLS13resumptionmastersecret', <h(messages)>>, '32')
         ticket_extension = <
             <'46', $max_early_data_size>
         >
@@ -886,7 +890,7 @@ rule receive_new_session_ticket:
     [
         RecvStream(~tid, $C, $S, p_auth_status, serverApplicationTrafficKey),
         F_MessageIn(senc{receivedMessage}serverApplicationTrafficKey),
-        L_State_C4(
+        F_State_C4(
             ~tid,
             $C,
             $S,
@@ -927,7 +931,7 @@ rule receive_new_session_ticket:
         RecvStream(~tid, $C, $S, p_auth_status, serverApplicationTrafficKey),
         !ClientPSK($C, $S, p_rms, p_auth_status, receivedMessage, 'res'),
         SecretPSK($C, p_rms),
-        L_State_C4(
+        F_State_C4(
             ~tid,
             $C,
             $S,

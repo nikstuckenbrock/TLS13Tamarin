@@ -1,14 +1,14 @@
 rule start_server:
     [
-        Fr(tid)
+        Fr(~tid)
     ]
     --[
-        Start(tid, $S, 'server'),
-        RIdentity(tid, $S, 'server', <$S>)
+        Start(~tid, $S, 'server'),
+        RIdentity(~tid, $S, 'server', <$S>)
     ]->
     [
         F_State_S0(
-            tid,
+            ~tid,
             $S,
             $C,
             '0',
@@ -132,7 +132,7 @@ rule hello_retry_request:
     let
         p_hrr = '0'
 
-        p_supported_groups = $supported_group
+        p_supported_groups = $supported_group // TODO: unsure
 
         hrr = 'hrr'
         new_g = p_supported_groups
@@ -221,15 +221,16 @@ rule hello_retry_request:
 rule server_hello:
     let
         p_gx = $p_g^some_x
+        auth_status = <'0', '0'>
         gy = $p_g^~y
         gxy = p_gx^~y
         psk_ke_mode = 'na'
         extensions = <
-            ExtensionSignatureSchemeList($supported_signature_algorithms),
+            ExtensionSignatureSchemeList($sig_algs),
             ExtensionKeyShareServerHello(KeyShareEntry($p_g, gy))
         >
         message = ServerHello(serverRandom, '0', $cipher_suite, '0', extensions)
-        earlySecret = Extract(p_res_psk, '0')
+        es = Extract(p_res_psk, '0')
         messages = <p_messages, message>
     in
     [
@@ -299,14 +300,14 @@ rule server_hello:
             psk_ke_mode,
             p_psk_id,
             p_edi,
-            earlySecret,
+            es,
             p_hs,
             p_ms,
             p_cats,
             p_sats,
             p_hs_keyc,
             p_hs_keys,
-            p_auth_status,
+            auth_status,
             p_ems,
             p_rms,
             p_cert_req
@@ -787,7 +788,7 @@ rule receive_client_auth:
     ]->
     [
         RecvStream(tid, $S, $C, p_auth_status, clientApplicationTrafficKey),
-        L_State_S4(
+        F_State_S4(
             tid,
             $S,
             $C,
@@ -826,7 +827,7 @@ rule receive_client_auth_cert:
         cert_req = '0'
         auth_status = <'auth', 'auth'>
 
-        certificateMessage = Certificate('0', pk(longTermKeyClient))
+        certificateMessage = Certificate('0', pk(~longTermKeyClient))
         messages = <p_messages, certificateMessage>
 
         sig_messages = <'TLS13client_CertificateVerify', <h(messages)>>
@@ -847,7 +848,7 @@ rule receive_client_auth_cert:
     in
     [
         F_MessageIn(senc{receivedMessage}p_handshakeKeyClient),
-        !Pk($C, pk(longTermKeyClient)),
+        !Pk($C, pk(~longTermKeyClient)),
         SendStream(tid, $S, $C, p_auth_status, app_keys),
         F_State_S3(
             tid,
@@ -884,7 +885,7 @@ rule receive_client_auth_cert:
     --[
         S3_cert(tid),
         Instance(tid, $S, 'server'),
-        Eq(verify(signature, sig_messages, pk(longTermKeyClient)), true),
+        Eq(verify(signature, sig_messages, pk(~longTermKeyClient)), true),
         Eq(verify_data, exp_verify_data),
         RMode(tid, $S, 'server', <p_psk_ke_mode>),
         CIdentity(tid, $S, 'server', <$C, auth_status>),
@@ -898,12 +899,12 @@ rule receive_client_auth_cert:
     [
         SendStream(tid, $S, $C, auth_status, app_keys),
         RecvStream(tid, $S, $C, auth_status, app_keyc),
-        L_State_S4(
+        F_State_S4(
             tid,
             $S,
             $C,
             p_res_psk,
-            p_messages,
+            messages,
             p_nc,
             p_ns,
             p_g,
@@ -924,7 +925,7 @@ rule receive_client_auth_cert:
             p_serverApplicationTrafficSecret,
             p_handshakeKeyClient,
             p_handshakeKeyServer,
-            p_auth_status,
+            auth_status,
             p_earlyMasterSecret,
             rms,
             cert_req
@@ -933,14 +934,14 @@ rule receive_client_auth_cert:
 
 rule new_session_ticket:
     let
-        p_rms = Expand(ms, <'TLS13resumptionmastersecret', <h(p_messages)>>, '32')
+        p_rms = Expand(ms, <'TLS13resumptionmastersecret', <h(messages)>>, '32')
         ticket_extension = <
             <'46', $max_early_data_size>
         >
         message = NewSessionTicket($ticket_lifetime, ~ticket_age_add, ~ticket, ticket_extension)
     in
     [
-        SendStream(~tid, $S, $C, auth_status, serverApplicationTrafficKey),
+        SendStream(~tid, $S, $C, p_auth_status, serverApplicationTrafficKey),
         Fr(~ticket),
         Fr(~ticket_age_add),
         F_State_S4(
@@ -978,13 +979,13 @@ rule new_session_ticket:
     --[
         S4_NST(~tid),
         Instance(~tid, $S, 'server'),
-        RPostHS(~tid, $S, 'server', <p_handshakeSecret, p_rms, $C, auth_status, p_messages>),
+        RPostHS(~tid, $S, 'server', <p_handshakeSecret, p_rms, $C, p_auth_status, p_messages>),
         RNST(~tid, $S, 'server', <~ticket, ~ticket_age_add>)
     ]->
     [
         MessageOut(senc{message}serverApplicationTrafficKey),
-        SendStream(~tid, $S, $C, auth_status, serverApplicationTrafficKey),
-        !ServerPSK($S, $C, p_rms, auth_status, message, 'res'),
+        SendStream(~tid, $S, $C, p_auth_status, serverApplicationTrafficKey),
+        !ServerPSK($S, $C, p_rms, p_auth_status, message, 'res'),
         SecretPSK($S, p_rms),
         F_State_S4(
             ~tid,
