@@ -1,0 +1,54 @@
+rule end_early_data:
+let
+    C = $C
+    S = $S
+in
+    [ EarlySendStream(tid, C, S, auth_status, ead_keyc, <'42','0'>)
+    ]
+  --[
+      C_EndZeroRTT(tid)
+    ]->
+    [
+      MessageOut(senc{<'1', '21'>}ead_keyc)
+    ]
+rule recv_end_early_data:
+let
+    C = $C
+    S = $S
+in
+    [ EarlyRecvStream(tid, S, C, auth_status, ead_keyc, <'42','0'>),
+      F_MessageIn(senc{<'1', '21'>}ead_keyc)
+    ]
+  --[
+      S_RecvEndZeroRTT(tid)
+    ]->
+    [
+    ]
+
+rule send_early_data:
+let
+    C = $C
+    S = $S
+in
+    [ EarlySendStream(tid, C, S, auth_status, ead_keyc, <'42','0'>),
+      Fr(~data)
+    ]
+  --[ C_SendZeroRTT(tid)
+    ]->
+    [ EarlySendStream(tid, C, S, auth_status, ead_keyc, <'42','0'>),
+      MessageOut(senc{<~data, '23'>}ead_keyc)
+    ]
+
+rule recv_early_data:
+let
+    C = $C
+    S = $S
+in
+    [ EarlyRecvStream(tid, S, C, auth_status, ead_keyc, <'42','0'>),
+      F_MessageIn(senc{<data, '23'>}ead_keyc)
+    ]
+  --[ S_RecvZeroRTT(tid)
+    ]->
+    [
+      EarlyRecvStream(tid, S, C, auth_status, ead_keyc, <'42','0'>)
+    ]

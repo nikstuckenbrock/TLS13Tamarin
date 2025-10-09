@@ -28,6 +28,7 @@ rule message_in_to_in:
 #include "lemmas/atMostOf.splib"
 #endif
 
+#include "model/earlyData.splib"
 #include "model/publicKeyInfrastructure.splib"
 #include "model/macros.splib"
 #include "model/client.splib"
