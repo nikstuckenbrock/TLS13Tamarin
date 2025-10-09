@@ -832,12 +832,12 @@ rule receive_client_auth_cert:
 
         sig_messages = <'TLS13client_CertificateVerify', <h(messages)>>
         certificateVerifyMessage = CertificateVerify(signature)
-        messages = <p_messages, certificateVerifyMessage>
+        messages = <messages, certificateVerifyMessage>
 
         exp_verify_data = hmac(Expand(Expand(p_handshakeSecret, <'TLS13clienthandshaketrafficsecret', <h(messages)>>, '32'), <'TLS13finished', '0'>, '32'), h(messages))
 
         finishedMessage = Finished(verify_data)
-        message = <p_messages, finishedMessage>
+        messages = <messages, finishedMessage>
 
         rms = Expand(p_masterSecret, <'TLS13resumptionmastersecret', <h(messages)>>, '32')
 
