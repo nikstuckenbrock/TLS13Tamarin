@@ -88,7 +88,9 @@ rule receive_hello_retry_request_psk:
         p_g = $group1
         p_hrr = '0'
         p_psk_ke_mode = <'0', '1'>
+        edi = '0'
 
+        hrr = 'hrr'
         supported_groups = <$group1, $group2>
 
         res_psk = p_res_psk
@@ -109,7 +111,6 @@ rule receive_hello_retry_request_psk:
 
         es = Extract(res_psk, '0')
         binder = '0'
-        edi = ExtensionEarlyDataIndication()
         binder_extensions = <
             ExtensionSupportedVersions(),
             ExtensionNamedGroupdList(supported_groups),
@@ -192,7 +193,7 @@ rule receive_hello_retry_request_psk:
             p_ns,
             $group2,
             p_sg,
-            p_hrr,
+            hrr,
             ~new_x,
             p_y,
             gx,
@@ -201,7 +202,7 @@ rule receive_hello_retry_request_psk:
             p_psk_ke_mode,
             ticket,
             edi,
-            p_es,
+            es,
             p_hs,
             p_ms,
             p_cats,
