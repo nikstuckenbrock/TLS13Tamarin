@@ -259,7 +259,12 @@ rule server_hello_psk_dhe:
     ]
     --[
         S1_PSK_DHE(~tid),
-        Instance(~tid, $S, 'server')
+        Instance(~tid, $S, 'server'),
+        Neq(p_gx, p_g),
+        Neq(p_x, inv(~y)),
+        DHChal(p_g, some_x, ~y, p_gx, gy, gxy),
+        RNonces(~tid, $S, 'server', <p_nc, ~p_ns>),
+        DH(~tid, $S, ~y)
     ]->
     [
         F_State_S2a(
