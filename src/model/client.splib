@@ -62,10 +62,10 @@ rule client_hello:
         MessageOut(message)
     ]
 
-rule receive_hello_retry_request:
+rule recv_hello_retry_request:
     let
-        p_g = $g1
-        p_hrr = '0'
+        prev_g = $g1
+        prev_hrr = '0'
         hrr = 'hrr'
         supported_groups = <$g1, $g2>
         psk_ke_mode = 'na'
@@ -76,51 +76,51 @@ rule receive_hello_retry_request:
             ExtensionKeyShareHelloRetryRequest($g2)
         >
         receivedMessage = HelloRetryRequest(receivedExtensions)
-        messages = <p_messages, receivedMessage>
+        messages = <prev_messages, receivedMessage>
         extensions = <
             ExtensionSupportedVersions(),
             ExtensionNamedGroupdList(supported_groups),
             ExtensionSignatureSchemeList($supported_signature_algorithms),
             ExtensionKeyShareClientHello(KeyShareEntry($g2, gx))
         >
-        message = ClientHello(p_clientRandom, '0', $cipher_suites, '0', extensions)
+        message = ClientHello(prev_nc, '0', $cipher_suites, '0', extensions)
         messages = <messages, message>
-        es = Extract(p_res_psk, '0')
+        es = Extract(prev_res_psk, '0')
     in
     [
         F_MessageIn(receivedMessage),
         Fr(~x),
-        DHExp(p_x, ~tid, $C),
+        DHExp(prev_x, ~tid, $C),
         F_State_C1(
             ~tid,
             $C,
             $S,
-            p_res_psk,
-            p_messages,
-            p_clientRandom,
-            p_serverRandom,
-            p_g,
-            p_sg,
-            p_hrr,
-            p_x,
-            p_y,
-            p_gx,
-            p_gy,
-            p_gxy,
-            p_psk_ke_mode,
-            p_psk_id,
-            p_edi,
-            p_es,
-            p_hs,
-            p_ms,
-            p_cats,
-            p_sats,
-            p_hs_keyc,
-            p_hs_keys,
-            p_auth_status,
-            p_ems,
-            p_rms,
-            p_cert_req
+            prev_res_psk,
+            prev_messages,
+            prev_nc,
+            prev_ns,
+            prev_g,
+            prev_sg,
+            prev_hrr,
+            prev_x,
+            prev_y,
+            prev_gx,
+            prev_gy,
+            prev_gxy,
+            prev_psk_ke_mode,
+            prev_psk_id,
+            prev_edi,
+            prev_es,
+            prev_hs,
+            prev_ms,
+            prev_cats,
+            prev_sats,
+            prev_hs_keyc,
+            prev_hs_keys,
+            prev_auth_status,
+            prev_ems,
+            prev_rms,
+            prev_cert_req
         )
     ]
     --[
@@ -128,7 +128,7 @@ rule receive_hello_retry_request:
         Instance(~tid, $C, 'client'),
         Neq($g1, $g2),
         Instance(~tid, $C, 'client'),
-        DeleteDH(~tid, $C, p_x),
+        DeleteDH(~tid, $C, prev_x),
         DH(~tid, $C, ~x)
     ]->
     [
@@ -138,32 +138,32 @@ rule receive_hello_retry_request:
             ~tid,
             $C,
             $S,
-            p_res_psk,
+            prev_res_psk,
             messages,
-            p_clientRandom,
-            p_serverRandom,
+            prev_nc,
+            prev_ns,
             $g2,
-            p_sg,
+            prev_sg,
             hrr,
             ~x,
-            p_y,
+            prev_y,
             gx,
-            p_gy,
-            p_gxy,
+            prev_gy,
+            prev_gxy,
             psk_ke_mode,
-            p_psk_id,
-            p_edi,
+            prev_psk_id,
+            prev_edi,
             es,
-            p_hs,
-            p_ms,
-            p_cats,
-            p_sats,
-            p_hs_keyc,
-            p_hs_keys,
+            prev_hs,
+            prev_ms,
+            prev_cats,
+            prev_sats,
+            prev_hs_keyc,
+            prev_hs_keys,
             auth_status,
-            p_ems,
-            p_rms,
-            p_cert_req
+            prev_ems,
+            prev_rms,
+            prev_cert_req
         )
     ]
 
