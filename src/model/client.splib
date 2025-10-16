@@ -166,95 +166,95 @@ rule recv_hello_retry_request:
         )
     ]
 
-rule receive_server_hello:
+rule recv_server_hello:
     let
-        p_x = ~x // TODO: Check if really needed.
+        prev_x = ~x // TODO: Check if really needed.
         serverRandom = new_ns // TODO: check if really needed.
         gy = new_gy
         gy = $g^new_y
-        gxy = gy^p_x
+        gxy = gy^prev_x
         extensions = <
-            ExtensionSignatureSchemeList($supported_signature_algorithms),
+            ExtensionSignatureSchemeList($sig_algs),
             ExtensionKeyShareServerHello(KeyShareEntry($g, gy))
         >
         receivedMessage = ServerHello(serverRandom, '0', $cipher_suite, '0', extensions)
         psk_ke_mode = 'na'
         auth_status = <'0', '0'>
-        messages = <p_messages, receivedMessage>
+        messages = <prev_messages, receivedMessage>
     in
     [
-        F_MessageIn(receivedMessage),
         F_State_C1(
             ~tid,
             $C,
             $S,
             p_res_psk,
-            p_messages,
-            p_clientRandom,
-            p_serverRandom,
+            prev_messages,
+            prev_nc,
+            prev_ns,
             $g,
-            p_sg,
-            p_hrr,
-            p_x,
-            p_y,
-            p_gx,
-            p_gy,
-            p_gxy,
-            p_psk_ke_mode,
-            p_psk_id,
-            p_edi,
-            p_es,
-            p_hs,
-            p_ms,
-            p_cats,
-            p_sats,
-            p_hs_keyc,
-            p_hs_keys,
-            p_auth_status,
-            p_ems,
-            p_rms,
-            p_cert_req
-        )
+            prev_sg,
+            prev_hrr,
+            prev_x,
+            prev_y,
+            prev_gx,
+            prev_gy,
+            prev_gxy,
+            prev_psk_ke_mode,
+            prev_psk_id,
+            prev_edi,
+            prev_es,
+            prev_hs,
+            prev_ms,
+            prev_cats,
+            prev_sats,
+            prev_hs_keyc,
+            prev_hs_keys,
+            prev_auth_status,
+            prev_ems,
+            prev_rms,
+            prev_cert_req
+        ),
+        F_MessageIn(receivedMessage)
     ]
     --[
         C1(~tid),
         Instance(~tid, $C, 'client'),
         Neq(gy, $g),
         Neq(gxy, $g),
-        DHChal($g, p_x, new_y, p_gx, gy, gxy),
-        RNonces(~tid, $C, 'client', <p_clientRandom,serverRandom>)
+        DHChal($g, prev_x, new_y, p_gx, gy, gxy),
+        RNonces(~tid, $C, 'client', <prev_nc, serverRandom>)
     ]->
     [
         F_State_C2a(
             ~tid,
             $C,
             $S,
-            p_res_psk,
+            prev_res_psk,
             messages,
-            p_clientRandom,
+            prev_nc,
             serverRandom,
             $g,
-            p_sg,
-            p_hrr,
-            p_x,
-            p_y,
-            p_gx,
+            prev_sg,
+            prev_hrr,
+            prev_x,
+            prev_y,
+            prev_gx,
             gy,
             gxy,
             psk_ke_mode,
-            p_psk_id,
-            p_edi,
-            p_es,
-            p_hs,
-            p_ms,
-            p_cats,
-            p_sats,
-            p_hs_keyc,
-            p_hs_keys,
+            prev_psk_id,
+            prev_edi,
+            prev_es,
+            prev_hs,
+            prev_ms,
+            prev_cats,
+            prev_sats,
+            prev_hs_keyc,
+            prev_hs_keys,
             auth_status,
-            p_ems,
-            p_rms,
-            p_cert_req
+            prev_ems,
+            prev_rms,
+            prev_cert_req
         )
     ]
 
