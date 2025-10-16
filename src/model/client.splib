@@ -70,7 +70,7 @@ rule recv_hello_retry_request:
         supported_groups = <$g1, $g2>
         psk_ke_mode = 'na'
         auth_status = <'0', '0'>
-        gx = $g2^~x
+        gx = $g2^~new_x
         receivedExtensions = <
             ExtensionSupportedVersions(),
             ExtensionKeyShareHelloRetryRequest($g2)
@@ -88,9 +88,6 @@ rule recv_hello_retry_request:
         es = Extract(prev_res_psk, '0')
     in
     [
-        F_MessageIn(receivedMessage),
-        Fr(~x),
-        DHExp(prev_x, ~tid, $C),
         F_State_C1(
             ~tid,
             $C,
@@ -121,19 +118,21 @@ rule recv_hello_retry_request:
             prev_ems,
             prev_rms,
             prev_cert_req
-        )
+        ),
+        Fr(~new_x),
+        F_MessageIn(receivedMessage),
+        DHExp(prev_x, ~tid, $C)
     ]
     --[
         C1_retry(~tid),
-        Instance(~tid, $C, 'client'),
         Neq($g1, $g2),
         Instance(~tid, $C, 'client'),
         DeleteDH(~tid, $C, prev_x),
-        DH(~tid, $C, ~x)
+        DH(~tid, $C, ~new_x)
     ]->
     [
         MessageOut(message),
-        DHExp(~x, ~tid, $C),
+        DHExp(~new_x, ~tid, $C),
         F_State_C1(
             ~tid,
             $C,
@@ -145,7 +144,7 @@ rule recv_hello_retry_request:
             $g2,
             prev_sg,
             hrr,
-            ~x,
+            ~new_x,
             prev_y,
             gx,
             prev_gy,
