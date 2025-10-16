@@ -43,7 +43,7 @@ rule start_server:
 rule receive_client_hello:
     let
         psk_ke_mode = 'na'
-        supported_groups = <$group1, $group2>
+        supported_groups = <$g1, $g2>
         gx = $new_group^new_x
         extensions = <
             ExtensionSupportedVersions(),
@@ -92,7 +92,7 @@ rule receive_client_hello:
     ]
     --[
         S0(~tid),
-        Neq($group1, $group2)
+        Neq($g1, $g2)
     ]->
     [
         F_State_S1(

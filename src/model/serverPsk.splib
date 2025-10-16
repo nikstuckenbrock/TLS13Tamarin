@@ -1,7 +1,7 @@
 rule receive_client_hello_psk:
     let
         binder = '0'
-        supported_groups = <$group1, $group2>
+        supported_groups = <$g1, $g2>
         gx = $new_group^x
         clientRandom = new_nc
         psk_ke_mode = <'0', '1'>
@@ -74,7 +74,7 @@ rule receive_client_hello_psk:
     ]
     --[
         S0_PSK(~tid),
-        Neq($group1, $group2),
+        Neq($g1, $g2),
         Eq(unmask(obfuscated_ticket_age, ticket_age_add), '1'),
         Eq(binder_check, binder_in),
         RPSK(~tid, $S, 'server', <$C, psk_res_psk, psk_auth_status>),

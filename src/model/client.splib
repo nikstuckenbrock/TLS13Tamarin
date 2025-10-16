@@ -1,13 +1,13 @@
 rule client_hello:
     let
         messages = '0'
-        supported_groups = <$group1, $group2>
-        gx = $group1^~x
+        supported_groups = <$g1, $g2>
+        gx = $g1^~x
         extensions = <
             ExtensionSupportedVersions(),
             ExtensionNamedGroupdList(supported_groups),
             ExtensionSignatureSchemeList($supported_signature_algorithms),
-            ExtensionKeyShareClientHello(KeyShareEntry($group1, gx))
+            ExtensionKeyShareClientHello(KeyShareEntry($g1, gx))
         >
         message = ClientHello(~nc, '0', $cipher_suites, '0', extensions)
         messages = <messages, message>
@@ -24,7 +24,7 @@ rule client_hello:
         DH(~nc, $C, ~x),
         HonestUse(~x),
         HonestUse(gx),
-        Neq($group1, $group2)
+        Neq($g1, $g2)
     ]->
     [
         DHExp(~x, ~nc, $C),
@@ -36,7 +36,7 @@ rule client_hello:
             messages,
             ~nc,
             '0',
-            $group1,
+            $g1,
             supported_groups,
             '0',
             ~x,
@@ -64,16 +64,16 @@ rule client_hello:
 
 rule receive_hello_retry_request:
     let
-        p_g = $group1
+        p_g = $g1
         p_hrr = '0'
         hrr = 'hrr'
-        supported_groups = <$group1, $group2>
+        supported_groups = <$g1, $g2>
         psk_ke_mode = 'na'
         auth_status = <'0', '0'>
-        gx = $group2^~x
+        gx = $g2^~x
         receivedExtensions = <
             ExtensionSupportedVersions(),
-            ExtensionKeyShareHelloRetryRequest($group2)
+            ExtensionKeyShareHelloRetryRequest($g2)
         >
         receivedMessage = HelloRetryRequest(receivedExtensions)
         messages = <p_messages, receivedMessage>
@@ -81,7 +81,7 @@ rule receive_hello_retry_request:
             ExtensionSupportedVersions(),
             ExtensionNamedGroupdList(supported_groups),
             ExtensionSignatureSchemeList($supported_signature_algorithms),
-            ExtensionKeyShareClientHello(KeyShareEntry($group2, gx))
+            ExtensionKeyShareClientHello(KeyShareEntry($g2, gx))
         >
         message = ClientHello(p_clientRandom, '0', $cipher_suites, '0', extensions)
         messages = <messages, message>
@@ -126,7 +126,7 @@ rule receive_hello_retry_request:
     --[
         C1_retry(~tid),
         Instance(~tid, $C, 'client'),
-        Neq($group1, $group2),
+        Neq($g1, $g2),
         Instance(~tid, $C, 'client'),
         DeleteDH(~tid, $C, p_x),
         DH(~tid, $C, ~x)
@@ -142,7 +142,7 @@ rule receive_hello_retry_request:
             messages,
             p_clientRandom,
             p_serverRandom,
-            $group2,
+            $g2,
             p_sg,
             hrr,
             ~x,

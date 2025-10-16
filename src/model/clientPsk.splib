@@ -2,8 +2,8 @@ rule client_hello_psk:
     let
         messages = '0'
         binder = '0'
-        supported_groups = <$group1, $group2>
-        gx = $group1^~x
+        supported_groups = <$g1, $g2>
+        gx = $g1^~x
         psk_ke_mode = <'0', '1'>
         obfuscated_ticket_age = mask(ticket_age_add, $ticket_age)
         identities = <<ticket, obfuscated_ticket_age>>
@@ -12,7 +12,7 @@ rule client_hello_psk:
         binder_extensions = <
             ExtensionSupportedVersions(),
             ExtensionNamedGroupdList(supported_groups),
-            ExtensionKeyShareClientHello(KeyShareEntry($group1, gx)),
+            ExtensionKeyShareClientHello(KeyShareEntry($g1, gx)),
             ExtensionPskKeyExchangeModes(psk_ke_mode),
             edi,
             ExtensionPreSharedKeyClientHello(identities, binder)
@@ -23,7 +23,7 @@ rule client_hello_psk:
         extensions = <
             ExtensionSupportedVersions(),
             ExtensionNamedGroupdList(supported_groups),
-            ExtensionKeyShareClientHello(KeyShareEntry($group1, gx)),
+            ExtensionKeyShareClientHello(KeyShareEntry($g1, gx)),
             ExtensionPskKeyExchangeModes(psk_ke_mode),
             edi,
             ExtensionPreSharedKeyClientHello(identities, binder)
@@ -58,7 +58,7 @@ rule client_hello_psk:
             messages,
             ~nc,
             '0',
-            $group1,
+            $g1,
             supported_groups,
             '0',
             ~x,
@@ -85,13 +85,13 @@ rule client_hello_psk:
 
 rule receive_hello_retry_request_psk:
     let
-        p_g = $group1
+        p_g = $g1
         p_hrr = '0'
         p_psk_ke_mode = <'0', '1'>
         edi = '0'
 
         hrr = 'hrr'
-        supported_groups = <$group1, $group2>
+        supported_groups = <$g1, $g2>
 
         res_psk = p_res_psk
         auth_status = p_auth_status
@@ -99,7 +99,7 @@ rule receive_hello_retry_request_psk:
 
         receivedExtensions = <
             ExtensionSupportedVersions(),
-            ExtensionKeyShareHelloRetryRequest($group2)
+            ExtensionKeyShareHelloRetryRequest($g2)
         >
         receivedMessage = HelloRetryRequest(receivedExtensions)
         messages = <p_messages, receivedMessage>
@@ -107,14 +107,14 @@ rule receive_hello_retry_request_psk:
         obfuscated_ticket_age = mask(ticket_age_add, '1')
         identities = <<ticket, obfuscated_ticket_age>>
 
-        gx = $group2^~new_x
+        gx = $g2^~new_x
 
         es = Extract(res_psk, '0')
         binder = '0'
         binder_extensions = <
             ExtensionSupportedVersions(),
             ExtensionNamedGroupdList(supported_groups),
-            ExtensionKeyShareClientHello(KeyShareEntry($group2, gx)),
+            ExtensionKeyShareClientHello(KeyShareEntry($g2, gx)),
             ExtensionPskKeyExchangeModes(p_psk_ke_mode),
             edi,
             ExtensionPreSharedKeyClientHello(identities, binder)
@@ -126,7 +126,7 @@ rule receive_hello_retry_request_psk:
         extensions = <
             ExtensionSupportedVersions(),
             ExtensionNamedGroupdList(supported_groups),
-            ExtensionKeyShareClientHello(KeyShareEntry($group2, gx)),
+            ExtensionKeyShareClientHello(KeyShareEntry($g2, gx)),
             ExtensionPskKeyExchangeModes(p_psk_ke_mode),
             edi,
             ExtensionPreSharedKeyClientHello(identities, binder)
@@ -174,7 +174,7 @@ rule receive_hello_retry_request_psk:
     ]
     --[
         C1_retry_PSK(~tid),
-        Neq($group1, $group2),
+        Neq($g1, $g2),
         Instance(~tid, $C, 'client'),
         RPSK(~tid, $C, 'client', <$S, p_res_psk, p_auth_status>),
         DeleteDH(~tid, $C, p_x),
@@ -191,7 +191,7 @@ rule receive_hello_retry_request_psk:
             messages,
             ~new_nc,
             p_ns,
-            $group2,
+            $g2,
             p_sg,
             hrr,
             ~new_x,
