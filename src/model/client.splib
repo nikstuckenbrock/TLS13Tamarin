@@ -930,7 +930,7 @@ rule receive_new_session_ticket:
     [
         RecvStream(~tid, $C, $S, p_auth_status, serverApplicationTrafficKey),
         !ClientPSK($C, $S, p_rms, p_auth_status, receivedMessage, 'res'),
-        SecretPSK($C, p_rms),
+        F_SecretPSK($C, p_rms),
         F_State_C4(
             ~tid,
             $C,

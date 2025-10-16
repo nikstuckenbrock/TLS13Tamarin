@@ -11,7 +11,3 @@ restriction one_long_term_key_per_actor:
 restriction one_role_per_actor:
     "All actor tid tid2 role role2 #i #j. Start(tid, actor, role)@i & Start(tid2, actor, role2)@j
         ==> role = role2"
-
-restriction one_actor_per_role:
-    "All actor actor2 nc nc2 role #i #j. Instance(nc, actor, role)@i & Instance(nc2, actor2, role)@j
-        ==> actor = actor2"

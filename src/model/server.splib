@@ -986,7 +986,7 @@ rule new_session_ticket:
         MessageOut(senc{message}serverApplicationTrafficKey),
         SendStream(~tid, $S, $C, p_auth_status, serverApplicationTrafficKey),
         !ServerPSK($S, $C, p_rms, p_auth_status, message, 'res'),
-        SecretPSK($S, p_rms),
+        F_SecretPSK($S, p_rms),
         F_State_S4(
             ~tid,
             $S,
