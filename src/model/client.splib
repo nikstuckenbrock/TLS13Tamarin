@@ -6,7 +6,7 @@ rule client_hello:
         extensions = <
             ExtensionSupportedVersions(),
             ExtensionNamedGroupdList(supported_groups),
-            ExtensionSignatureSchemeList($supported_signature_algorithms),
+            ExtensionSignatureSchemeList($sig_algs),
             ExtensionKeyShareClientHello(KeyShareEntry($g1, gx))
         >
         message = ClientHello(~nc, '0', $cipher_suites, '0', extensions)
@@ -21,13 +21,12 @@ rule client_hello:
         C0(~nc),
         Start(~nc, $C, 'client'),
         RIdentity(~nc, $C, 'client', <$C>),
+        Neq($g1, $g2),
         DH(~nc, $C, ~x),
         HonestUse(~x),
-        HonestUse(gx),
-        Neq($g1, $g2)
+        HonestUse(gx)
     ]->
     [
-        DHExp(~x, ~nc, $C),
         F_State_C1(
             ~nc,
             $C,
@@ -59,6 +58,7 @@ rule client_hello:
             '0',
             '0'
         ),
+        DHExp(~x, ~nc, $C),
         MessageOut(message)
     ]
 
