@@ -17,7 +17,7 @@ rule client_hello_psk:
             edi,
             ExtensionPreSharedKeyClientHello(identities, binder)
         >
-        binder_message = ClientHello(~clientRandom, '0', $cipher_suites, '0', binder_extensions)
+        binder_message = ClientHello(~nc, '0', $cipher_suites, '0', binder_extensions)
         binder_messages = <messages, binder_message>
         binder = hmac(Expand(Expand(es, <psk_type, 'TLS13pskbinderkey', '0'> , '32'), <'32', '0', '0'> , '32'), h(binder_messages))
         extensions = <
@@ -28,35 +28,35 @@ rule client_hello_psk:
             edi,
             ExtensionPreSharedKeyClientHello(identities, binder)
         >
-        message = ClientHello(~clientRandom, '0', $cipher_suites, '0', extensions)
+        message = ClientHello(~nc, '0', $cipher_suites, '0', extensions)
         messages = <messages, message>
 
         ead_keyc = Expand(Expand(es, <'TLS13clientearlytrafficsecret', <h(messages)>>, '32'), <'TLS13earlyapplicationdatakeyexpansion_key', '0'>, '32')
     in
     [
-        Fr(~clientRandom),
+        Fr(~nc),
         Fr(~x),
         !ClientPSK($C, $S, res_psk, auth_status, <'4',$ticket_lifetime, ticket_age_add, ticket,<<'46',$max_early_data_size>> >, psk_type)
     ]
     --[
-        C0_PSK(~clientRandom),
-        Start(~clientRandom, $C, 'client'),
-        RPSK(~clientRandom, $C, 'client', <$S, res_psk, auth_status>),
+        C0_PSK(~nc),
+        Start(~nc, $C, 'client'),
+        RPSK(~nc, $C, 'client', <$S, res_psk, auth_status>),
         Neq(res_psk, '0'),
-        DH(~clientRandom, $C, ~x)
+        DH(~nc, $C, ~x)
     ]->
     [
         MessageOut(message),
-        F_CachePSK(~clientRandom, $S, res_psk, auth_status, <'4', $ticket_lifetime, ticket_age_add, ticket, <<'46',$max_early_data_size>> >,psk_type),
-        EarlySendStream(~clientRandom, $C, $S, auth_status, ead_keyc, edi),
-        DHExp(~x, ~clientRandom, $C),
+        F_CachePSK(~nc, $S, res_psk, auth_status, <'4', $ticket_lifetime, ticket_age_add, ticket, <<'46',$max_early_data_size>> >,psk_type),
+        EarlySendStream(~nc, $C, $S, auth_status, ead_keyc, edi),
+        DHExp(~x, ~nc, $C),
         F_State_C1(
-            ~clientRandom,
+            ~nc,
             $C,
             $S,
             res_psk,
             messages,
-            ~clientRandom,
+            ~nc,
             '0',
             $group1,
             supported_groups,

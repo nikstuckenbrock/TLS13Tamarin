@@ -9,32 +9,32 @@ rule client_hello:
             ExtensionSignatureSchemeList($supported_signature_algorithms),
             ExtensionKeyShareClientHello(KeyShareEntry($group1, gx))
         >
-        message = ClientHello(~clientRandom, '0', $cipher_suites, '0', extensions)
+        message = ClientHello(~nc, '0', $cipher_suites, '0', extensions)
         messages = <messages, message>
         earlySecret = Extract('0', '0')
     in
     [
-        Fr(~clientRandom),
+        Fr(~nc),
         Fr(~x)
     ]
     --[
-        C0(~clientRandom),
-        Start(~clientRandom, $C, 'client'),
-        RIdentity(~clientRandom, $C, 'client', <$C>),
-        DH(~clientRandom, $C, ~x),
+        C0(~nc),
+        Start(~nc, $C, 'client'),
+        RIdentity(~nc, $C, 'client', <$C>),
+        DH(~nc, $C, ~x),
         HonestUse(~x),
         HonestUse(gx),
         Neq($group1, $group2)
     ]->
     [
-        DHExp(~x, ~clientRandom, $C),
+        DHExp(~x, ~nc, $C),
         F_State_C1(
-            ~clientRandom,
+            ~nc,
             $C,
             $S,
             '0',
             messages,
-            ~clientRandom,
+            ~nc,
             '0',
             $group1,
             supported_groups,
