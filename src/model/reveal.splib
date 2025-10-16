@@ -1,5 +1,13 @@
-rule reveal_ltk:
-  [ !Ltk($A, ~ltkA) ] --[ RevLtk($A) ]-> [ MessageOut(~ltkA) ]
+rule Reveal_Ltk:
+  [
+    !Ltk($A, ~ltkA)
+  ]
+  --[
+    RevLtk($A)
+  ]->
+  [
+    MessageOut(~ltkA)
+  ]
 
 rule reveal_dh_exp:
   [ DHExp(~x, ~tid, $A) ] --[ RevDHExp(~tid, $A,~x) ]-> [ MessageOut(~x), DHExp(~x, ~tid, $A) ]
