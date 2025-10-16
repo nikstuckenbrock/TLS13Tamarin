@@ -1,4 +1,4 @@
-rule register_pk:
+rule Register_pk:
     [
         Fr(~ltkA)
     ]
