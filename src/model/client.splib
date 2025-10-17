@@ -878,7 +878,7 @@ rule client_auth_cert:
         RecvStream(~tid, $C, $S, auth_status, serverApplicationTrafficKey)
     ]
 
-rule receive_new_session_ticket:
+rule recv_new_session_ticket:
     let
         p_rms = Expand(ms, <'TLS13resumptionmastersecret', <h(messages)>>, '32')
         ticket_extension = <
@@ -887,8 +887,6 @@ rule receive_new_session_ticket:
         receivedMessage = NewSessionTicket($ticket_lifetime, ticket_age_add, ticket, ticket_extension)
     in
     [
-        RecvStream(~tid, $C, $S, p_auth_status, serverApplicationTrafficKey),
-        F_MessageIn(senc{receivedMessage}serverApplicationTrafficKey),
         F_State_C4(
             ~tid,
             $C,
@@ -919,7 +917,9 @@ rule receive_new_session_ticket:
             p_ems,
             p_rms,
             p_cert_req
-        )
+        ),
+        RecvStream(~tid, $C, $S, p_auth_status, serverApplicationTrafficKey),
+        F_MessageIn(senc{receivedMessage}serverApplicationTrafficKey)
     ]
     --[
         C4_NST(~tid),
@@ -927,9 +927,6 @@ rule receive_new_session_ticket:
         RPostHS(~tid, $C, 'client', <p_hs, p_rms, $S, p_auth_status, p_messages>)
     ]->
     [
-        RecvStream(~tid, $C, $S, p_auth_status, serverApplicationTrafficKey),
-        !ClientPSK($C, $S, p_rms, p_auth_status, receivedMessage, 'res'),
-        F_SecretPSK($C, p_rms),
         F_State_C4(
             ~tid,
             $C,
@@ -960,5 +957,8 @@ rule receive_new_session_ticket:
             p_ems,
             p_rms,
             p_cert_req
-        )
+        ),
+        RecvStream(~tid, $C, $S, p_auth_status, serverApplicationTrafficKey),
+        !ClientPSK($C, $S, p_rms, p_auth_status, receivedMessage, 'res'),
+        F_SecretPSK($C, p_rms)
     ]

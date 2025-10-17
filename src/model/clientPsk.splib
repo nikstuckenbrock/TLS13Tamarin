@@ -120,7 +120,7 @@ rule recv_hello_retry_request_psk:
             ExtensionPreSharedKeyClientHello(identities, binder)
         >
         binder_message = ClientHello(~new_nc, '0', $cipher_suites, '0', binder_extensions)
-        binder_messages = <p_messages, binder_message>
+        binder_messages = <messages, binder_message>
         binder = hmac(Expand(Expand(es, <psk_type, 'TLS13pskbinderkey', '0'> , '32'), <'32', '0', '0'> , '32'), h(binder_messages))
 
         extensions = <

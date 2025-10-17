@@ -940,9 +940,6 @@ rule new_session_ticket:
         message = NewSessionTicket($ticket_lifetime, ~ticket_age_add, ~ticket, ticket_extension)
     in
     [
-        SendStream(~tid, $S, $C, p_auth_status, serverApplicationTrafficKey),
-        Fr(~ticket),
-        Fr(~ticket_age_add),
         F_State_S4(
             ~tid,
             $S,
@@ -973,7 +970,10 @@ rule new_session_ticket:
             p_ems,
             p_rms,
             p_cert_req
-        )
+        ),
+        SendStream(~tid, $S, $C, p_auth_status, serverApplicationTrafficKey),
+        Fr(~ticket),
+        Fr(~ticket_age_add)
     ]
     --[
         S4_NST(~tid),
@@ -982,10 +982,6 @@ rule new_session_ticket:
         RNST(~tid, $S, 'server', <~ticket, ~ticket_age_add>)
     ]->
     [
-        MessageOut(senc{message}serverApplicationTrafficKey),
-        SendStream(~tid, $S, $C, p_auth_status, serverApplicationTrafficKey),
-        !ServerPSK($S, $C, p_rms, p_auth_status, message, 'res'),
-        F_SecretPSK($S, p_rms),
         F_State_S4(
             ~tid,
             $S,
@@ -1016,5 +1012,9 @@ rule new_session_ticket:
             p_ems,
             p_rms,
             p_cert_req
-        )
+        ),
+        SendStream(~tid, $S, $C, p_auth_status, serverApplicationTrafficKey),
+        !ServerPSK($S, $C, p_rms, p_auth_status, message, 'res'),
+        F_SecretPSK($S, p_rms),
+        MessageOut(senc{message}serverApplicationTrafficKey)
     ]
