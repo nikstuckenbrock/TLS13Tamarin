@@ -44,7 +44,7 @@ rule receive_client_hello_psk:
             p_res_psk,
             p_messages,
             p_nc,
-            p_serverRandom,
+            p_ns,
             p_g,
             p_sg,
             p_hrr,
@@ -126,7 +126,7 @@ rule server_hello_psk:
             <'41', '0'>,
             edi
         >
-        message = ServerHello(~p_serverRandom, '0', $cipher_suite, '0', extensions)
+        message = ServerHello(~p_ns, '0', $cipher_suite, '0', extensions)
         messages = <p_messages, message>
     in
     [
@@ -137,8 +137,8 @@ rule server_hello_psk:
             $C,
             p_res_psk,
             p_messages,
-            p_clientRandom,
-            ~p_serverRandom,
+            p_nc,
+            ~p_ns,
             p_g,
             p_sg,
             p_hrr,
@@ -166,7 +166,7 @@ rule server_hello_psk:
     --[
         S1_PSK(~tid),
         Instance(~tid, $S, 'server'),
-        RNonces(~tid, $S, 'server', <p_clientRandom, ~p_serverRandom>),
+        RNonces(~tid, $S, 'server', <p_nc, ~p_ns>),
         DH(~tid, $S, ~y)
     ]->
     [
@@ -178,8 +178,8 @@ rule server_hello_psk:
             $C,
             p_res_psk,
             messages,
-            p_clientRandom,
-            ~p_serverRandom,
+            p_nc,
+            ~p_ns,
             p_g,
             p_sg,
             p_hrr,

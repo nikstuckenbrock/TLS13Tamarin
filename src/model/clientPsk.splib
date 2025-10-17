@@ -405,7 +405,7 @@ rule receive_server_auth_psk:
         ems = Expand(p_ms, <'TLS13exportermastersecret', <h(messages)>>, '32')
     in
     [
-        F_MessageIn(senc{message}p_handshakeKeyServer),
+        F_MessageIn(senc{message}p_hs_keys),
         F_State_C2d(
             tid,
             $C,

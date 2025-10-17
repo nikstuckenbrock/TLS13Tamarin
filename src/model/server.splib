@@ -16,7 +16,7 @@ rule start_server:
             '0',
             '0',
             '0',
-            $supported_groups,
+            $g,
             '0',
             '0',
             '0',
@@ -40,34 +40,34 @@ rule start_server:
         )
     ]
 
-rule receive_client_hello:
+rule recv_client_hello:
     let
         psk_ke_mode = 'na'
         supported_groups = <$g1, $g2>
-        gx = $new_group^new_x
+        gx = $new_g^new_x
         extensions = <
             ExtensionSupportedVersions(),
             ExtensionNamedGroupdList(supported_groups),
-            ExtensionSignatureSchemeList($supported_signature_algorithms),
-            ExtensionKeyShareClientHello(KeyShareEntry($new_group,gx))
+            ExtensionSignatureSchemeList($sig_algs),
+            ExtensionKeyShareClientHello(KeyShareEntry($new_g, gx))
         >
-        receivedMessage = ClientHello(clientRandom, '0', $cipher_suites, '0', extensions)
+        receivedMessage = ClientHello(new_nc, '0', $cipher_suites, '0', extensions)
         messages = <p_messages, receivedMessage>
-        group = $new_group
+        group = $new_g
     in
     [
         F_MessageIn(receivedMessage),
-        Fr(~serverRandom),
+        Fr(~new_ns),
         F_State_S0(
             ~tid,
             $S,
             $C,
             p_res_psk,
             p_messages,
-            p_clientRandom,
-            p_serverRandom,
-            p_group,
-            p_supported_groups,
+            p_nc,
+            p_ns,
+            p_g,
+            p_sg,
             p_hrr,
             p_x,
             p_y,
@@ -101,10 +101,10 @@ rule receive_client_hello:
             $C,
             p_res_psk,
             messages,
-            clientRandom,
-            ~serverRandom,
+            new_nc,
+            ~new_ns,
             group,
-            p_supported_groups,
+            p_sg,
             p_hrr,
             p_x,
             p_y,
@@ -132,11 +132,11 @@ rule hello_retry_request:
     let
         p_hrr = '0'
 
-        p_supported_groups = $supported_group // TODO: unsure
+        p_sg = $p_sg // TODO: unsure
 
         hrr = 'hrr'
-        new_g = p_supported_groups
-        g = p_supported_groups
+        new_g = p_sg
+        g = p_sg
 
         extensions = <
             ExtensionSupportedVersions(),
@@ -152,10 +152,10 @@ rule hello_retry_request:
             $C,
             p_res_psk,
             p_messages,
-            p_clientRandom,
-            p_serverRandom,
-            p_group,
-            p_supported_groups,
+            p_nc,
+            p_ns,
+            p_g,
+            p_sg,
             p_hrr,
             p_x,
             p_y,
@@ -180,7 +180,7 @@ rule hello_retry_request:
     ]
     --[
         S1_retry(~tid),
-        Neq(p_group, p_supported_groups),
+        Neq(p_g, p_sg),
         Instance(~tid, $S, 'server')
     ]->
     [
@@ -191,10 +191,10 @@ rule hello_retry_request:
             $C,
             p_res_psk,
             messages,
-            p_clientRandom,
-            p_serverRandom,
+            p_nc,
+            p_ns,
             g,
-            p_supported_groups,
+            p_sg,
             hrr,
             p_x,
             p_y,
@@ -229,22 +229,21 @@ rule server_hello:
             ExtensionSignatureSchemeList($sig_algs),
             ExtensionKeyShareServerHello(KeyShareEntry($p_g, gy))
         >
-        message = ServerHello(serverRandom, '0', $cipher_suite, '0', extensions)
+        message = ServerHello(p_ns, '0', $cipher_suite, '0', extensions)
         es = Extract(p_res_psk, '0')
         messages = <p_messages, message>
     in
     [
-        Fr(~y),
         F_State_S1(
             ~tid,
             $S,
             $C, 
             p_res_psk,
             p_messages,
-            p_clientRandom,
-            serverRandom,
+            p_nc,
+            p_ns,
             $p_g,
-            p_supported_groups,
+            p_sg,
             p_hrr,
             p_x,
             p_y,
@@ -265,32 +264,30 @@ rule server_hello:
             p_ems,
             p_rms,
             p_cert_req
-        )
+        ),
+        Fr(~y)
     ]
     --[
         S1(~tid),
-        Instance(~tid, $S, 'server'),
-        Eq($p_g, p_supported_groups),
+        Eq($p_g, p_sg),
         Neq(p_gx, $p_g),
         Neq(gxy, $p_g),
         Instance(~tid, $S, 'server'),
-        RNonces(~tid, $S, 'server', <p_clientRandom, serverRandom>),
+        RNonces(~tid, $S, 'server', <p_nc, p_ns>),
         DHChal($p_g, some_x, ~y, p_gx, gy, gxy),
         DH(~tid, $S, ~y)
     ]->
     [
-        MessageOut(message),
-        DHExp(~y, ~tid, $S),
         F_State_S2a(
             ~tid,
             $S,
             $C,
             p_res_psk,
             messages,
-            p_clientRandom,
-            serverRandom,
+            p_nc,
+            p_ns,
             $p_g,
-            p_supported_groups,
+            p_sg,
             p_hrr,
             p_x,
             ~y,
@@ -311,7 +308,9 @@ rule server_hello:
             p_ems,
             p_rms,
             p_cert_req
-        )
+        ),
+        DHExp(~y, ~tid, $S),
+        MessageOut(message)
     ]
 
 rule server_gen_keys:
@@ -423,12 +422,12 @@ rule encrypted_extensions:
             p_psk_id,
             p_edi,
             p_es,
-            p_handshakeSecret,
-            p_masterSecret,
+            p_hs,
+            p_ms,
             p_cats,
             p_sats,
-            p_handshakeKeyClient,
-            p_handshakeKeyServer,
+            p_hs_keyc,
+            p_hs_keys,
             p_auth_status,
             p_ems,
             p_rms,
@@ -440,7 +439,7 @@ rule encrypted_extensions:
         Instance(~tid, $S, 'server')
     ]->
     [
-        MessageOut(senc{message}p_handshakeKeyServer),
+        MessageOut(senc{message}p_hs_keys),
         F_State_S2c(
             ~tid,
             $S,
@@ -461,12 +460,12 @@ rule encrypted_extensions:
             p_psk_id,
             p_edi,
             p_es,
-            p_handshakeSecret,
-            p_masterSecret,
+            p_hs,
+            p_ms,
             p_cats,
             p_sats,
-            p_handshakeKeyClient,
-            p_handshakeKeyServer,
+            p_hs_keyc,
+            p_hs_keys,
             p_auth_status,
             p_ems,
             p_rms,
@@ -499,12 +498,12 @@ rule skip_certificate_request:
             p_psk_id,
             p_edi,
             p_es,
-            p_handshakeSecret,
-            p_masterSecret,
+            p_hs,
+            p_ms,
             p_cats,
             p_sats,
-            p_handshakeKeyClient,
-            p_handshakeKeyServer,
+            p_hs_keyc,
+            p_hs_keys,
             p_auth_status,
             p_ems,
             p_rms,
@@ -536,12 +535,12 @@ rule skip_certificate_request:
             p_psk_id,
             p_edi,
             p_es,
-            p_handshakeSecret,
-            p_masterSecret,
+            p_hs,
+            p_ms,
             p_cats,
             p_sats,
-            p_handshakeKeyClient,
-            p_handshakeKeyServer,
+            p_hs_keyc,
+            p_hs_keys,
             p_auth_status,
             p_ems,
             p_rms,
@@ -578,12 +577,12 @@ rule certificate_request:
             p_psk_id,
             p_edi,
             p_es,
-            p_handshakeSecret,
-            p_masterSecret,
+            p_hs,
+            p_ms,
             p_cats,
             p_sats,
-            p_handshakeKeyClient,
-            p_handshakeKeyServer,
+            p_hs_keyc,
+            p_hs_keys,
             p_auth_status,
             p_ems,
             p_rms,
@@ -615,45 +614,45 @@ rule certificate_request:
             p_psk_id,
             p_edi,
             p_es,
-            p_handshakeSecret,
-            p_masterSecret,
+            p_hs,
+            p_ms,
             p_cats,
             p_sats,
-            p_handshakeKeyClient,
-            p_handshakeKeyServer,
+            p_hs_keyc,
+            p_hs_keys,
             p_auth_status,
             p_ems,
             p_rms,
             cert_req
         ),
-        MessageOut(senc{message}p_handshakeKeyServer)
+        MessageOut(senc{message}p_hs_keys)
     ]
 
 rule server_auth:
     let
 
         // Certificate
-        certificateMessage = Certificate('0', pk(~longTermKeyServer))
+        certificateMessage = Certificate('0', pk(~ltkS))
         messages = <p_messages, certificateMessage>
 
         // CertificateVerify
-        signature = sign{<'TLS13server_CertificateVerify', <h(messages)>>}~longTermKeyServer
+        signature = sign{<'TLS13server_CertificateVerify', <h(messages)>>}~ltkS
         certificateVerifyMessage = CertificateVerify(signature)
         messages = <messages, certificateVerifyMessage>
 
         // Finished
-        verify_data = hmac(Expand(Expand(p_handshakeSecret, <'TLS13serverhandshaketrafficsecret', <h(messages)>>, '32'), <'TLS13finished', '0'>, '32'), h(messages))
+        verify_data = hmac(Expand(Expand(p_hs, <'TLS13serverhandshaketrafficsecret', <h(messages)>>, '32'), <'TLS13finished', '0'>, '32'), h(messages))
         finishedMessage = Finished(verify_data)
         messages = <messages, finishedMessage>
 
-        earlyMasterSecret = Expand(p_masterSecret, <'TLS13exportermastersecret', <h(messages)>>, '32')
-        clientApplicationTrafficSecret = Expand(p_masterSecret, <'TLS13clientapplicationtrafficsecret', <h(messages)>>, '32')
-        serverApplicationTrafficSecret = Expand(p_masterSecret, <'TLS13serverapplicationtrafficsecret', <h(messages)>>, '32')
+        earlyMasterSecret = Expand(p_ms, <'TLS13exportermastersecret', <h(messages)>>, '32')
+        clientApplicationTrafficSecret = Expand(p_ms, <'TLS13clientapplicationtrafficsecret', <h(messages)>>, '32')
+        serverApplicationTrafficSecret = Expand(p_ms, <'TLS13serverapplicationtrafficsecret', <h(messages)>>, '32')
         serverApplicationTrafficKey = Expand(serverApplicationTrafficSecret, <'TLS13applicationdatakeyexpansion_key', '0'>, '32')
         auth_status = <'auth', '0'>
     in
     [
-        !Ltk($S, ~longTermKeyServer),
+        !Ltk($S, ~ltkS),
         F_State_S2d(
             ~tid,
             $S,
@@ -674,12 +673,12 @@ rule server_auth:
             p_psk_id,
             p_edi,
             p_es,
-            p_handshakeSecret,
-            p_masterSecret,
+            p_hs,
+            p_ms,
             p_cats,
             p_sats,
-            p_handshakeKeyClient,
-            p_handshakeKeyServer,
+            p_hs_keyc,
+            p_hs_keys,
             p_auth_status,
             p_ems,
             p_rms,
@@ -690,11 +689,11 @@ rule server_auth:
         S2d(~tid),
         Instance(~tid, $S, 'server'),
         Eq(p_psk_ke_mode, 'na'),
-        UseLtk(~longTermKeyServer, signature),
+        UseLtk(~ltkS, signature),
         RTranscript(~tid, $S, 'server', <messages>)
     ]->
     [
-        MessageOut(senc{<certificateMessage,certificateVerifyMessage,finishedMessage>}p_handshakeKeyServer),
+        MessageOut(senc{<certificateMessage,certificateVerifyMessage,finishedMessage>}p_hs_keys),
         SendStream(~tid, $S, $C, auth_status, <messages>),
         F_State_S3(
             ~tid,
@@ -716,12 +715,12 @@ rule server_auth:
             p_psk_id,
             p_edi,
             p_es,
-            p_handshakeSecret,
-            p_masterSecret,
+            p_hs,
+            p_ms,
             clientApplicationTrafficSecret,
             serverApplicationTrafficSecret,
-            p_handshakeKeyClient,
-            p_handshakeKeyServer,
+            p_hs_keyc,
+            p_hs_keys,
             auth_status,
             earlyMasterSecret,
             p_rms,
@@ -732,15 +731,15 @@ rule server_auth:
 rule receive_client_auth:
     let
         p_cert_req = '0'
-        exp_verify_data = hmac(Expand(Expand(p_handshakeSecret, <'TLS13clienthandshaketrafficsecret', <h(p_messages)>>, '32'), <'TLS13finished', '0'>, '32'), h(p_messages))
+        exp_verify_data = hmac(Expand(Expand(p_hs, <'TLS13clienthandshaketrafficsecret', <h(p_messages)>>, '32'), <'TLS13finished', '0'>, '32'), h(p_messages))
         receivedFinished = Finished(verify_data)
         messages = <p_messages, receivedFinished>
-        resumptionMasterSecret = Expand(p_masterSecret, <'TLS13resumptionmastersecret', <h(messages)>>, '32')
-        clientApplicationTrafficKey = Expand(p_clientApplicationTrafficSecret, <'TLS13applicationdatakeyexpansion_key', '0'>, '32')
-        serverApplicationTrafficKey = Expand(p_serverApplicationTrafficSecret, <'TLS13applicationdatakeyexpansion_key', '0'>, '32')
+        resumptionMasterSecret = Expand(p_ms, <'TLS13resumptionmastersecret', <h(messages)>>, '32')
+        clientApplicationTrafficKey = Expand(p_cats, <'TLS13applicationdatakeyexpansion_key', '0'>, '32')
+        serverApplicationTrafficKey = Expand(p_sats, <'TLS13applicationdatakeyexpansion_key', '0'>, '32')
     in
     [
-        F_MessageIn(senc{receivedFinished}p_handshakeKeyClient),
+        F_MessageIn(senc{receivedFinished}p_hs_keyc),
         F_State_S3(
             tid,
             $S,
@@ -761,14 +760,14 @@ rule receive_client_auth:
             p_psk_id,
             p_edi,
             p_es,
-            p_handshakeSecret,
-            p_masterSecret,
-            p_clientApplicationTrafficSecret,
-            p_serverApplicationTrafficSecret,
-            p_handshakeKeyClient,
-            p_handshakeKeyServer,
+            p_hs,
+            p_ms,
+            p_cats,
+            p_sats,
+            p_hs_keyc,
+            p_hs_keys,
             p_auth_status,
-            p_earlyMasterSecret,
+            p_ems,
             p_rms,
             p_cert_req
         )
@@ -779,8 +778,8 @@ rule receive_client_auth:
         Eq(verify_data, exp_verify_data),
         RMode(tid, $S, 'server', <p_psk_ke_mode>),
         CIdentity(tid, $S, 'server', <$C, p_auth_status>),
-        CHS(tid, $S, 'server', <p_handshakeSecret>),
-        RHSMS(tid, $S, 'server', <p_handshakeSecret, p_masterSecret>),
+        CHS(tid, $S, 'server', <p_hs>),
+        RHSMS(tid, $S, 'server', <p_hs, p_ms>),
         RRMS(tid, $S, 'server', <$C, resumptionMasterSecret, messages>),
         CTranscript(tid, $S, 'server', <messages>),
         CNonces(tid, $S, 'server', <p_nc, p_ns>),
@@ -808,14 +807,14 @@ rule receive_client_auth:
             p_psk_id,
             p_edi,
             p_es,
-            p_handshakeSecret,
-            p_masterSecret,
-            p_clientApplicationTrafficSecret,
-            p_serverApplicationTrafficSecret,
-            p_handshakeKeyClient,
-            p_handshakeKeyServer,
+            p_hs,
+            p_ms,
+            p_cats,
+            p_sats,
+            p_hs_keyc,
+            p_hs_keys,
             p_auth_status,
-            p_earlyMasterSecret,
+            p_ems,
             resumptionMasterSecret,
             p_cert_req
         )
@@ -827,28 +826,28 @@ rule receive_client_auth_cert:
         cert_req = '0'
         auth_status = <'auth', 'auth'>
 
-        certificateMessage = Certificate('0', pk(~longTermKeyClient))
+        certificateMessage = Certificate('0', pk(~ltkC))
         messages = <p_messages, certificateMessage>
 
         sig_messages = <'TLS13client_CertificateVerify', <h(messages)>>
         certificateVerifyMessage = CertificateVerify(signature)
         messages = <messages, certificateVerifyMessage>
 
-        exp_verify_data = hmac(Expand(Expand(p_handshakeSecret, <'TLS13clienthandshaketrafficsecret', <h(messages)>>, '32'), <'TLS13finished', '0'>, '32'), h(messages))
+        exp_verify_data = hmac(Expand(Expand(p_hs, <'TLS13clienthandshaketrafficsecret', <h(messages)>>, '32'), <'TLS13finished', '0'>, '32'), h(messages))
 
         finishedMessage = Finished(verify_data)
         messages = <messages, finishedMessage>
 
-        rms = Expand(p_masterSecret, <'TLS13resumptionmastersecret', <h(messages)>>, '32')
+        rms = Expand(p_ms, <'TLS13resumptionmastersecret', <h(messages)>>, '32')
 
         receivedMessage = <certificateMessage, certificateVerifyMessage, finishedMessage>
 
-        app_keyc = Expand(p_clientApplicationTrafficSecret, <'TLS13applicationdatakeyexpansion_key', '0'>, '32')
-        app_keys = Expand(p_serverApplicationTrafficSecret, <'TLS13applicationdatakeyexpansion_key', '0'>, '32')
+        app_keyc = Expand(p_cats, <'TLS13applicationdatakeyexpansion_key', '0'>, '32')
+        app_keys = Expand(p_sats, <'TLS13applicationdatakeyexpansion_key', '0'>, '32')
     in
     [
-        F_MessageIn(senc{receivedMessage}p_handshakeKeyClient),
-        !Pk($C, pk(~longTermKeyClient)),
+        F_MessageIn(senc{receivedMessage}p_hs_keyc),
+        !Pk($C, pk(~ltkC)),
         SendStream(tid, $S, $C, p_auth_status, app_keys),
         F_State_S3(
             tid,
@@ -870,14 +869,14 @@ rule receive_client_auth_cert:
             p_psk_id,
             p_edi,
             p_es,
-            p_handshakeSecret,
-            p_masterSecret,
-            p_clientApplicationTrafficSecret,
-            p_serverApplicationTrafficSecret,
-            p_handshakeKeyClient,
-            p_handshakeKeyServer,
+            p_hs,
+            p_ms,
+            p_cats,
+            p_sats,
+            p_hs_keyc,
+            p_hs_keys,
             p_auth_status,
-            p_earlyMasterSecret,
+            p_ems,
             p_rms,
             p_cert_req
         )
@@ -885,12 +884,12 @@ rule receive_client_auth_cert:
     --[
         S3_cert(tid),
         Instance(tid, $S, 'server'),
-        Eq(verify(signature, sig_messages, pk(~longTermKeyClient)), true),
+        Eq(verify(signature, sig_messages, pk(~ltkC)), true),
         Eq(verify_data, exp_verify_data),
         RMode(tid, $S, 'server', <p_psk_ke_mode>),
         CIdentity(tid, $S, 'server', <$C, auth_status>),
-        CHS(tid, $S, 'server', <p_handshakeSecret>),
-        RHSMS(tid, $S, 'server', <p_handshakeSecret, p_masterSecret>),
+        CHS(tid, $S, 'server', <p_hs>),
+        RHSMS(tid, $S, 'server', <p_hs, p_ms>),
         RRMS(tid, $S, 'server', <$C, rms, messages>),
         CTranscript(tid, $S, 'server', <messages>),
         SessionKey(tid, $S, $C, auth_status, <app_keys, app_keyc>),
@@ -919,14 +918,14 @@ rule receive_client_auth_cert:
             p_psk_id,
             p_edi,
             p_es,
-            p_handshakeSecret,
-            p_masterSecret,
-            p_clientApplicationTrafficSecret,
-            p_serverApplicationTrafficSecret,
-            p_handshakeKeyClient,
-            p_handshakeKeyServer,
+            p_hs,
+            p_ms,
+            p_cats,
+            p_sats,
+            p_hs_keyc,
+            p_hs_keys,
             auth_status,
-            p_earlyMasterSecret,
+            p_ems,
             rms,
             cert_req
         )
@@ -964,14 +963,14 @@ rule new_session_ticket:
             p_psk_id,
             p_edi,
             p_es,
-            p_handshakeSecret,
-            p_masterSecret,
-            p_clientApplicationTrafficSecret,
-            p_serverApplicationTrafficSecret,
-            p_handshakeKeyClient,
-            p_handshakeKeyServer,
+            p_hs,
+            p_ms,
+            p_cats,
+            p_sats,
+            p_hs_keyc,
+            p_hs_keys,
             p_auth_status,
-            p_earlyMasterSecret,
+            p_ems,
             p_rms,
             p_cert_req
         )
@@ -979,7 +978,7 @@ rule new_session_ticket:
     --[
         S4_NST(~tid),
         Instance(~tid, $S, 'server'),
-        RPostHS(~tid, $S, 'server', <p_handshakeSecret, p_rms, $C, p_auth_status, p_messages>),
+        RPostHS(~tid, $S, 'server', <p_hs, p_rms, $C, p_auth_status, p_messages>),
         RNST(~tid, $S, 'server', <~ticket, ~ticket_age_add>)
     ]->
     [
@@ -1007,14 +1006,14 @@ rule new_session_ticket:
             p_psk_id,
             p_edi,
             p_es,
-            p_handshakeSecret,
-            p_masterSecret,
-            p_clientApplicationTrafficSecret,
-            p_serverApplicationTrafficSecret,
-            p_handshakeKeyClient,
-            p_handshakeKeyServer,
+            p_hs,
+            p_ms,
+            p_cats,
+            p_sats,
+            p_hs_keyc,
+            p_hs_keys,
             p_auth_status,
-            p_earlyMasterSecret,
+            p_ems,
             p_rms,
             p_cert_req
         )
