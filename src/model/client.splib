@@ -266,7 +266,6 @@ rule client_gen_keys:
         handshakeKeyServer = Expand(Expand(handshakeSecret, <'TLS13serverhandshaketrafficsecret', <h(p_messages)>>, '32'), <'TLS13handshakekeyexpansion_key', '0'>, '32')
     in
     [
-        DHExp(p_x, ~tid, $C),
         F_State_C2a(
             ~tid,
             $C,
@@ -297,7 +296,8 @@ rule client_gen_keys:
             p_ems,
             p_rms,
             p_cert_req
-        )
+        ),
+        DHExp(p_x, ~tid, $C)
     ]
     --[
         C2a(~tid),
@@ -340,13 +340,12 @@ rule client_gen_keys:
         )
     ]
 
-rule receive_encrypted_extensions:
+rule recv_encrypted_extensions:
     let
-        receivedMessage = EncryptedExtensions($encryptedExtensions)
+        receivedMessage = EncryptedExtensions($exts)
         messages = <p_messages, receivedMessage>
     in
     [
-        F_MessageIn(senc{receivedMessage}p_handshakeKeyServer),
         F_State_C2b(
             ~tid,
             $C,
@@ -367,17 +366,18 @@ rule receive_encrypted_extensions:
             p_psk_id,
             p_edi,
             p_es,
-            p_handshakeSecret,
-            p_masterSecret,
+            p_hs,
+            p_ms,
             p_cats,
             p_sats,
-            p_handshakeKeyClient,
-            p_handshakeKeyServer,
+            p_hs_keyc,
+            p_hs_keys,
             p_auth_status,
             p_ems,
             p_rms,
             p_cert_req
-        )
+        ),
+        F_MessageIn(senc{receivedMessage}p_hs_keys)
     ]
     --[
         C2b(~tid),
@@ -404,12 +404,12 @@ rule receive_encrypted_extensions:
             p_psk_id,
             p_edi,
             p_es,
-            p_handshakeSecret,
-            p_masterSecret,
+            p_hs,
+            p_ms,
             p_cats,
             p_sats,
-            p_handshakeKeyClient,
-            p_handshakeKeyServer,
+            p_hs_keyc,
+            p_hs_keys,
             p_auth_status,
             p_ems,
             p_rms,
@@ -417,7 +417,7 @@ rule receive_encrypted_extensions:
         )
     ]
 
-rule skip_receive_certificate_request:
+rule skip_recv_certificate_request:
     let
         cert_req = '0'
     in
@@ -442,12 +442,12 @@ rule skip_receive_certificate_request:
             p_psk_id,
             p_edi,
             p_es,
-            p_handshakeSecret,
-            p_masterSecret,
+            p_hs,
+            p_ms,
             p_cats,
             p_sats,
-            p_handshakeKeyClient,
-            p_handshakeKeyServer,
+            p_hs_keyc,
+            p_hs_keys,
             p_auth_status,
             p_ems,
             p_rms,
@@ -479,12 +479,12 @@ rule skip_receive_certificate_request:
             p_psk_id,
             p_edi,
             p_es,
-            p_handshakeSecret,
-            p_masterSecret,
+            p_hs,
+            p_ms,
             p_cats,
             p_sats,
-            p_handshakeKeyClient,
-            p_handshakeKeyServer,
+            p_hs_keyc,
+            p_hs_keys,
             p_auth_status,
             p_ems,
             p_rms,
@@ -492,16 +492,15 @@ rule skip_receive_certificate_request:
         )
     ]
 
-rule receive_certificate_request:
+rule recv_certificate_request:
     let
-        p_psk_ke_mode ='na'
+        p_psk_ke_mode = 'na'
         certificate_request_context = '0'
         cert_req = '1'
         receivedMessage = CertificateRequest(certificate_request_context, $certificate_extensions)
         messages = <p_messages, receivedMessage>
     in
     [
-        F_MessageIn(senc{receivedMessage}p_handshakeKeyServer),
         F_State_C2c(
             ~tid,
             $C,
@@ -522,17 +521,18 @@ rule receive_certificate_request:
             p_psk_id,
             p_edi,
             p_es,
-            p_handshakeSecret,
-            p_masterSecret,
+            p_hs,
+            p_ms,
             p_cats,
             p_sats,
-            p_handshakeKeyClient,
-            p_handshakeKeyServer,
+            p_hs_keyc,
+            p_hs_keys,
             p_auth_status,
             p_ems,
             p_rms,
             p_cert_req
-        )
+        ),
+        F_MessageIn(senc{receivedMessage}p_hs_keys)
     ]
     --[
         C2c_req(~tid),
@@ -559,12 +559,12 @@ rule receive_certificate_request:
             p_psk_id,
             p_edi,
             p_es,
-            p_handshakeSecret,
-            p_masterSecret,
+            p_hs,
+            p_ms,
             p_cats,
             p_sats,
-            p_handshakeKeyClient,
-            p_handshakeKeyServer,
+            p_hs_keyc,
+            p_hs_keys,
             p_auth_status,
             p_ems,
             p_rms,
@@ -572,14 +572,14 @@ rule receive_certificate_request:
         )
     ]
 
-rule receive_server_auth:
+rule recv_server_auth:
     let
 
         // Certificate
 
         p_psk_ke_mode = 'na'
 
-        certificateMessage = Certificate('0', pk(~longTermKeyServer))
+        certificateMessage = Certificate('0', pk(~ltkS))
         messages = <p_messages, certificateMessage>
         
         sig_messages = <'TLS13server_CertificateVerify', <h(messages)>>
@@ -587,20 +587,18 @@ rule receive_server_auth:
         receivedCertificateVerifyMessage = CertificateVerify(signature)
         messages = <messages, receivedCertificateVerifyMessage>
 
-        exp_verify_data = hmac(Expand(Expand(p_handshakeSecret, <'TLS13serverhandshaketrafficsecret', <h(messages)>>, '32'), <'TLS13finished', '0'>, '32'), h(messages))
+        exp_verify_data = hmac(Expand(Expand(p_hs, <'TLS13serverhandshaketrafficsecret', <h(messages)>>, '32'), <'TLS13finished', '0'>, '32'), h(messages))
 
         finishedMessage = Finished(verify_data)
         messages = <messages, finishedMessage>
 
-        earlyMasterSecret = Expand(p_masterSecret, <'TLS13exportermastersecret', <h(messages)>>, '32')
-        clientApplicationTrafficSecret = Expand(p_masterSecret, <'TLS13clientapplicationtrafficsecret', <h(messages)>>, '32')
-        serverApplicationTrafficSecret = Expand(p_masterSecret, <'TLS13serverapplicationtrafficsecret', <h(messages)>>, '32')
+        earlyMasterSecret = Expand(p_ms, <'TLS13exportermastersecret', <h(messages)>>, '32')
+        clientApplicationTrafficSecret = Expand(p_ms, <'TLS13clientapplicationtrafficsecret', <h(messages)>>, '32')
+        serverApplicationTrafficSecret = Expand(p_ms, <'TLS13serverapplicationtrafficsecret', <h(messages)>>, '32')
         serverApplicationTrafficKey = Expand(serverApplicationTrafficSecret, <'TLS13applicationdatakeyexpansion_key', '0'>, '32')
         auth_status = <'0', 'auth'>
     in
-    [
-        F_MessageIn(senc{<certificateMessage,receivedCertificateVerifyMessage,finishedMessage>}p_handshakeKeyServer),
-        !Pk($S, pk(~longTermKeyServer)),
+    [      
         F_State_C2d(
             tid,
             $C,
@@ -621,32 +619,33 @@ rule receive_server_auth:
             p_psk_id,
             p_edi,
             p_es,
-            p_handshakeSecret,
-            p_masterSecret,
+            p_hs,
+            p_ms,
             p_cats,
             p_sats,
-            p_handshakeKeyClient,
-            p_handshakeKeyServer,
+            p_hs_keyc,
+            p_hs_keys,
             p_auth_status,
             p_ems,
             p_rms,
             p_cert_req
-        )
+        ),
+        !Pk($S, pk(~ltkS)),
+        F_MessageIn(senc{<certificateMessage,receivedCertificateVerifyMessage,finishedMessage>}p_hs_keys)
     ]
     --[
         C2d(tid),
         Instance(tid, $C, 'client'),
         Eq(p_psk_ke_mode, 'na'),
-        Eq(verify(signature, sig_messages, pk(~longTermKeyServer)), true),
+        Eq(verify(signature, sig_messages, pk(~ltkS)), true),
         Eq(verify_data, exp_verify_data),
         RMode(tid, $C, 'client', <p_psk_ke_mode>),
         CIdentity(tid, $C, 'client', <<$S, auth_status>>),
-        CHS(tid, $C, 'client', <p_handshakeSecret>),
+        CHS(tid, $C, 'client', <p_hs>),
         CTranscript(tid, $C, 'client', <messages>),
         CNonces(tid, $C, 'client', <p_nc, p_ns>)
     ]->
     [
-        RecvStream(tid, $C, $S, auth_status, serverApplicationTrafficKey),
         F_State_C3(
             tid,
             $C,
@@ -667,17 +666,18 @@ rule receive_server_auth:
             p_psk_id,
             p_edi,
             p_es,
-            p_handshakeSecret,
-            p_masterSecret,
+            p_hs,
+            p_ms,
             clientApplicationTrafficSecret,
             serverApplicationTrafficSecret,
-            p_handshakeKeyClient,
-            p_handshakeKeyServer,
+            p_hs_keyc,
+            p_hs_keys,
             auth_status,
             earlyMasterSecret,
             p_rms,
             p_cert_req
-        )
+        ),
+        RecvStream(tid, $C, $S, auth_status, serverApplicationTrafficKey)
     ]
 
 rule client_auth:
