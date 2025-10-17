@@ -1,4 +1,4 @@
-rule receive_client_hello_psk:
+rule recv_client_hello_psk:
     let
         binder = '0'
         supported_groups = <$g1, $g2>
@@ -81,7 +81,6 @@ rule receive_client_hello_psk:
         Neq(psk_res_psk, '0')
     ]->
     [
-        EarlyRecvStream(~tid, $S, $C, psk_auth_status, ead_keyc, new_edi),
         F_State_S1(
             ~tid,
             $S,
@@ -112,7 +111,8 @@ rule receive_client_hello_psk:
             p_ems,
             p_rms,
             p_cert_req
-        )
+        ),
+        EarlyRecvStream(~tid, $S, $C, psk_auth_status, ead_keyc, new_edi)
     ]
 
 rule server_hello_psk:

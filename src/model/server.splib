@@ -321,7 +321,6 @@ rule server_gen_keys:
         handshakeKeyServer = Expand(Expand(handshakeSecret, <'TLS13serverhandshaketrafficsecret', <h(p_messages)>>, '32'), <'TLS13handshakekeyexpansion_key', '0'>, '32')
     in
     [
-        DHExp(p_y, ~tid, $S),
         F_State_S2a(
             ~tid,
             $S,
@@ -352,12 +351,13 @@ rule server_gen_keys:
             p_ems,
             p_rms,
             p_cert_req
-        )
+        ),
+        DHExp(p_y, ~tid, $S)
     ]
     --[
         S2a(~tid),
-        Instance(~tid, $S, 'server'),
         Extract('0', handshakeSecret),
+        Instance(~tid, $S, 'server'),
         RHS(~tid, $S, 'server', <handshakeSecret>),
         RMS(~tid, $S, 'server', <masterSecret>),
         DeleteDH(~tid, $S, p_y)
@@ -398,7 +398,7 @@ rule server_gen_keys:
 
 rule encrypted_extensions:
     let
-        message = EncryptedExtensions($encryptedExtensions)
+        message = EncryptedExtensions($exts)
         messages = <p_messages, message>
     in
     [
@@ -439,7 +439,6 @@ rule encrypted_extensions:
         Instance(~tid, $S, 'server')
     ]->
     [
-        MessageOut(senc{message}p_hs_keys),
         F_State_S2c(
             ~tid,
             $S,
@@ -470,7 +469,8 @@ rule encrypted_extensions:
             p_ems,
             p_rms,
             p_cert_req
-        )
+        ),
+        MessageOut(senc{message}p_hs_keys)
     ]
 
 rule skip_certificate_request:
@@ -652,7 +652,6 @@ rule server_auth:
         auth_status = <'auth', '0'>
     in
     [
-        !Ltk($S, ~ltkS),
         F_State_S2d(
             ~tid,
             $S,
@@ -683,7 +682,8 @@ rule server_auth:
             p_ems,
             p_rms,
             p_cert_req
-        )
+        ),
+        !Ltk($S, ~ltkS)
     ]
     --[
         S2d(~tid),
@@ -693,8 +693,6 @@ rule server_auth:
         RTranscript(~tid, $S, 'server', <messages>)
     ]->
     [
-        MessageOut(senc{<certificateMessage,certificateVerifyMessage,finishedMessage>}p_hs_keys),
-        SendStream(~tid, $S, $C, auth_status, <messages>),
         F_State_S3(
             ~tid,
             $S,
@@ -725,10 +723,12 @@ rule server_auth:
             earlyMasterSecret,
             p_rms,
             p_cert_req
-        )
+        ),
+        SendStream(~tid, $S, $C, auth_status, serverApplicationTrafficKey),
+        MessageOut(senc{<certificateMessage,certificateVerifyMessage,finishedMessage>}p_hs_keys)
     ]
 
-rule receive_client_auth:
+rule recv_client_auth:
     let
         p_cert_req = '0'
         exp_verify_data = hmac(Expand(Expand(p_hs, <'TLS13clienthandshaketrafficsecret', <h(p_messages)>>, '32'), <'TLS13finished', '0'>, '32'), h(p_messages))
@@ -739,9 +739,8 @@ rule receive_client_auth:
         serverApplicationTrafficKey = Expand(p_sats, <'TLS13applicationdatakeyexpansion_key', '0'>, '32')
     in
     [
-        F_MessageIn(senc{receivedFinished}p_hs_keyc),
         F_State_S3(
-            tid,
+            ~tid,
             $S,
             $C,
             p_res_psk,
@@ -770,25 +769,25 @@ rule receive_client_auth:
             p_ems,
             p_rms,
             p_cert_req
-        )
+        ),
+        F_MessageIn(senc{receivedFinished}p_hs_keyc)
     ]
     --[
-        S3(tid),
-        Instance(tid, $S, 'server'),
+        S3(~tid),
+        Instance(~tid, $S, 'server'),
         Eq(verify_data, exp_verify_data),
-        RMode(tid, $S, 'server', <p_psk_ke_mode>),
-        CIdentity(tid, $S, 'server', <$C, p_auth_status>),
-        CHS(tid, $S, 'server', <p_hs>),
-        RHSMS(tid, $S, 'server', <p_hs, p_ms>),
-        RRMS(tid, $S, 'server', <$C, resumptionMasterSecret, messages>),
-        CTranscript(tid, $S, 'server', <messages>),
-        CNonces(tid, $S, 'server', <p_nc, p_ns>),
-        SessionKey(tid, $S, $C, p_auth_status, <serverApplicationTrafficKey, clientApplicationTrafficKey>)
+        RMode(~tid, $S, 'server', <p_psk_ke_mode>),
+        CIdentity(~tid, $S, 'server', <$C, p_auth_status>),
+        CHS(~tid, $S, 'server', <p_hs>),
+        RHSMS(~tid, $S, 'server', <p_hs, p_ms>),
+        RRMS(~tid, $S, 'server', <$C, resumptionMasterSecret, messages>),
+        CTranscript(~tid, $S, 'server', <messages>),
+        CNonces(~tid, $S, 'server', <p_nc, p_ns>),
+        SessionKey(~tid, $S, $C, p_auth_status, <serverApplicationTrafficKey, clientApplicationTrafficKey>)
     ]->
     [
-        RecvStream(tid, $S, $C, p_auth_status, clientApplicationTrafficKey),
         F_State_S4(
-            tid,
+            ~tid,
             $S,
             $C,
             p_res_psk,
@@ -817,10 +816,11 @@ rule receive_client_auth:
             p_ems,
             resumptionMasterSecret,
             p_cert_req
-        )
+        ),
+        RecvStream(~tid, $S, $C, p_auth_status, clientApplicationTrafficKey)
     ]
 
-rule receive_client_auth_cert:
+rule recv_client_auth_cert:
     let
         p_cert_req = '1'
         cert_req = '0'
@@ -846,11 +846,8 @@ rule receive_client_auth_cert:
         app_keys = Expand(p_sats, <'TLS13applicationdatakeyexpansion_key', '0'>, '32')
     in
     [
-        F_MessageIn(senc{receivedMessage}p_hs_keyc),
-        !Pk($C, pk(~ltkC)),
-        SendStream(tid, $S, $C, p_auth_status, app_keys),
         F_State_S3(
-            tid,
+            ~tid,
             $S,
             $C,
             p_res_psk,
@@ -879,27 +876,28 @@ rule receive_client_auth_cert:
             p_ems,
             p_rms,
             p_cert_req
-        )
+        ),
+        !Pk($C, pk(~ltkC)),
+        SendStream(~tid, $S, $C, p_auth_status, app_keys),
+        F_MessageIn(senc{receivedMessage}p_hs_keyc)
     ]
     --[
-        S3_cert(tid),
-        Instance(tid, $S, 'server'),
+        S3_cert(~tid),
+        Instance(~tid, $S, 'server'),
         Eq(verify(signature, sig_messages, pk(~ltkC)), true),
         Eq(verify_data, exp_verify_data),
-        RMode(tid, $S, 'server', <p_psk_ke_mode>),
-        CIdentity(tid, $S, 'server', <$C, auth_status>),
-        CHS(tid, $S, 'server', <p_hs>),
-        RHSMS(tid, $S, 'server', <p_hs, p_ms>),
-        RRMS(tid, $S, 'server', <$C, rms, messages>),
-        CTranscript(tid, $S, 'server', <messages>),
-        SessionKey(tid, $S, $C, auth_status, <app_keys, app_keyc>),
-        CNonces(tid, $S, 'server', <p_nc,p_ns>)
+        RMode(~tid, $S, 'server', <p_psk_ke_mode>),
+        CIdentity(~tid, $S, 'server', <$C, auth_status>),
+        CHS(~tid, $S, 'server', <p_hs>),
+        RHSMS(~tid, $S, 'server', <p_hs, p_ms>),
+        RRMS(~tid, $S, 'server', <$C, rms, messages>),
+        CTranscript(~tid, $S, 'server', <messages>),
+        SessionKey(~tid, $S, $C, auth_status, <app_keys, app_keyc>),
+        CNonces(~tid, $S, 'server', <p_nc,p_ns>)
     ]->
     [
-        SendStream(tid, $S, $C, auth_status, app_keys),
-        RecvStream(tid, $S, $C, auth_status, app_keyc),
         F_State_S4(
-            tid,
+            ~tid,
             $S,
             $C,
             p_res_psk,
@@ -928,7 +926,9 @@ rule receive_client_auth_cert:
             p_ems,
             rms,
             cert_req
-        )
+        ),
+        SendStream(~tid, $S, $C, auth_status, app_keys),
+        RecvStream(~tid, $S, $C, auth_status, app_keyc)
     ]
 
 rule new_session_ticket:
