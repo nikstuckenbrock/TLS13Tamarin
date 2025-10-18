@@ -12,9 +12,6 @@ equations: unmask(mask(x, y), y) = x, unmask(mask(x, y), x) = y
 #ifdef reachability
 rule message_out_to_in:
     [ MessageOut(message) ] --> [ F_MessageIn(message) ]
-
-rule message_in_to_out:
-    [ F_MessageIn(message) ] --> [ MessageOut(message) ]
 #else
 rule message_out_to_out:
     [ MessageOut(message) ] --> [ Out(message) ]

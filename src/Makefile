@@ -27,3 +27,26 @@ dhInj:
 
 dhCal:
 	$(TAMARIN) -DdhCal --prove=dh_chal_dual --heuristic=cccccccccsssssssssssssssssssss --output=../proofs/dh_chal.spthy >> ../logs/dh_cal.log 2>&1
+
+secretHelpers:
+	$(TAMARIN) -DsecretHelpers --prove=ku_extract tls13.spthy --heuristic=S --output=../proofs/secret_helpers.ku_extract.spthy >> ../logs/secret_helpers.log 2>&1
+	$(TAMARIN) -DsecretHelpers --prove=ku_expand tls13.spthy --heuristic=S --output=../proofs/secret_helpers.ku_expand.spthy >> ../logs/secret_helpers.log 2>&1
+	$(TAMARIN) -DsecretHelpers --prove=ku_dh_chal_dual tls13.spthy --heuristic=S --output=../proofs/secret_helpers.ku_dh_chal_dual.spthy >> ../logs/secret_helpers.log 2>&1
+	$(TAMARIN) -DsecretHelpers --prove=ku_hs tls13.spthy --heuristic=S --output=../proofs/secret_helpers.ku_hs.spthy >> ../logs/secret_helpers.log 2>&1
+	$(TAMARIN) -DsecretHelpers --prove=ku_ltk tls13.spthy --heuristic=S --output=../proofs/secret_helpers.ku_ltk.spthy >> ../logs/secret_helpers.log 2>&1
+	$(TAMARIN) -DsecretHelpers --prove=ku_fresh_psk tls13.spthy --heuristic=S --output=../proofs/secret_helpers.ku_fresh_psk.spthy >> ../logs/secret_helpers.log 2>&1
+	$(TAMARIN) -DsecretHelpers --prove=hsms_derive tls13.spthy --heuristic=S --output=../proofs/secret_helpers.hsms_derive.spthy >> ../logs/secret_helpers.log 2>&1
+	$(TAMARIN) -DsecretHelpers --prove=matching_hsms tls13.spthy --heuristic=S --output=../proofs/secret_helpers.matching_hsms.spthy >> ../logs/secret_helpers.log 2>&1
+	$(TAMARIN) -DsecretHelpers --prove=sig_origin tls13.spthy --heuristic=S --output=../proofs/secret_helpers.sig_origin.spthy >> ../logs/secret_helpers.log 2>&1
+	$(TAMARIN) -DsecretHelpers --prove=posths_rms tls13.spthy --heuristic=S --output=../proofs/secret_helpers.posths_rms.spthy >> ../logs/secret_helpers.log 2>&1
+	$(TAMARIN) -DsecretHelpers --prove=posths_rms_weak tls13.spthy --heuristic=S --output=../proofs/secret_helpers.posths_rms_weak.spthy >> ../logs/secret_helpers.log 2>&1
+	$(TAMARIN) -DsecretHelpers --prove=matching_rms_posths tls13.spthy --heuristic=S --output=../proofs/secret_helpers.matching_rms_posths.spthy >> ../logs/secret_helpers.log 2>&1
+	$(TAMARIN) -DsecretHelpers --prove=matching_rms_actors tls13.spthy --heuristic=S --output=../proofs/secret_helpers.matching_rms_actors.spthy >> ../logs/secret_helpers.log 2>&1
+	$(TAMARIN) -DsecretHelpers --prove=matching_rms_posths --bound=8 --heuristic=CCCiiiiiiii --output=../proofs/secret_helpers.matching_rms_posths.spthy >> ../logs/secret_helpers.log 2>&1
+	$(TAMARIN) -DsecretHelpers --prove=matching_transcripts_posths --bound=8 --heuristic=CCCiiiiiiii --output=../proofs/secret_helpers.matching_transcripts_posths.spthy >> ../logs/secret_helpers.log 2>&1
+	$(TAMARIN) -DsecretHelpers --prove=matching_rms_actors --bound=8 --heuristic=CCCiiiiiiii --output=../proofs/secret_helpers.matching_rms_actors.spthy >> ../logs/secret_helpers.log 2>&1
+	$(TAMARIN) -DsecretHelpers --prove=matching_sessions tls13.spthy --heuristic=CCCCCissssssssssssssssssssssss --output=../proofs/secret_helpers.matching_sessions.spthy >> ../logs/secret_helpers.log 2>&1
+
+lemmas:
+	$(TAMARIN) -Dlemmas --prove=secret_session_keys tls13.spthy --output=../proofs/lemmas.secret_session_keys.spthy >> ../logs/lemmas.log 2>&1
+	$(TAMARIN) -Dlemmas --prove=unique_session_keys tls13.spthy --heuristic=c --output=../proofs/lemmas.unique_session_keys.spthy >> ../logs/lemmas.log 2>&1
