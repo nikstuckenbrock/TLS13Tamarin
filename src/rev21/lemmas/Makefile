@@ -15,6 +15,24 @@ clean:
 	# Replace "prev_" with "p_" to save space...
 	perl -0777pi -e 's/prev_/p_/g' $@
 
+invariants:
+	bash -c "$(TAM) invariants.spthy --prove=tid_invariant --heuristic=S --output=../proofs/invariants.1.spthy $(PIPE)"
+	bash -c "$(TAM) invariants.spthy --prove=one_start_per_tid --heuristic=SC --output=../proofs/invariants.2.spthy $(PIPE)"
+
+authHelpers:
+	bash -c "$(TAM) auth_helpers.spthy --prove=matching_nonces --heuristic=S --output=../proofs/auth_helpers.matching_nonces.spthy $(PIPE)"
+	bash -c "$(TAM) auth_helpers.spthy --prove=consistent_nonces --heuristic=S --output=../proofs/auth_helpers.consistent_nonces.spthy $(PIPE)"
+	bash -c "$(TAM) auth_helpers.spthy --prove=invariant_nonces --heuristic=S --output=../proofs/auth_helpers.invariant_nonces.spthy $(PIPE)"
+	bash -c "$(TAM) auth_helpers.spthy --prove=matching_rms_nonces --heuristic=S --output=../proofs/auth_helpers.matching_rms_nonces.spthy $(PIPE)"
+
+dhInj:
+	bash -c "$(TAM) dh_inj.spthy --prove=dh_exp_invariant --heuristic=C --output=../proofs/dh_inj.spthy $(PIPE)"
+	bash -c "$(TAM) dh_inj.spthy --prove=one_dh_per_x --heuristic=C --output=../proofs/dh_inj.spthy $(PIPE)"
+	bash -c "$(TAM) dh_inj.spthy --prove=rev_dh_ordering --heuristic=C --output=../proofs/dh_inj.spthy $(PIPE)"
+	bash -c "$(TAM) dh_inj.spthy --prove=rev_dh_before_hs --heuristic=C --output=../proofs/dh_inj.spthy $(PIPE)"
+
+dhCal:
+	bash -c "$(TAM) dh_chal.spthy --prove=dh_chal_dual --heuristic=cccccccccsssssssssssssssssssss --output=../proofs/dh_chal.spthy $(PIPE)"
 
 proofs:
 	rm -f error.log
