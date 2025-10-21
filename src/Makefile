@@ -7,7 +7,40 @@ reachability: $(STATES:%=../proofs/reachability.exists_%.spthy)
 	$(TAMARIN) -Dreachability --heuristic=S --prove=exists_$* tls13.spthy --output=$@ >> ../logs/exists.log 2>&1
 
 uniqueness:
-	$(TAMARIN) -Duniqueness --heuristic=S --prove tls13.spthy --output=../proofs/uniqueness.spthy >> ../logs/uniqueness.log 2>&1
+	$(TAMARIN) -Duniqueness --heuristic=S --prove=one_C0_per_tid tls13.spthy --output=../proofs/uniqueness.one_C0_per_tid.spthy >> ../logs/uniqueness.log 2>&1
+	$(TAMARIN) -Duniqueness --heuristic=S --prove=one_C1_per_tid tls13.spthy --output=../proofs/uniqueness.one_C1_per_tid.spthy >> ../logs/uniqueness.log 2>&1
+	$(TAMARIN) -Duniqueness --heuristic=S --prove=one_C1_retry_per_tid tls13.spthy --output=../proofs/uniqueness.one_C1_retry_per_tid.spthy >> ../logs/uniqueness.log 2>&1
+	$(TAMARIN) -Duniqueness --heuristic=S --prove=one_S1_per_tid tls13.spthy --output=../proofs/uniqueness.one_S1_per_tid.spthy >> ../logs/uniqueness.log 2>&1
+	$(TAMARIN) -Duniqueness --heuristic=S --prove=one_S1_PSK_per_tid tls13.spthy --output=../proofs/uniqueness.one_S1_PSK_per_tid.spthy >> ../logs/uniqueness.log 2>&1
+	$(TAMARIN) -Duniqueness --heuristic=S --prove=one_S1_PSK_DHE_per_tid tls13.spthy --output=../proofs/uniqueness.one_S1_PSK_DHE_per_tid.spthy >> ../logs/uniqueness.log 2>&1
+	$(TAMARIN) -Duniqueness --heuristic=S --prove=one_C1_PSK_per_tid tls13.spthy --output=../proofs/uniqueness.one_C1_PSK_per_tid.spthy >> ../logs/uniqueness.log 2>&1
+	$(TAMARIN) -Duniqueness --heuristic=S --prove=one_C1_PSK_DHE_per_tid tls13.spthy --output=../proofs/uniqueness.one_C1_PSK_DHE_per_tid.spthy >> ../logs/uniqueness.log 2>&1
+	$(TAMARIN) -Duniqueness --heuristic=S --prove=one_S2a_per_tid tls13.spthy --output=../proofs/uniqueness.one_S2a_per_tid.spthy >> ../logs/uniqueness.log 2>&1
+	$(TAMARIN) -Duniqueness --heuristic=S --prove=one_S2b_per_tid tls13.spthy --output=../proofs/uniqueness.one_S2b_per_tid.spthy >> ../logs/uniqueness.log 2>&1
+	$(TAMARIN) -Duniqueness --heuristic=S --prove=one_S2c_per_tid tls13.spthy --output=../proofs/uniqueness.one_S2c_per_tid.spthy >> ../logs/uniqueness.log 2>&1
+	$(TAMARIN) -Duniqueness --heuristic=S --prove=one_S2c_req_per_tid tls13.spthy --output=../proofs/uniqueness.one_S2c_req_per_tid.spthy >> ../logs/uniqueness.log 2>&1
+	$(TAMARIN) -Duniqueness --heuristic=S --prove=one_S2d_per_tid tls13.spthy --output=../proofs/uniqueness.one_S2d_per_tid.spthy >> ../logs/uniqueness.log 2>&1
+	$(TAMARIN) -Duniqueness --heuristic=S --prove=one_S2d_PSK_per_tid tls13.spthy --output=../proofs/uniqueness.one_S2d_PSK_per_tid.spthy >> ../logs/uniqueness.log 2>&1
+	$(TAMARIN) -Duniqueness --heuristic=S --prove=one_C2a_per_tid tls13.spthy --output=../proofs/uniqueness.one_C2a_per_tid.spthy >> ../logs/uniqueness.log 2>&1
+	$(TAMARIN) -Duniqueness --heuristic=S --prove=one_C2b_per_tid tls13.spthy --output=../proofs/uniqueness.one_C2b_per_tid.spthy >> ../logs/uniqueness.log 2>&1
+	$(TAMARIN) -Duniqueness --heuristic=S --prove=one_C2c_per_tid tls13.spthy --output=../proofs/uniqueness.one_C2c_per_tid.spthy >> ../logs/uniqueness.log 2>&1
+	$(TAMARIN) -Duniqueness --heuristic=S --prove=one_C2c_req_per_tid tls13.spthy --output=../proofs/uniqueness.one_C2c_req_per_tid.spthy >> ../logs/uniqueness.log 2>&1
+	$(TAMARIN) -Duniqueness --heuristic=S --prove=one_C2d_per_tid tls13.spthy --output=../proofs/uniqueness.one_C2d_per_tid.spthy >> ../logs/uniqueness.log 2>&1
+	$(TAMARIN) -Duniqueness --heuristic=S --prove=one_C2d_PSK_per_tid tls13.spthy --output=../proofs/uniqueness.one_C2d_PSK_per_tid.spthy >> ../logs/uniqueness.log 2>&1
+	$(TAMARIN) -Duniqueness --heuristic=S --prove=one_C3_per_tid tls13.spthy --output=../proofs/uniqueness.one_C3_per_tid.spthy >> ../logs/uniqueness.log 2>&1
+	$(TAMARIN) -Duniqueness --heuristic=S --prove=one_C3_cert_per_tid tls13.spthy --output=../proofs/uniqueness.one_C3_cert_per_tid.spthy >> ../logs/uniqueness.log 2>&1
+	$(TAMARIN) -Duniqueness --heuristic=S --prove=one_S3_per_tid tls13.spthy --output=../proofs/uniqueness.one_S3_per_tid.spthy >> ../logs/uniqueness.log 2>&1
+	$(TAMARIN) -Duniqueness --heuristic=S --prove=one_S3_cert_per_tid tls13.spthy --output=../proofs/uniqueness.one_S3_cert_per_tid.spthy >> ../logs/uniqueness.log 2>&1
+	$(TAMARIN) -Duniqueness --heuristic=S --prove=S1_vs_S1_PSK_DHE tls13.spthy --output=../proofs/uniqueness.S1_vs_S1_PSK_DHE.spthy >> ../logs/uniqueness.log 2>&1
+	$(TAMARIN) -Duniqueness --heuristic=S --prove=S1_PSK_vs_S1_PSK_DHE tls13.spthy --output=../proofs/uniqueness.S1_PSK_vs_S1_PSK_DHE.spthy >> ../logs/uniqueness.log 2>&1
+	$(TAMARIN) -Duniqueness --heuristic=S --prove=S1_PSK_vs_S1 tls13.spthy --output=../proofs/uniqueness.S1_PSK_vs_S1.spthy >> ../logs/uniqueness.log 2>&1
+	$(TAMARIN) -Duniqueness --heuristic=S --prove=C1_vs_C1_PSK_DHE tls13.spthy --output=../proofs/uniqueness.C1_vs_C1_PSK_DHE.spthy >> ../logs/uniqueness.log 2>&1
+	$(TAMARIN) -Duniqueness --heuristic=S --prove=C1_PSK_vs_C1_PSK_DHE tls13.spthy --output=../proofs/uniqueness.C1_PSK_vs_C1_PSK_DHE.spthy >> ../logs/uniqueness.log 2>&1
+	$(TAMARIN) -Duniqueness --heuristic=S --prove=C1_PSK_vs_C1 tls13.spthy --output=../proofs/uniqueness.C1_PSK_vs_C1.spthy >> ../logs/uniqueness.log 2>&1
+	$(TAMARIN) -Duniqueness --heuristic=S --prove=S3_vs_S3_cert tls13.spthy --output=../proofs/uniqueness.S3_vs_S3_cert.spthy >> ../logs/uniqueness.log 2>&1
+	$(TAMARIN) -Duniqueness --heuristic=S --prove=C3_vs_C3_cert tls13.spthy --output=../proofs/uniqueness.C3_vs_C3_cert.spthy >> ../logs/uniqueness.log 2>&1
+	$(TAMARIN) -Duniqueness --heuristic=S --prove=S2d_vs_S2d_PSK tls13.spthy --output=../proofs/uniqueness.S2d_vs_S2d_PSK.spthy >> ../logs/uniqueness.log 2>&1
+	$(TAMARIN) -Duniqueness --heuristic=S --prove=C2d_vs_C2d_PSK tls13.spthy --output=../proofs/uniqueness.C2d_vs_C2d_PSK.spthy >> ../logs/uniqueness.log 2>&1
 
 invariants:
 	$(TAMARIN) -Dinvariants --heuristic=SC --prove=one_start_per_tid tls13.spthy --output=../proofs/invariants.one_start_per_tid.spthy >> ../logs/invariants.log 2>&1
@@ -26,7 +59,7 @@ dhInj:
 	$(TAMARIN) -DdhInj --prove=rev_dh_before_hs tls13.spthy --heuristic=C --output=../proofs/dh_inj.rev_dh_before_hs.spthy >> ../logs/dh_inj.log 2>&1
 
 dhCal:
-	$(TAMARIN) -DdhCal --prove=dh_chal_dual --heuristic=cccccccccsssssssssssssssssssss --output=../proofs/dh_chal.spthy >> ../logs/dh_cal.log 2>&1
+	$(TAMARIN) -DdhCal --prove=dh_chal_dual tls13.spthy --heuristic=cccccccccsssssssssssssssssssss --output=../proofs/dh_chal.spthy >> ../logs/dh_cal.log 2>&1
 
 secretHelpers:
 	$(TAMARIN) -DsecretHelpers --prove=ku_extract tls13.spthy --heuristic=S --output=../proofs/secret_helpers.ku_extract.spthy >> ../logs/secret_helpers.log 2>&1
