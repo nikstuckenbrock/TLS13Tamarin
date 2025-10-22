@@ -46,8 +46,9 @@ rule client_hello_psk:
         DH(~nc, $C, ~x)
     ]->
     [
-        F_State_C1(
+        ClientState(
             ~nc,
+            'C1',
             $C,
             $S,
             res_psk,
@@ -136,8 +137,9 @@ rule recv_hello_retry_request_psk:
         messages = <messages, message>
     in
     [
-        F_State_C1(
+        ClientState(
             ~tid,
+            'C1',
             $C,
             $S,
             p_res_psk,
@@ -186,8 +188,9 @@ rule recv_hello_retry_request_psk:
         MessageOut(message),
         DHExp(~new_x, ~tid, $C),
         !DHEx(~new_x, ~tid, $C),
-        F_State_C1(
+        ClientState(
             ~tid,
+            'C1',
             $C,
             $S,
             res_psk,
@@ -232,8 +235,9 @@ rule recv_server_hello_psk:
         messages = <p_messages, message>
     in
     [
-        F_State_C1(
+        ClientState(
             ~tid,
+            'C1',
             $C,
             $S,
             p_res_psk,
@@ -271,8 +275,9 @@ rule recv_server_hello_psk:
         RNonces(~tid, $C, 'client', <p_nc ,new_ns>)
     ]->
     [
-        F_State_C2a(
+        ClientState(
             ~tid,
+            'C2a',
             $C,
             $S,
             p_res_psk,
@@ -321,8 +326,9 @@ rule recv_server_hello_psk_dhe:
         messages = <p_messages, receivedMessage>
     in
     [
-        F_State_C1(
+        ClientState(
             ~tid,
+            'C1',
             $C,
             $S,
             p_res_psk,
@@ -362,8 +368,9 @@ rule recv_server_hello_psk_dhe:
         RNonces(~tid, $C, 'client', <p_nc, new_ns>)
     ]->
     [
-        F_State_C2a(
+        ClientState(
             ~tid,
+            'C2a',
             $C,
             $S,
             p_res_psk,
@@ -408,8 +415,9 @@ rule recv_server_auth_psk:
         ems = Expand(p_ms, <'TLS13exportermastersecret', <h(messages)>>, '32')
     in
     [
-        F_State_C2d(
+        ClientState(
             ~tid,
+            'C2d',
             $C,
             $S,
             p_res_psk,
@@ -453,8 +461,9 @@ rule recv_server_auth_psk:
         CTranscript(~tid, $C, 'client', <messages>)
     ]->
     [
-        F_State_C3(
+        ClientState(
             ~tid,
+            'C3',
             $C,
             $S,
             p_res_psk,

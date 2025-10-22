@@ -6,8 +6,9 @@ rule update_req_client:
     in
     [
         SendStream(~tid, $C, $S, p_auth_status, p_app_keyc),
-        F_State_C4(
+        ClientState(
             ~tid,
+            'C4',
             $C,
             $S,
             p_res_psk,
@@ -46,8 +47,9 @@ rule update_req_client:
     [
         MessageOut(senc{message}p_app_keyc),
         SendStream(~tid, $C, $S, p_auth_status, app_keyc),
-        F_State_C4(
+        ClientState(
             ~tid,
+            'C4',
             $C,
             $S,
             p_res_psk,
@@ -91,8 +93,9 @@ rule update_recv_server:
         message = KeyUpdate(KeyUpdateUpdateNotRequested())
     in
     [
-        F_State_S4(
+        ServerState(
             ~tid,
+            'S4',
             $S,
             $C,
             p_res_psk,
@@ -135,8 +138,9 @@ rule update_recv_server:
         RecvStream(~tid, $S, $C, p_auth_status, app_keyc),
         SendStream(~tid, $S, $C, p_auth_status, app_keys),
         MessageOut(senc{message}p_app_keys),
-        F_State_S4(
+        ServerState(
             ~tid,
+            'S4',
             $S,
             $C,
             p_res_psk,
@@ -178,8 +182,9 @@ rule update_fin_client:
     [
         RecvStream(~tid, $C, $S, p_auth_status, p_app_keys),
         F_MessageIn(senc{receivedMessage}p_app_keys),
-        F_State_C4(
+        ClientState(
             ~tid,
+            'C4',
             $C,
             $S,
             p_res_psk,
@@ -217,8 +222,9 @@ rule update_fin_client:
     ]->
     [
         RecvStream(~tid, $C, $S, p_auth_status, app_keys),
-        F_State_C4(
+        ClientState(
             ~tid,
+            'C4',
             $C,
             $S,
             p_res_psk,
@@ -258,8 +264,9 @@ rule update_req_server:
     in
     [
         SendStream(~tid, $S, $C, p_auth_status, p_app_keys),
-        F_State_S4(
+        ServerState(
             ~tid,
+            'S4',
             $S,
             $C,
             p_res_psk,
@@ -297,8 +304,9 @@ rule update_req_server:
     ]->
     [
         MessageOut(senc{message}p_app_keys),
-        F_State_S4(
+        ServerState(
             ~tid,
+            'S4',
             $S,
             $C,
             p_res_psk,
@@ -345,8 +353,9 @@ rule update_recv_client:
         RecvStream(~tid, $C, $S, p_auth_status, p_app_keys),
         SendStream(~tid, $C, $S, p_auth_status, p_app_keyc),
         F_MessageIn(senc{receivedMessage}p_app_keys),
-        F_State_C4(
+        ClientState(
             ~tid,
+            'C4',
             $C,
             $S,
             p_res_psk,
@@ -386,8 +395,9 @@ rule update_recv_client:
         RecvStream(~tid, $C, $S, p_auth_status, app_keys),
         SendStream(~tid, $C, $S, p_auth_status, app_keyc),
         MessageOut(senc{message}p_app_keyc),
-        F_State_C4(
+        ClientState(
             ~tid,
+            'C4',
             $C,
             $S,
             p_res_psk,
@@ -429,8 +439,9 @@ rule update_fin_server:
     [
         F_MessageIn(senc{receivedMessage}p_app_keyc),
         RecvStream(~tid, $S, $C, p_auth_status, p_app_keyc),
-        F_State_S4(
+        ServerState(
             ~tid,
+            'S4',
             $S,
             $C,
             p_res_psk,
@@ -468,8 +479,9 @@ rule update_fin_server:
     ]->
     [
         RecvStream(~tid, $S, $C, p_auth_status, app_keyc),
-        F_State_S4(
+        ServerState(
             ~tid,
+            'S4',
             $S,
             $C,
             p_res_psk,
