@@ -907,7 +907,7 @@ rule recv_new_session_ticket:
         ticket_extension = <
             <'46', $max_early_data_size>
         >
-        receivedMessage = NewSessionTicket($ticket_lifetime, ~ticket_age_add, ~ticket, ticket_extension)
+        receivedMessage = NewSessionTicket($ticket_lifetime, ticket_age_add, ticket, ticket_extension)
     in
     [
         ClientState(

@@ -53,6 +53,10 @@ rule message_in_to_in:
 #include "lemmas/authHelpers.splib"
 #endif
 
+#ifdef secretHelpers
+#include "lemmas/secretHelpers.splib"
+#endif
+
 #ifdef dhInj
 #include "lemmas/dhInj.splib"
 #endif

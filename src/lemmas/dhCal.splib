@@ -10,15 +10,15 @@ lemma one_S1_per_tid [reuse]:
 lemma one_C1_per_tid [reuse]:
     "All tid #i #j. C1(tid)@i & C1(tid)@j ==> #i = #j"
 
-lemma cert_req_origin [typing]:
+lemma cert_req_origin [sources]:
   "All certificate_request_context certificate_extensions keys #i.
-    KU(senc{<'13',certificate_request_context,certificate_extensions>}keys)@i ==> 
+    KU(senc{<'13',<certificate_request_context,certificate_extensions>>}keys)@i ==> 
       (Ex #j. KU(certificate_request_context)@j & #j < #i) |
       (Ex #j tid actor role. RCertReqCtxt(tid, actor, role, <certificate_request_context>)@j & #j < #i)"
 
-lemma nst_source [typing]:
+lemma nst_source [sources]:
   "All ticket ticket_age_add tkt_lt tkt_exts app_key #i.
-    KU(senc{<'4',tkt_lt,ticket_age_add,ticket,tkt_exts>}app_key)@i ==>
+    KU(senc{<'4',<tkt_lt,ticket_age_add,ticket,tkt_exts>>}app_key)@i ==>
       (Ex #j #k. KU(ticket)@j & KU(ticket_age_add)@k & #j < #i & #k < #i) |
       (Ex tid S #j. RNST(tid, S, 'server', <ticket,ticket_age_add>)@j & #j < #i)"
 
