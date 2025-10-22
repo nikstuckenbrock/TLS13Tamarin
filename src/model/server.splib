@@ -310,6 +310,7 @@ rule server_hello:
             p_cert_req
         ),
         DHExp(~y, ~tid, $S),
+        !DHEx(~y, ~tid, $S),
         MessageOut(message)
     ]
 
@@ -352,7 +353,8 @@ rule server_gen_keys:
             p_rms,
             p_cert_req
         ),
-        DHExp(p_y, ~tid, $S)
+        DHExp(p_y, ~tid, $S),
+        !DHEx(p_y, ~tid, $S)
     ]
     --[
         S2a(~tid),

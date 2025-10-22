@@ -80,6 +80,7 @@ rule client_hello_psk:
         F_CachePSK(~nc, $S, res_psk, auth_status, <'4', $ticket_lifetime, ticket_age_add, ~ticket, <<'46',$max_early_data_size>> >,psk_type),
         EarlySendStream(~nc, $C, $S, auth_status, ead_keyc, edi),
         DHExp(~x, ~nc, $C),
+        !DHEx(~x, ~nc, $C),
         MessageOut(message)
     ]
 
@@ -170,6 +171,7 @@ rule recv_hello_retry_request_psk:
         Fr(~new_nc),
         Fr(~new_x),
         DHExp(p_x, ~tid, $C),
+        !DHEx(p_x, ~tid, $C),
         F_MessageIn(receivedMessage)
     ]
     --[
@@ -183,6 +185,7 @@ rule recv_hello_retry_request_psk:
     [
         MessageOut(message),
         DHExp(~new_x, ~tid, $C),
+        !DHEx(~new_x, ~tid, $C),
         F_State_C1(
             ~tid,
             $C,
