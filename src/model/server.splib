@@ -393,8 +393,7 @@ rule server_gen_keys:
             p_send_key,
             p_recv_key
         ),
-        DHExp(p_y, ~tid, $S),
-        !DHEx(p_y, ~tid, $S)
+        DHExp(p_y, ~tid, $S)
     ]
     --[
         S2a(~tid),
