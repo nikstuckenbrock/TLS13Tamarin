@@ -299,7 +299,7 @@ rule server_hello_psk_dhe:
             p_cert_req
         ),
         DHExp(~y, ~tid, $S),
-        !DHEx(~y, ~tid, $S)
+        !DHEx(~y, ~tid, $S),
         MessageOut(message)
     ]
 
