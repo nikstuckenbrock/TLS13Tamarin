@@ -365,7 +365,7 @@ rule update_req_server:
             p_cert_req,
             False(),
             p_recv_stream,
-            p_send_key,
+            '0',
             p_recv_key
         )
     ]
