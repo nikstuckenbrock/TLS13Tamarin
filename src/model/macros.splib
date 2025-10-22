@@ -1,4 +1,7 @@
 macros:
+    True() = '1',
+    False() = '0',
+
     // https://datatracker.ietf.org/doc/html/rfc8446#section-4
     Handshake(msg_type, content) = <msg_type, content>,
 

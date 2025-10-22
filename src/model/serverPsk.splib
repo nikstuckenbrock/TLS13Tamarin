@@ -67,7 +67,11 @@ rule recv_client_hello_psk:
             p_auth_status,
             p_ems,
             p_rms,
-            p_cert_req
+            p_cert_req,
+            p_send_stream,
+            p_recv_stream,
+            p_send_key,
+            p_recv_key
         ),
         F_MessageIn(receivedMessage),
         Fr(~ns),
@@ -112,7 +116,11 @@ rule recv_client_hello_psk:
             psk_auth_status,
             p_ems,
             p_rms,
-            p_cert_req
+            p_cert_req,
+            p_send_stream,
+            p_recv_stream,
+            p_send_key,
+            p_recv_key
         ),
         EarlyRecvStream(~tid, $S, $C, psk_auth_status, ead_keyc, new_edi)
     ]
@@ -161,7 +169,11 @@ rule server_hello_psk:
             p_auth_status,
             p_ems,
             p_rms,
-            p_cert_req
+            p_cert_req,
+            p_send_stream,
+            p_recv_stream,
+            p_send_key,
+            p_recv_key
         ),
         Fr(~y_ignored),
     ]
@@ -202,7 +214,11 @@ rule server_hello_psk:
             p_auth_status,
             p_ems,
             p_rms,
-            p_cert_req
+            p_cert_req,
+            p_send_stream,
+            p_recv_stream,
+            p_send_key,
+            p_recv_key
         ),
         DHExp(~y_ignored, ~tid, $S),
         !DHEx(~y_ignored, ~tid, $S),
@@ -258,7 +274,11 @@ rule server_hello_psk_dhe:
             p_auth_status,
             p_ems,
             p_rms,
-            p_cert_req
+            p_cert_req,
+            p_send_stream,
+            p_recv_stream,
+            p_send_key,
+            p_recv_key
         ),
         Fr(~y)
     ]
@@ -302,7 +322,11 @@ rule server_hello_psk_dhe:
             p_auth_status,
             p_ems,
             p_rms,
-            p_cert_req
+            p_cert_req,
+            p_send_stream,
+            p_recv_stream,
+            p_send_key,
+            p_recv_key
         ),
         DHExp(~y, ~tid, $S),
         !DHEx(~y, ~tid, $S),
@@ -351,7 +375,11 @@ rule server_auth_psk:
             p_auth_status,
             p_ems,
             p_rms,
-            p_cert_req
+            p_cert_req,
+            p_send_stream,
+            p_recv_stream,
+            p_send_key,
+            p_recv_key
         )
     ]
     --[
@@ -391,8 +419,11 @@ rule server_auth_psk:
             p_auth_status,
             earlyMasterSecret,
             p_rms,
-            p_cert_req
+            p_cert_req,
+            '1',
+            p_recv_stream,
+            serverApplicationTrafficKey,
+            p_recv_key
         ),
-        SendStream(~tid, $S, $C, p_auth_status, serverApplicationTrafficKey),
         MessageOut(senc{message}p_hs_keys)
     ]

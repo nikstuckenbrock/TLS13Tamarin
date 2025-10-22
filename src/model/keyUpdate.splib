@@ -1,11 +1,12 @@
 rule update_req_client:
     let
+        p_send_stream = True()
+
         cats = Expand(p_cats, <'ats', '0'>, '32')
         app_keyc = Expand(cats, <'TLS13applicationdatakeyexpansion_key', '0'>, '32')
         message = KeyUpdate(KeyUpdateUpdateRequested())
     in
     [
-        SendStream(~tid, $C, $S, p_auth_status, p_app_keyc),
         ClientState(
             ~tid,
             'C4',
@@ -36,7 +37,11 @@ rule update_req_client:
             p_auth_status,
             p_ems,
             p_rms,
-            p_cert_req
+            p_cert_req,
+            p_send_stream,
+            p_recv_stream,
+            p_app_keyc,
+            p_recv_key
         )
     ]
     --[
@@ -46,7 +51,6 @@ rule update_req_client:
     ]->
     [
         MessageOut(senc{message}p_app_keyc),
-        SendStream(~tid, $C, $S, p_auth_status, app_keyc),
         ClientState(
             ~tid,
             'C4',
@@ -77,12 +81,19 @@ rule update_req_client:
             p_auth_status,
             p_ems,
             p_rms,
-            p_cert_req
+            p_cert_req,
+            p_send_stream,
+            p_recv_stream,
+            app_keyc,
+            p_recv_key
         )
     ]
 
 rule update_recv_server:
     let
+        p_send_stream = True()
+        p_recv_stream = True()
+
         receivedMessage = KeyUpdate(KeyUpdateUpdateRequested())
 
         cats = Expand(p_cats, <'ats', '0'>, '32')
@@ -123,10 +134,12 @@ rule update_recv_server:
             p_auth_status,
             p_ems,
             p_rms,
-            p_cert_req
+            p_cert_req,
+            p_send_stream,
+            p_recv_stream,
+            p_app_keys,
+            p_app_keyc
         ),
-        RecvStream(~tid, $S, $C, p_auth_status, p_app_keyc),
-        SendStream(~tid, $S, $C, p_auth_status, p_app_keys),
         F_MessageIn(senc{receivedMessage}p_app_keyc)
     ]
     --[
@@ -135,8 +148,6 @@ rule update_recv_server:
         RPostHS(~tid, $S, 'server', <p_hs, p_rms, $C, p_auth_status, p_messages>)
     ]->
     [
-        RecvStream(~tid, $S, $C, p_auth_status, app_keyc),
-        SendStream(~tid, $S, $C, p_auth_status, app_keys),
         MessageOut(senc{message}p_app_keys),
         ServerState(
             ~tid,
@@ -168,19 +179,24 @@ rule update_recv_server:
             p_auth_status,
             p_ems,
             p_rms,
-            p_cert_req
+            p_cert_req,
+            p_send_stream,
+            p_recv_stream,
+            app_keys,
+            app_keyc
         )
     ]
 
 rule update_fin_client:
     let
+        p_recv_stream = True()
+
         sats = Expand(p_sats, <'ats', '0'>, '32')
         app_keys = Expand(sats, <'TLS13applicationdatakeyexpansion_key', '0'>, '32')
 
         receivedMessage = KeyUpdate(KeyUpdateUpdateNotRequested())
     in
     [
-        RecvStream(~tid, $C, $S, p_auth_status, p_app_keys),
         F_MessageIn(senc{receivedMessage}p_app_keys),
         ClientState(
             ~tid,
@@ -212,7 +228,11 @@ rule update_fin_client:
             p_auth_status,
             p_ems,
             p_rms,
-            p_cert_req
+            p_cert_req,
+            p_send_stream,
+            p_recv_stream,
+            p_send_key,
+            p_app_keys
         )
     ]
     --[
@@ -221,7 +241,6 @@ rule update_fin_client:
         RPostHS(~tid, $C, 'client', <p_hs, p_rms, $S, p_auth_status, p_messages>)
     ]->
     [
-        RecvStream(~tid, $C, $S, p_auth_status, app_keys),
         ClientState(
             ~tid,
             'C4',
@@ -252,18 +271,23 @@ rule update_fin_client:
             p_auth_status,
             p_ems,
             p_rms,
-            p_cert_req
+            p_cert_req,
+            p_send_stream,
+            p_recv_stream,
+            p_send_key,
+            app_keys
         )
     ]
 
 rule update_req_server:
     let
+        p_send_stream = True()
+
         sats = Expand(p_sats, <'ats', '0'>, '32')
         app_keys = Expand(sats, <'TLS13applicationdatakeyexpansion_key', '0'>, '32')
         message = KeyUpdate(KeyUpdateUpdateRequested())
     in
     [
-        SendStream(~tid, $S, $C, p_auth_status, p_app_keys),
         ServerState(
             ~tid,
             'S4',
@@ -294,7 +318,11 @@ rule update_req_server:
             p_auth_status,
             p_ems,
             p_rms,
-            p_cert_req
+            p_cert_req,
+            p_send_stream,
+            p_recv_stream,
+            p_app_keys,
+            p_recv_key
         )
     ]
     --[
@@ -334,12 +362,18 @@ rule update_req_server:
             p_auth_status,
             p_ems,
             p_rms,
-            p_cert_req
+            p_cert_req,
+            False(),
+            p_recv_stream,
+            p_send_key,
+            p_recv_key
         )
     ]
 
 rule update_recv_client:
     let
+        p_send_stream = True()
+        p_recv_stream = True()
         receivedMessage = KeyUpdate(KeyUpdateUpdateRequested())
 
         cats = Expand(p_cats, <'ats', '0'>, '32')
@@ -350,8 +384,6 @@ rule update_recv_client:
         message = KeyUpdate(KeyUpdateUpdateNotRequested())
     in
     [
-        RecvStream(~tid, $C, $S, p_auth_status, p_app_keys),
-        SendStream(~tid, $C, $S, p_auth_status, p_app_keyc),
         F_MessageIn(senc{receivedMessage}p_app_keys),
         ClientState(
             ~tid,
@@ -383,7 +415,11 @@ rule update_recv_client:
             p_auth_status,
             p_ems,
             p_rms,
-            p_cert_req
+            p_cert_req,
+            p_send_stream,
+            p_recv_stream,
+            p_app_keyc,
+            p_app_keys
         )
     ]
     --[
@@ -392,8 +428,6 @@ rule update_recv_client:
         RPostHS(~tid, $C, 'client', <p_hs, p_rms, $S, p_auth_status, p_messages>)
     ]->
     [
-        RecvStream(~tid, $C, $S, p_auth_status, app_keys),
-        SendStream(~tid, $C, $S, p_auth_status, app_keyc),
         MessageOut(senc{message}p_app_keyc),
         ClientState(
             ~tid,
@@ -425,12 +459,18 @@ rule update_recv_client:
             p_auth_status,
             p_ems,
             p_rms,
-            p_cert_req
+            p_cert_req,
+            p_send_stream,
+            p_recv_stream,
+            app_keyc,
+            app_keys
         )
     ]
 
 rule update_fin_server:
     let
+        p_recv_stream = True()
+
         receivedMessage = KeyUpdate(KeyUpdateUpdateNotRequested())
 
         cats = Expand(p_cats, <'ats', '0'>, '32')
@@ -438,7 +478,6 @@ rule update_fin_server:
     in
     [
         F_MessageIn(senc{receivedMessage}p_app_keyc),
-        RecvStream(~tid, $S, $C, p_auth_status, p_app_keyc),
         ServerState(
             ~tid,
             'S4',
@@ -469,7 +508,11 @@ rule update_fin_server:
             p_auth_status,
             p_ems,
             p_rms,
-            p_cert_req
+            p_cert_req,
+            p_send_stream,
+            p_recv_stream,
+            p_send_key,
+            p_app_keyc
         )
     ]
     --[
@@ -478,7 +521,6 @@ rule update_fin_server:
         RPostHS(~tid, $S, 'server', <p_hs, p_rms, $C, p_auth_status, p_messages>)
     ]->
     [
-        RecvStream(~tid, $S, $C, p_auth_status, app_keyc),
         ServerState(
             ~tid,
             'S4',
@@ -509,6 +551,10 @@ rule update_fin_server:
             p_auth_status,
             p_ems,
             p_rms,
-            p_cert_req
+            p_cert_req,
+            p_send_stream,
+            p_recv_stream,
+            p_send_key,
+            app_keyc
         )
     ]

@@ -57,7 +57,11 @@ rule client_hello:
             <'0', '0'>,
             '0',
             '0',
-            '0'
+            '0',
+            '0', // sendstream
+            '0', // recvstream
+            '0', // sendstreamkey
+            '0'  // recvstreamkey
         ),
         DHExp(~x, ~nc, $C),
         !DHEx(~x, ~nc, $C),
@@ -120,7 +124,11 @@ rule recv_hello_retry_request:
             p_auth_status,
             p_ems,
             p_rms,
-            p_cert_req
+            p_cert_req,
+            p_send_stream,
+            p_recv_stream,
+            p_send_key,
+            p_recv_key
         ),
         Fr(~new_x),
         F_MessageIn(receivedMessage),
@@ -168,7 +176,11 @@ rule recv_hello_retry_request:
             auth_status,
             p_ems,
             p_rms,
-            p_cert_req
+            p_cert_req,
+            p_send_stream,
+            p_recv_stream,
+            p_send_key,
+            p_recv_key
         )
     ]
 
@@ -219,7 +231,11 @@ rule recv_server_hello:
             p_auth_status,
             p_ems,
             p_rms,
-            p_cert_req
+            p_cert_req,
+            p_send_stream,
+            p_recv_stream,
+            p_send_key,
+            p_recv_key
         ),
         F_MessageIn(receivedMessage)
     ]
@@ -262,7 +278,11 @@ rule recv_server_hello:
             auth_status,
             p_ems,
             p_rms,
-            p_cert_req
+            p_cert_req,
+            p_send_stream,
+            p_recv_stream,
+            p_send_key,
+            p_recv_key
         )
     ]
 
@@ -304,7 +324,11 @@ rule client_gen_keys:
             p_auth_status,
             p_ems,
             p_rms,
-            p_cert_req
+            p_cert_req,
+            p_send_stream,
+            p_recv_stream,
+            p_send_key,
+            p_recv_key
         ),
         DHExp(p_x, ~tid, $C),
         !DHEx(p_x, ~tid, $C)
@@ -347,7 +371,11 @@ rule client_gen_keys:
             p_auth_status,
             p_ems,
             p_rms,
-            p_cert_req
+            p_cert_req,
+            p_send_stream,
+            p_recv_stream,
+            p_send_key,
+            p_recv_key
         )
     ]
 
@@ -387,7 +415,11 @@ rule recv_encrypted_extensions:
             p_auth_status,
             p_ems,
             p_rms,
-            p_cert_req
+            p_cert_req,
+            p_send_stream,
+            p_recv_stream,
+            p_send_key,
+            p_recv_key
         ),
         F_MessageIn(senc{receivedMessage}p_hs_keys)
     ]
@@ -426,7 +458,11 @@ rule recv_encrypted_extensions:
             p_auth_status,
             p_ems,
             p_rms,
-            p_cert_req
+            p_cert_req,
+            p_send_stream,
+            p_recv_stream,
+            p_send_key,
+            p_recv_key
         )
     ]
 
@@ -465,7 +501,11 @@ rule skip_recv_certificate_request:
             p_auth_status,
             p_ems,
             p_rms,
-            p_cert_req
+            p_cert_req,
+            p_send_stream,
+            p_recv_stream,
+            p_send_key,
+            p_recv_key
         )
     ]
     --[
@@ -503,7 +543,11 @@ rule skip_recv_certificate_request:
             p_auth_status,
             p_ems,
             p_rms,
-            cert_req
+            cert_req,
+            p_send_stream,
+            p_recv_stream,
+            p_send_key,
+            p_recv_key
         )
     ]
 
@@ -546,7 +590,11 @@ rule recv_certificate_request:
             p_auth_status,
             p_ems,
             p_rms,
-            p_cert_req
+            p_cert_req,
+            p_send_stream,
+            p_recv_stream,
+            p_send_key,
+            p_recv_key
         ),
         F_MessageIn(senc{receivedMessage}p_hs_keys)
     ]
@@ -585,7 +633,11 @@ rule recv_certificate_request:
             p_auth_status,
             p_ems,
             p_rms,
-            cert_req
+            cert_req,
+            p_send_stream,
+            p_recv_stream,
+            p_send_key,
+            p_recv_key
         )
     ]
 
@@ -646,7 +698,11 @@ rule recv_server_auth:
             p_auth_status,
             p_ems,
             p_rms,
-            p_cert_req
+            p_cert_req,
+            p_send_stream,
+            p_recv_stream,
+            p_send_key,
+            p_recv_key
         ),
         !Pk($S, pk(~ltkS)),
         F_MessageIn(senc{<certificateMessage,receivedCertificateVerifyMessage,finishedMessage>}p_hs_keys)
@@ -694,9 +750,12 @@ rule recv_server_auth:
             auth_status,
             earlyMasterSecret,
             p_rms,
-            p_cert_req
+            p_cert_req,
+            p_send_stream,
+            True(),
+            p_send_key,
+            serverApplicationTrafficKey
         ),
-        RecvStream(~tid, $C, $S, auth_status, serverApplicationTrafficKey)
     ]
 
 rule client_auth:
@@ -741,7 +800,11 @@ rule client_auth:
             p_auth_status,
             p_ems,
             p_rms,
-            p_cert_req
+            p_cert_req,
+            p_send_stream,
+            p_recv_stream,
+            p_send_key,
+            p_recv_key
         )
     ]
     --[
@@ -784,16 +847,20 @@ rule client_auth:
             p_auth_status,
             p_ems,
             resumptionMasterSecret,
-            p_cert_req
+            p_cert_req,
+            True(),
+            p_recv_stream,
+            clientApplicationTrafficKey,
+            p_recv_key
         ),
-        MessageOut(senc{finishedMessage}p_hs_keyc),
-        SendStream(~tid, $C, $S, p_auth_status, clientApplicationTrafficKey)
+        MessageOut(senc{finishedMessage}p_hs_keyc)
     ]
 
 rule client_auth_cert:
     let
         p_cert_req = '1'
         p_psk_ke_mode = 'na'
+        p_recv_stream = True()
 
         // Certificate
         certificateMessage = Certificate('0', pk(~ltkC))
@@ -848,9 +915,12 @@ rule client_auth_cert:
             p_auth_status,
             p_ems,
             p_rms,
-            p_cert_req
+            p_cert_req,
+            p_send_stream,
+            p_recv_stream,
+            p_send_key,
+            serverApplicationTrafficKey
         ),
-        RecvStream(~tid, $C, $S, p_auth_status, serverApplicationTrafficKey),
         !Ltk($C, ~ltkC)
     ]
     --[
@@ -894,15 +964,18 @@ rule client_auth_cert:
             auth_status,
             p_ems,
             rms,
-            cert_req
+            cert_req,
+            True(),
+            p_recv_stream,
+            clientApplicationTrafficKey,
+            serverApplicationTrafficKey
         ),
-        MessageOut(senc{<certificateMessage,certificateVerifyMessage,finishedMessage>}p_hs_keyc),
-        SendStream(~tid, $C, $S, auth_status, clientApplicationTrafficKey),
-        RecvStream(~tid, $C, $S, auth_status, serverApplicationTrafficKey)
+        MessageOut(senc{<certificateMessage,certificateVerifyMessage,finishedMessage>}p_hs_keyc)
     ]
 
 rule recv_new_session_ticket:
     let
+        p_recv_stream = True()
         p_rms = Expand(ms, <'TLS13resumptionmastersecret', <h(messages)>>, '32')
         ticket_extension = <
             <'46', $max_early_data_size>
@@ -940,9 +1013,12 @@ rule recv_new_session_ticket:
             p_auth_status,
             p_ems,
             p_rms,
-            p_cert_req
+            p_cert_req,
+            p_send_stream,
+            p_recv_stream,
+            p_send_key,
+            serverApplicationTrafficKey
         ),
-        RecvStream(~tid, $C, $S, p_auth_status, serverApplicationTrafficKey),
         F_MessageIn(senc{receivedMessage}serverApplicationTrafficKey)
     ]
     --[
@@ -981,9 +1057,12 @@ rule recv_new_session_ticket:
             p_auth_status,
             p_ems,
             p_rms,
-            p_cert_req
+            p_cert_req,
+            p_send_stream,
+            p_recv_stream,
+            p_send_key,
+            serverApplicationTrafficKey
         ),
-        RecvStream(~tid, $C, $S, p_auth_status, serverApplicationTrafficKey),
         !ClientPSK($C, $S, p_rms, p_auth_status, receivedMessage, 'res'),
         F_SecretPSK($C, p_rms)
     ]

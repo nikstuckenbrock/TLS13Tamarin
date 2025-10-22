@@ -1,6 +1,44 @@
 rule send:
+    let
+        p_send_stream = True()
+    in
     [
-        SendStream(~tid, $actor, $peer, auth_status, app_key_out),
+        ClientState(
+            ~tid,
+            p_state,
+            $C,
+            $S,
+            p_res_psk,
+            p_messages,
+            p_nc,
+            p_ns,
+            p_g,
+            p_sg,
+            p_hrr,
+            p_x,
+            p_y,
+            p_gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            p_hs,
+            p_ms,
+            p_cats,
+            p_sats,
+            p_hs_keyc,
+            p_hs_keys,
+            auth_status,
+            p_ems,
+            p_rms,
+            p_cert_req,
+            p_send_stream,
+            p_recv_stream,
+            app_key_out,
+            p_recv_key
+        ),
         Fr(~data)
     ]
     --[
@@ -8,13 +46,86 @@ rule send:
         SendData(~tid, $actor, $peer, auth_status, ~data)
     ]->
     [
-        SendStream(~tid, $actor, $peer, auth_status, app_key_out),
+        ClientState(
+            ~tid,
+            p_state,
+            $C,
+            $S,
+            p_res_psk,
+            p_messages,
+            p_nc,
+            p_ns,
+            p_g,
+            p_sg,
+            p_hrr,
+            p_x,
+            p_y,
+            p_gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            p_hs,
+            p_ms,
+            p_cats,
+            p_sats,
+            p_hs_keyc,
+            p_hs_keys,
+            auth_status,
+            p_ems,
+            p_rms,
+            p_cert_req,
+            p_send_stream,
+            p_recv_stream,
+            app_key_out,
+            p_recv_key
+        ),
         MessageOut(senc{DataRecord(~data)}app_key_out)
     ]
 
 rule recv:
+    let
+        p_recv_stream = True()
+    in
     [
-        RecvStream(~tid, $actor, $peer, auth_status, app_key_in),
+        ClientState(
+            ~tid,
+            p_state,
+            $C,
+            $S,
+            p_res_psk,
+            p_messages,
+            p_nc,
+            p_ns,
+            p_g,
+            p_sg,
+            p_hrr,
+            p_x,
+            p_y,
+            p_gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            p_hs,
+            p_ms,
+            p_cats,
+            p_sats,
+            p_hs_keyc,
+            p_hs_keys,
+            auth_status,
+            p_ems,
+            p_rms,
+            p_cert_req,
+            p_send_stream,
+            p_recv_stream,
+            p_send_key,
+            app_key_in
+        ),
         F_MessageIn(senc{DataRecord(data)}app_key_in)
     ]
     --[
@@ -22,5 +133,40 @@ rule recv:
         RecvData(~tid, $actor, $peer, auth_status, data)
     ]->
     [
-      RecvStream(~tid, $actor, $peer, auth_status, app_key_in)
+      ClientState(
+            ~tid,
+            p_state,
+            $C,
+            $S,
+            p_res_psk,
+            p_messages,
+            p_nc,
+            p_ns,
+            p_g,
+            p_sg,
+            p_hrr,
+            p_x,
+            p_y,
+            p_gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            p_hs,
+            p_ms,
+            p_cats,
+            p_sats,
+            p_hs_keyc,
+            p_hs_keys,
+            auth_status,
+            p_ems,
+            p_rms,
+            p_cert_req,
+            p_send_stream,
+            p_recv_stream,
+            p_send_key,
+            app_key_in
+        )
     ]

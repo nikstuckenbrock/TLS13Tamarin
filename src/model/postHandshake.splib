@@ -1,5 +1,7 @@
 rule certificate_request_post:
     let
+        p_send_stream = True()
+
         message = CertificateRequest(~cert_req_ctxt, $certificate_extensions)
     in
     [
@@ -33,9 +35,12 @@ rule certificate_request_post:
             p_auth_status,
             p_ems,
             p_rms,
-            p_cert_req
+            p_cert_req,
+            p_send_stream,
+            p_recv_stream,
+            app_keys,
+            p_recv_key
         ),
-        SendStream(~tid, $S, $C, p_auth_status, app_keys),
         Fr(~cert_req_ctxt)
     ]
     --[
@@ -75,15 +80,20 @@ rule certificate_request_post:
             p_auth_status,
             p_ems,
             p_rms,
-            p_cert_req
+            p_cert_req,
+            p_send_stream,
+            p_recv_stream,
+            app_keys,
+            p_recv_key
         ),
-        SendStream(~tid, $S, $C, p_auth_status, app_keys),
         L_ServerCertReq(~tid, $S, $C, ~cert_req_ctxt),
         MessageOut(senc{message}app_keys)
     ]
 
 rule recv_certificate_request_post:
     let
+        p_recv_stream = True()
+
         receivedMessage = CertificateRequest(certificate_request_context, $certificate_extensions)
     in
     [
@@ -117,9 +127,12 @@ rule recv_certificate_request_post:
             p_auth_status,
             p_ems,
             p_rms,
-            p_cert_req
+            p_cert_req,
+            p_send_stream,
+            p_recv_stream,
+            p_send_key,
+            app_keys
         ),
-        RecvStream(~tid, $C, $S, p_auth_status, app_keys),
         F_MessageIn(senc{receivedMessage}app_keys)
     ]
     --[
@@ -159,15 +172,19 @@ rule recv_certificate_request_post:
             p_auth_status,
             p_ems,
             p_rms,
-            p_cert_req
+            p_cert_req,
+            p_send_stream,
+            p_recv_stream,
+            p_send_key,
+            app_keys
         ),
-        RecvStream(~tid, $C, $S, p_auth_status, app_keys),
         L_ClientCertReq(~tid, $C, $S, certificate_request_context)
     ]
 
 rule client_auth_post:
     let
         p_auth_status = <p_cas, p_sas>
+        p_send_stream = True()
         certificate = pk(~ltkC)
 
         message = CertificateRequest(certificate_request_context, $certificate_extensions)
@@ -214,9 +231,12 @@ rule client_auth_post:
             p_auth_status,
             p_ems,
             p_rms,
-            p_cert_req
+            p_cert_req,
+            p_send_stream,
+            p_recv_stream,
+            app_keyc,
+            p_recv_key
         ),
-        SendStream(~tid, $C, $S, p_auth_status, app_keyc),
         !Ltk($C, ~ltkC),
         L_ClientCertReq(~tid, $C, $S, certificate_request_context)
     ]
@@ -259,15 +279,19 @@ rule client_auth_post:
             auth_status,
             p_ems,
             p_rms,
-            p_cert_req
+            p_cert_req,
+            p_send_stream,
+            p_recv_stream,
+            app_keyc,
+            p_recv_key
         ),
-        SendStream(~tid, $C, $S, auth_status, app_keyc),
         MessageOut(senc{messagesOut}app_keyc)
     ]
 
 rule recv_client_auth_post:
     let
         p_auth_status = <p_sas, p_cas>
+        p_recv_stream = True()
         certificate = pk(~ltkC)
 
         message = CertificateRequest(~cert_req_ctxt, $certificate_extensions)
@@ -314,9 +338,12 @@ rule recv_client_auth_post:
             p_auth_status,
             p_ems,
             p_rms,
-            p_cert_req
+            p_cert_req,
+            p_send_stream,
+            p_recv_stream,
+            p_send_key,
+            app_keyc
         ),
-        RecvStream(~tid, $S, $C, p_auth_status, app_keyc),
         !Pk($C, pk(~ltkC)),
         L_ServerCertReq(~tid, $S, $C, ~cert_req_ctxt),
         F_MessageIn(senc{receivedMessage}app_keyc)
@@ -363,7 +390,10 @@ rule recv_client_auth_post:
             auth_status,
             p_ems,
             p_rms,
-            p_cert_req
+            p_cert_req,
+            p_send_stream,
+            p_recv_stream,
+            p_send_key,
+            app_keyc
         ),
-        RecvStream(~tid, $S, $C, auth_status, app_keyc)
     ]
