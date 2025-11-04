@@ -22,9 +22,6 @@
                 "timeout": 7200
             },
             "output_file_prefix": "reachability",
-            "preprocess_flags": [
-                "reachability"
-            ],
             "tamarin_options": [
                 "-D=reachability"
             ],
