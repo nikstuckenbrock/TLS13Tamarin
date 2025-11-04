@@ -124,8 +124,7 @@ rule recv_hello_retry_request:
         ),
         Fr(~new_x),
         F_MessageIn(receivedMessage),
-        DHExp(p_x, ~tid, $C),
-        !DHEx(p_x, ~tid, $C)
+        DHExp(p_x, ~tid, $C)
     ]
     --[
         C1_retry(~tid),
@@ -306,8 +305,7 @@ rule client_gen_keys:
             p_rms,
             p_cert_req
         ),
-        DHExp(p_x, ~tid, $C),
-        !DHEx(p_x, ~tid, $C)
+        DHExp(p_x, ~tid, $C)
     ]
     --[
         C2a(~tid),

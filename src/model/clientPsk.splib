@@ -173,7 +173,6 @@ rule recv_hello_retry_request_psk:
         Fr(~new_nc),
         Fr(~new_x),
         DHExp(p_x, ~tid, $C),
-        !DHEx(p_x, ~tid, $C),
         F_MessageIn(receivedMessage)
     ]
     --[

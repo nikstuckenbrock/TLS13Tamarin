@@ -1,6 +1,8 @@
 theory tls13
 begin
 
+heuristic: o "./oracle.py"
+
 builtins: diffie-hellman, hashing, symmetric-encryption, signing
 
 functions: Expand/3, Extract/2, hmac/1, mac/1, mask/2, unmask/2
@@ -63,6 +65,10 @@ rule message_in_to_in:
 
 #ifdef dhCal
 #include "lemmas/dhCal.splib"
+#endif
+
+#ifdef lemmas
+#include "lemmas/lemmas.splib"
 #endif
 
 end

@@ -158,6 +158,7 @@ lemma matching_rms_posths [reuse]:
     RRMS(tid, actor, role, <peer2,rms,messages>)@i &
     RRMS(tid2, peer, role2, <actor2,rms,messages2>)@j & not (role = role2) ==>
      messages = messages2"
+
 lemma rms_derives_hs[reuse,hide_lemma=sig_origin]:
   "All tid actor role peer hs rms messages #i #j #k.
      RRMS(tid, actor, role, <peer,rms,messages>)@j &
@@ -211,4 +212,23 @@ lemma secret_session_keys [hide_lemma=sig_origin,hide_lemma=posths_rms]:
       not (Ex tid4 y #r. RevDHExp(tid4, actor, y)@r & #r < #i) &
       not (Ex rms #r. RevealPSK(actor, rms)@r) &
       not (Ex rms #r. RevealPSK(peer, rms)@r)
-    ==> not Ex #j. K(kr)@
+    ==> not Ex #j. K(kr)@j"
+
+lemma secret_session_keys_pfs [hide_lemma=sig_origin,hide_lemma=posths_rms]:
+  "All tid actor peer role kw kr pas psk_ke_mode #i.
+      SessionKey(tid, actor, peer, <pas, 'auth'>, <kw, kr>)@i & 
+      RMode(tid, actor, role, <psk_ke_mode>)@i &
+      not (Ex #r. RevLtk(peer)@r & #r < #i) &
+      not (Ex tid3 x #r. RevDHExp(tid3, peer, x)@r & #r < #i) &
+      not (Ex tid4 y #r. RevDHExp(tid4, actor, y)@r & #r < #i) &
+      not (Ex rms #r. RevealPSK(actor, rms)@r & #r < #i) &
+      not (Ex rms #r. RevealPSK(peer, rms)@r & #r < #i) &
+      not (psk_ke_mode = '0')
+    ==> not Ex #j. K(kr)@j"
+
+lemma unique_session_keys:
+  "All tid tid2 actor peer peer2 kr kw as as2 #i #j.
+     SessionKey(tid, actor, peer, as, <kr, kw>)@i & 
+     SessionKey(tid2, actor, peer2, as2, <kr, kw>)@j
+      ==>
+        #i = #j"

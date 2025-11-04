@@ -99,3 +99,15 @@ lemma S2d_vs_S2d_PSK [reuse]:
 
 lemma C2d_vs_C2d_PSK [reuse]:
     "All tid #i #j. C2d(tid)@i & C2d_PSK(tid)@j ==> F"
+
+lemma cert_req_origin [sources]:
+  "All certificate_request_context certificate_extensions keys #i.
+    KU(senc{<'13',<certificate_request_context,certificate_extensions>>}keys)@i ==> 
+      (Ex #j. KU(certificate_request_context)@j & #j < #i) |
+      (Ex #j tid actor role. RCertReqCtxt(tid, actor, role, <certificate_request_context>)@j & #j < #i)"
+
+lemma nst_source [sources]:
+  "All ticket ticket_age_add tkt_lt tkt_exts app_key #i.
+    KU(senc{<'4',<tkt_lt,ticket_age_add,ticket,tkt_exts>>}app_key)@i ==>
+      (Ex #j #k. KU(ticket)@j & KU(ticket_age_add)@k & #j < #i & #k < #i) |
+      (Ex tid S #j. RNST(tid, S, 'server', <ticket,ticket_age_add>)@j & #j < #i)"
