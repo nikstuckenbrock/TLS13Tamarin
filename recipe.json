@@ -22,6 +22,9 @@
                 "timeout": 7200
             },
             "output_file_prefix": "reachability",
+            "preprocess_flags": [
+                "reachability"
+            ],
             "tamarin_options": [
                 "-D=reachability"
             ],
@@ -94,26 +97,7 @@
                     "name": "exists_C2d_PSK"
                 },
                 {
-                    "name": "exists_S4_req"
-                },
-                {
                     "name": "exists_S4_NST"
-                },
-                {
-                    "name": "exists_S4_update_recv",
-                    "resources": {
-                        "max_cores": 24,
-                        "max_memory": 200,
-                        "timeout": 24000
-                    }
-                },
-                {
-                    "name": "exists_S4_update_req",
-                    "resources": {
-                        "max_cores": 24,
-                        "max_memory": 200,
-                        "timeout": 24000
-                    }
                 }
             ]
         },
@@ -125,6 +109,9 @@
                 "timeout": 7200
             },
             "output_file_prefix": "invariants",
+            "preprocess_flags": [
+                "invariants"
+            ],
             "tamarin_versions": [
                 "stable",
                 "development"
@@ -148,6 +135,9 @@
                 "max_memory": 200,
                 "timeout": 14000
             },
+            "preprocess_flags": [
+                "uniqueness"
+            ],
             "output_file_prefix": "uniqueness",
             "tamarin_options": [
                 "-D=uniqueness"
@@ -269,6 +259,9 @@
                 "timeout": 7200
             },
             "output_file_prefix": "authHelpers",
+            "preprocess_flags": [
+                "authHelpers"
+            ],
             "tamarin_options": [
                 "-D=authHelpers"
             ],
@@ -299,6 +292,9 @@
                 "timeout": 7200
             },
             "output_file_prefix": "dhInj",
+            "preprocess_flags": [
+                "dhInj"
+            ],
             "tamarin_options": [
                 "-D=dhInj"
             ],
@@ -323,6 +319,9 @@
                 "max_memory": 200,
                 "timeout": 7200
             },
+            "preprocess_flags": [
+                "dhCal"
+            ],
             "tamarin_options": [
                 "-D=dhCal"
             ],
@@ -344,6 +343,9 @@
                 "timeout": 14000
             },
             "output_file_prefix": "lemmas",
+            "preprocess_flags": [
+                "lemmas"
+            ],
             "tamarin_versions": [
                 "stable",
                 "development"
@@ -368,6 +370,9 @@
                 "timeout": 14000
             },
             "output_file_prefix": "secretHelpers",
+            "preprocess_flags": [
+                "secretHelpers"
+            ],
             "tamarin_versions": [
                 "stable",
                 "development"
