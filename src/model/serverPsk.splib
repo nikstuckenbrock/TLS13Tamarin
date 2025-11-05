@@ -4,7 +4,7 @@ rule recv_client_hello_psk:
         supported_groups = <$g1, $g2>
         gx = $new_g^x
         clientRandom = new_nc
-        psk_ke_mode = <'0', '1'>
+        psk_ke_mode = <PskKeyExchangeModePskKe(), PskKeyExchangeModePskDheKe()>
         ticket = ~ticket
         ticket_age_add = ~ticket_age_add
         identities = <<ticket, obfuscated_ticket_age>>
@@ -13,7 +13,7 @@ rule recv_client_hello_psk:
         binder_extensions = <
             ExtensionSupportedVersions(),
             ExtensionNamedGroupdList(supported_groups),
-            ExtensionKeyShareClientHello(KeyShareEntry($new_g, gx)),
+            ExtensionKeyShare(KeyShareEntry($new_g, gx)),
             ExtensionPskKeyExchangeModes(psk_ke_mode),
             new_edi,
             ExtensionPreSharedKeyClientHello(identities, binder)
@@ -26,7 +26,7 @@ rule recv_client_hello_psk:
         extensions = <
             ExtensionSupportedVersions(),
             ExtensionNamedGroupdList(supported_groups),
-            ExtensionKeyShareClientHello(KeyShareEntry($new_g, gx)),
+            ExtensionKeyShare(KeyShareEntry($new_g, gx)),
             ExtensionPskKeyExchangeModes(psk_ke_mode),
             new_edi,
             ExtensionPreSharedKeyClientHello(identities, binder_in)
@@ -220,7 +220,7 @@ rule server_hello_psk_dhe:
         es = Extract(p_res_psk, '0')
         extensions = <
             ExtensionSignatureSchemeList($sig_algs),
-            ExtensionKeyShareServerHello(KeyShareEntry(p_g, gy)),
+            ExtensionKeyShare(KeyShareEntry(p_g, gy)),
             <'41', '0'>,
             p_edi
         >

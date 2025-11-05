@@ -50,7 +50,7 @@ rule recv_client_hello:
             ExtensionSupportedVersions(),
             ExtensionNamedGroupdList(supported_groups),
             ExtensionSignatureSchemeList($sig_algs),
-            ExtensionKeyShareClientHello(KeyShareEntry($new_g, gx))
+            ExtensionKeyShare(KeyShareEntry($new_g, gx))
         >
         receivedMessage = ClientHello(new_nc, '0', $cipher_suites, '0', extensions)
         messages = <p_messages, receivedMessage>
@@ -143,9 +143,9 @@ rule hello_retry_request:
 
         extensions = <
             ExtensionSupportedVersions(),
-            ExtensionKeyShareHelloRetryRequest(new_g)
+            ExtensionKeyShare(new_g)
         >
-        message = HelloRetryRequest(extensions)
+        message = ServerHello(HelloRetryRequestRandom(), '0', $cipher_suites, '0', extensions)
         messages = <p_messages, message>
     in
     [
@@ -232,7 +232,7 @@ rule server_hello:
         psk_ke_mode = 'na'
         extensions = <
             ExtensionSignatureSchemeList($sig_algs),
-            ExtensionKeyShareServerHello(KeyShareEntry($p_g, gy))
+            ExtensionKeyShare(KeyShareEntry($p_g, gy))
         >
         message = ServerHello(p_ns, '0', $cipher_suite, '0', extensions)
         es = Extract(p_res_psk, '0')

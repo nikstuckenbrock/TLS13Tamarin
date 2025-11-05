@@ -6,7 +6,6 @@ macros:
     HandshakeMessageTypeClientHello() = '1',
     HandshakeMessageTypeServerHello() = '2',
     HandshakeMessageTypeNewSessionTicket() = '4',
-    HandshakeMessageTypeHelloRetryRequest() = '6',
     HandshakeMessageTypeEncryptedExtensions() = '8',
     HandshakeMessageTypeCertificate() = '11',
     HandshakeMessageTypeCertificateRequest() = '13',
@@ -15,26 +14,30 @@ macros:
     HandshakeMessageTypeKeyUpdate() = '24',
 
     ProtocolVersion() = '0x0303',
+    HelloRetryRequestRandom() = h('HelloRetryRequest'),
+
+    // https://datatracker.ietf.org/doc/html/draft-ietf-tls-tls13-21#section-4.2.8
+    PskKeyExchangeModePskKe() = '0',
+    PskKeyExchangeModePskDheKe() = '1',
 
     Extension(extension_type, extension_data) = <extension_type, extension_data>,
     ExtensionSupportedVersions() = Extension('43', ProtocolVersion()),
     ExtensionNamedGroupdList(supported_groups) = Extension('10', supported_groups),
     ExtensionSignatureSchemeList(supported_signature_algorithms) = Extension('13', supported_signature_algorithms),
     KeyShareEntry(named_group, key_exchange) = <named_group, key_exchange>,
-    ExtensionKeyShareClientHello(client_shares) = Extension('51', client_shares),
-    ExtensionKeyShareHelloRetryRequest(new_group) = Extension('51', new_group),
-    ExtensionKeyShareServerHello(server_share) = Extension('51', server_share),
+    ExtensionKeyShare(share) = Extension('51', share),
     ExtensionEarlyDataIndication() = Extension('42', <'0'>),
     ExtensionPskKeyExchangeModes(ke_mode) = Extension('45', ke_mode),
     ExtensionPreSharedKeyClientHello(identities, binders) = Extension('41', <identities, <binders>>),
 
+    // https://datatracker.ietf.org/doc/html/rfc8446#section-4.1.2
+    LegacyVersion() = '0x0303',
+
     // https://datatracker.ietf.org/doc/html/rfc8446#appendix-B.3.1
-    ClientHello(random, legacy_session_id, cipher_suites, legacy_compression_methods, extensions) = Handshake(HandshakeMessageTypeClientHello(), <random, legacy_session_id, cipher_suites, legacy_compression_methods, extensions>),
+    ClientHello(random, legacy_session_id, cipher_suites, legacy_compression_methods, extensions) = Handshake(HandshakeMessageTypeClientHello(), <LegacyVersion(), random, legacy_session_id, cipher_suites, legacy_compression_methods, extensions>),
 
     // https://datatracker.ietf.org/doc/html/rfc8446#section-4.1.3
-    ServerHello(random, legacy_session_id_echo, cipher_suite, legacy_compression_method, extensions) = Handshake(HandshakeMessageTypeServerHello(), <random, legacy_session_id_echo, cipher_suite, legacy_compression_method, extensions>),
-
-    HelloRetryRequest(extensions) = Handshake(HandshakeMessageTypeHelloRetryRequest(), <extensions>),
+    ServerHello(random, legacy_session_id_echo, cipher_suite, legacy_compression_method, extensions) = Handshake(HandshakeMessageTypeServerHello(), <LegacyVersion(), random, legacy_session_id_echo, cipher_suite, legacy_compression_method, extensions>),
 
     EncryptedExtensions(extensions) = Handshake(HandshakeMessageTypeEncryptedExtensions(), <extensions>),
 
