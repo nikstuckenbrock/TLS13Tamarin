@@ -95,14 +95,23 @@ elif argv[1] == "matching_rms_actors":
         "ServerState"
     ], lines)
 elif argv[1] == "matching_sessions":
+    new_lines: list = []
+    for line in lines:
+        if "∀ tid tid2 actor actor2 role role2 peer peer2 rms" in line[1]:
+            pass
+        else:
+            new_lines.append(line)
     match = match_against_list([
-        "RRMS",
-        "ClientState",
-        "ServerState",
+        "RRMS( tid",
+        "ClientState( ~tid, 'C3'",
+        "ServerState( ~tid.1, 'S3'",
+        "ServerState( ~tid, 'S3'",
+        "ClientState( ~tid.1, 'C3'",
         "RevealPSK",
         "RevDHExp",
-        "F_SecretPSK"
-    ], lines)
+        "F_SecretPSK",
+        "(∃ #j."
+    ], new_lines)
 elif argv[1] == "secret_session_keys":
     match = match_against_list([
         "SessionKey",
@@ -110,6 +119,17 @@ elif argv[1] == "secret_session_keys":
         "F_SecretPSK",
         "ClientState",
         "ServerState"
+    ], lines)
+elif argv[1] == "secret_session_keys_pfs":
+    match = match_against_list([
+        "∃ #r.",
+        "∃ #j.",
+        "ClientState( ~tid, 'C3'",
+        "ServerState( ~tid, 'S3'",
+        "SessionKey("
+        "RMode(",
+        "F_SecretPSK( $A",
+        "!Pk( $C, pk(~ltkC)"
     ], lines)
 elif argv[1] == "dh_chal_dual":
     match = match_against_list([
@@ -126,7 +146,35 @@ elif argv[1] == "dh_chal_dual":
         "!KU( $g^(~y*",
         "!KU( ~ticket"
     ], lines)
+elif argv[1] == "rev_dh_before_hs":
+    match = match_against_list([
+        "ServerState( ~tid, 'S1'",
+    ], lines)
+elif argv[1] == "invariant_post_hs":
+    match = match_against_list([
+        "RRMS",
+    ], lines)
+elif argv[1] == "handshake_secret":
+    match = match_against_list([
+        " CHS(",
+        "RRMS(",
+        "∃ #j.",
+        " (∃ #r.",
+        "CIdentity( ~tid",
+        "ServerState( ~tid, 'S3'",
+        "ServerState( ~tid, 'S2d'",
+        "∃ aas2"
+    ], lines)
+elif argv[1] == "mutual_transcript_agreement":
+    match = match_against_list([
+    ], lines)
+elif argv[1] == "auth_psk":
+    match = match_against_list([
+        "ClientState( ~tid, 'C3'",
+        "ServerState( ~tid.1, 'S3'",
+        "CIdentity",
+        "RRMS"
+    ], lines)
 
 if match is not None:
     print(match)
-

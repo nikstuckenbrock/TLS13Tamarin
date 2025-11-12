@@ -2,7 +2,7 @@
     "config": {
         "global_max_cores": "max",
         "global_max_memory": "max",
-        "default_timeout": 24000,
+        "default_timeout": 48000,
         "output_directory": "./results"
     },
     "tamarin_versions": {
@@ -97,7 +97,12 @@
                     "name": "exists_C2d_PSK"
                 },
                 {
-                    "name": "exists_S4_NST"
+                    "name": "exists_S4_NST",
+                    "resources": {
+                        "max_cores": 24,
+                        "max_memory": 200,
+                        "timeout": 48000
+                    }
                 }
             ]
         },
@@ -172,7 +177,12 @@
                     "name": "one_C1_PSK_DHE_per_tid"
                 },
                 {
-                    "name": "one_S2a_per_tid"
+                    "name": "one_S2a_per_tid",
+                    "resources": {
+                        "max_cores": 24,
+                        "max_memory": 200,
+                        "timeout": 48000
+                    }
                 },
                 {
                     "name": "one_S2b_per_tid"
@@ -358,6 +368,9 @@
                     "name": "secret_session_keys"
                 },
                 {
+                    "name": "secret_session_keys_pfs"
+                },
+                {
                     "name": "unique_session_keys"
                 }
             ]
@@ -431,6 +444,9 @@
                 },
                 {
                     "name": "matching_sessions"
+                },
+                {
+                    "name": "invariant_post_hs"
                 }
             ]
         }
