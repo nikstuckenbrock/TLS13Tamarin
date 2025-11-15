@@ -73,10 +73,20 @@
                     "name": "exists_S2d"
                 },
                 {
-                    "name": "exists_C3"
+                    "name": "exists_C3",
+                    "resources": {
+                        "max_cores": 24,
+                        "max_memory": 300,
+                        "timeout": 48000
+                    }
                 },
                 {
-                    "name": "exists_S3"
+                    "name": "exists_S3",
+                    "resources": {
+                        "max_cores": 24,
+                        "max_memory": 300,
+                        "timeout": 48000
+                    }
                 },
                 {
                     "name": "exists_C1_PSK"
