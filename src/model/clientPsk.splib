@@ -272,7 +272,7 @@ rule recv_server_hello_psk:
         C1_PSK(~tid),
         Instance(~tid, $C, 'client'),
         RNonces(~tid, $C, 'client', <p_nc ,new_ns>),
-        Neq(serverRandom, HelloRetryRequestRandom()
+        Neq(serverRandom, HelloRetryRequestRandom())
     ]->
     [
         ClientState(
@@ -366,7 +366,7 @@ rule recv_server_hello_psk_dhe:
         Instance(~tid, $C, 'client'),
         DHChal($g, ~x, new_y, p_gx, gy, gxy),
         RNonces(~tid, $C, 'client', <p_nc, new_ns>),
-        Neq(serverRandom, HelloRetryRequestRandom()
+        Neq(serverRandom, HelloRetryRequestRandom())
     ]->
     [
         ClientState(
@@ -460,7 +460,7 @@ rule recv_server_auth_psk:
         CHS(~tid, $C, 'client', <p_hs>),
         CNonces(~tid, $C, 'client', <p_nc, p_ns>),
         CTranscript(~tid, $C, 'client', <messages>),
-        Neq(serverRandom, HelloRetryRequestRandom()
+        Neq(serverRandom, HelloRetryRequestRandom())
     ]->
     [
         ClientState(
