@@ -227,6 +227,7 @@ rule recv_server_hello:
         Instance(~tid, $C, 'client'),
         Neq(gy, $g),
         Neq(gxy, $g),
+        Neq(serverRandom, HelloRetryRequestRandom(),
         DHChal($g, p_x, new_y, p_gx, gy, gxy),
         RNonces(~tid, $C, 'client', <p_nc, serverRandom>)
     ]->
