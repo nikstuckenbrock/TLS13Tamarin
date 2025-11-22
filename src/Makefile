@@ -76,8 +76,12 @@ secretHelpers:
 	$(TAMARIN) -DsecretHelpers --prove=matching_rms_actors tls13.spthy --output=../proofs/secret_helpers.matching_rms_actors.spthy >> ../logs/secret_helpers.log 2>&1
 	$(TAMARIN) -DsecretHelpers --prove=matching_sessions tls13.spthy --output=../proofs/secret_helpers.matching_sessions.spthy >> ../logs/secret_helpers.log 2>&1
 	$(TAMARIN) -DsecretHelpers --prove=invariant_post_hs tls13.spthy --output=../proofs/secret_helpers.invariant_post_hs.spthy >> ../logs/secret_helpers.log 2>&1
+	$(TAMARIN) -DsecretHelpers --prove=matching_hsms tls13.spthy --output=../proofs/secret_helpers.matching_hsms.spthy >> ../logs/secret_helpers.log 2>&1
+	$(TAMARIN) -DsecretHelpers --prove=post_master_secret tls13.spthy --output=../proofs/secret_helpers.post_master_secret.spthy >> ../logs/secret_helpers.log 2>&1
 
 lemmata:
 	$(TAMARIN) -Dlemmas --prove=secret_session_keys tls13.spthy --output=../proofs/lemmas.secret_session_keys.spthy >> ../logs/lemmas.log 2>&1
 	$(TAMARIN) -Dlemmas --prove=secret_session_keys_pfs tls13.spthy --output=../proofs/lemmas.secret_session_keys.spthy >> ../logs/lemmas.log 2>&1
 	$(TAMARIN) -Dlemmas --prove=unique_session_keys tls13.spthy --output=../proofs/lemmas.unique_session_keys.spthy >> ../logs/lemmas.log 2>&1
+	$(TAMARIN) -Dlemmas --prove=entity_authentication tls13.spthy --output=../proofs/lemmas.entity_authentication.spthy >> ../logs/lemmas.log 2>&1
+	$(TAMARIN) -Dlemmas --prove=injective_mutual_entity_authentication --output=../proofs/lemmas.injective_mutual_entity_authentication.spthy >> ../logs/lemmas.log 2>&1

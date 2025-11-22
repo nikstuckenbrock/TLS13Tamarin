@@ -405,6 +405,12 @@
                 },
                 {
                     "name": "unique_session_keys"
+                },
+                {
+                    "name": "entity_authentication"
+                },
+                {
+                    "name": "injective_mutual_entity_authentication"
                 }
             ]
         },
@@ -480,6 +486,12 @@
                 },
                 {
                     "name": "invariant_post_hs"
+                },
+                {
+                    "name": "matching_hsms"
+                },
+                {
+                    "name": "post_master_secret"
                 }
             ]
         }
