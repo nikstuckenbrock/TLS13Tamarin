@@ -22,10 +22,10 @@ The Multiset-Rewriting-Rules are split into several security protocol library fi
 1. abc
 2. ab
 3. ab
-4. Rules related to the default key update defined in [RFC 8446 Section 4.6.3](https://datatracker.ietf.org/doc/html/rfc8446#section-4.6.3).
+4. Rules related to the default key update defined in [RFC 8446 Section 4.6.3](https://datatracker.ietf.org/doc/html/rfc8446#section-4.6.3). [More](./key_update.md)
 5. ab
 6. ab
-7. ab
+7. Contains the rules dictating the public-key infrastructure. [More](./public_key_infrastructure.md)
 8. ab
 9. ab
 10. abc
