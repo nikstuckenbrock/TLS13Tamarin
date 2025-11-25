@@ -3,7 +3,7 @@
 This site serves a description of the Tamarin Prover TLS 1.3 model.
 The model has already undergone several revisions of TLS and is now at the level of [RFC 8446](https://datatracker.ietf.org/doc/html/rfc8446) (with a few restrictions).
 You can find a brief overview of the models history also including some forks and variants of the model in the [history](./history/index.md) section.
-The documentation is split into multiple sections
+The documentation is split into multiple sections:
 
 <div class="grid cards" markdown>
 
