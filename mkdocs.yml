@@ -21,9 +21,15 @@ theme:
         name: Switch to system preference
   features:
     - content.code.annotate
+    - content.code.copy
     - navigation.tabs
     - navigation.tabs.sticky
-markdown_extensions: 
+    - navigation.path
+    - navigation.indexes
+    - toc.integrate
+    - navigation.top
+markdown_extensions:
+  - neoteroi.timeline
   - abbr
   - attr_list
   - md_in_html
