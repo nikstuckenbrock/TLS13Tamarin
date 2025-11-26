@@ -29,7 +29,6 @@ theme:
     - toc.integrate
     - navigation.top
 markdown_extensions:
-  - neoteroi.timeline
   - abbr
   - attr_list
   - md_in_html
