@@ -31,4 +31,12 @@ The documentation is split into multiple sections:
 
     [:octicons-arrow-right-24: Getting started](#)
 
+- :material-script-text:{ .lg .middle } __RFC Mapping__
+
+    ---
+
+    Annotated RFC 8446 to explain mapping to the model.
+
+    [:octicons-arrow-right-24: Getting started](#)
+
 </div>
