@@ -21,7 +21,7 @@ struct {
 ///
 
 /// html | div[style='float: left; width: 50%; padding: 5px;']
-```
+```title="macros.splib"
 DataRecord(data) = <data, '23'>
 ```
 ///
@@ -29,8 +29,11 @@ DataRecord(data) = <data, '23'>
 /// html | div[style='clear: both;']
 ///
 
+Sending and receiving data is modelled by sending and receiving some fresh term `~data`.
+The keys used for encryption are stored in the `SendStream` and `RecvStream` facts which are introduced [here]().
+
 /// html | div[style='float: left; width: 50%; padding: 5px;']
-```
+```title="record.splib"
 rule send:
     [
         SendStream(~tid, $actor, $peer, auth_status, app_key_out),
@@ -48,7 +51,7 @@ rule send:
 ///
 
 /// html | div[style='float: left; width: 50%; padding: 5px;']
-```
+```title="record.splib"
 rule recv:
     [
         RecvStream(~tid, $actor, $peer, auth_status, app_key_in),
