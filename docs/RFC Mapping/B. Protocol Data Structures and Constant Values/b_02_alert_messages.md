@@ -1,0 +1,1 @@
+# [B.2. Alert Messages](https://datatracker.ietf.org/doc/html/rfc8446#section-B.2)

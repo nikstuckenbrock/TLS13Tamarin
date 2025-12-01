@@ -13,7 +13,7 @@ The documentation is split into multiple sections:
 
     The model itself containing all necessary Multiset-Rewriting-Rules
 
-    [:octicons-arrow-right-24: Getting started](#)
+    [:octicons-arrow-right-24: More](./model/index.md)
 
 -   :material-security-network:{ .lg .middle } __Lemmas__
 
@@ -21,7 +21,7 @@ The documentation is split into multiple sections:
 
     Focus on your content and generate a responsive and searchable static site
 
-    [:octicons-arrow-right-24: Getting started](#)
+    [:octicons-arrow-right-24: More](./history/index.md)
 
 - :material-history:{ .lg .middle } __History__
 
@@ -29,7 +29,7 @@ The documentation is split into multiple sections:
 
     Brief overview of older revisions of the model and some forks and variants.
 
-    [:octicons-arrow-right-24: Getting started](#)
+    [:octicons-arrow-right-24: More](./history/index.md)
 
 - :material-script-text:{ .lg .middle } __RFC Mapping__
 
@@ -37,6 +37,6 @@ The documentation is split into multiple sections:
 
     Annotated RFC 8446 to explain mapping to the model.
 
-    [:octicons-arrow-right-24: Getting started](#)
+    [:octicons-arrow-right-24: More](./RFC%20Mapping/index.md)
 
 </div>
