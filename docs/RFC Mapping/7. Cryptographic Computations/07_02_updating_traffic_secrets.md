@@ -1,0 +1,1 @@
+# [7.2. Updating Traffic Secrets](https://datatracker.ietf.org/doc/html/rfc8446#section-7.2)
