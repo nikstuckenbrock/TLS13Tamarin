@@ -13,7 +13,6 @@ graph LR
     D --> F
 ```
 
-
 ```python
 📦TLS13Tamarin
  ┗ 📂src
@@ -42,3 +41,14 @@ graph LR
 9. 
 10. 
 11. 
+
+Lemmas are related to TLS security properties as follows:
+
+| **Security Property** 	| **Lemma** 	|
+|-----------	|----------	|
+| 0         	|          	|
+| 1         	|          	|
+| 2         	|          	|
+| 3         	|          	|
+| 4         	|          	|
+| 5         	|          	|
