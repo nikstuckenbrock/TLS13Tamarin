@@ -78,7 +78,6 @@ rule recv_hello_retry_request:
 let
     g1 = $g1
     g2 = $g2
-    prev_sg = <g1, g2>
     prev_g = g1
     prev_hrr = '0'
     set_state()
