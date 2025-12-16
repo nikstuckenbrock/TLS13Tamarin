@@ -39,22 +39,22 @@ The documentation is split into multiple sections:
 
 </div>
 
-- [ ] 1.Introduction
-- [ ] 1.1.Conventions and Terminology
-- [ ] 1.2.Major Differences from TLS 1.2
-- [ ] 1.3.Updates Affecting TLS 1.2
+- [x] 1.Introduction
+- [x] 1.1.Conventions and Terminology
+- [x] 1.2.Major Differences from TLS 1.2
+- [x] 1.3.Updates Affecting TLS 1.2
 - [ ] 2.Protocol Overview
 - [ ] 2.1.Incorrect DHE Share
 - [ ] 2.2.Resumption and Pre-Shared Key (PSK)
 - [ ] 2.3.0-RTT Data
-- [ ] 3.Presentation Language
-- [ ] 3.1.Basic Block Size
-- [ ] 3.2.Miscellaneous
-- [ ] 3.3.Numbers
-- [ ] 3.4.Vectors
-- [ ] 3.5.Enumerateds
+- [x] 3.Presentation Language
+- [x] 3.1.Basic Block Size
+- [x] 3.2.Miscellaneous
+- [x] 3.3.Numbers
+- [x] 3.4.Vectors
+- [x] 3.5.Enumerateds
 - [ ] 3.6.Constructed Types
-- [ ] 3.7.Constants
+- [x] 3.7.Constants
 - [ ] 3.8.Variants
 - [ ] 4.Handshake Protocol
 - [ ] 4.1.Key Exchange Messages
@@ -102,9 +102,9 @@ The documentation is split into multiple sections:
 - [ ] 5.3.Per-Record Nonce
 - [ ] 5.4.Record Padding
 - [ ] 5.5.Limits on Key Usage
-- [ ] 6.Alert Protocol
-- [ ] 6.1.Closure Alerts
-- [ ] 6.2.Error Alerts
+- [x] 6.Alert Protocol
+- [x] 6.1.Closure Alerts
+- [x] 6.2.Error Alerts
 - [ ] 7.Cryptographic Computations
 - [ ] 7.1.Key Schedule
 - [ ] 7.2.Updating Traffic Secrets
@@ -131,7 +131,7 @@ The documentation is split into multiple sections:
 - [ ] A.2.Server
 - [ ] B.Protocol Data Structures and Constant Values
 - [ ] B.1.Record Layer
-- [ ] B.2.Alert Messages
+- [x] B.2.Alert Messages
 - [ ] B.3.Handshake Protocol
 - [ ] B.3.1.Key Exchange Messages
 - [ ] B.3.1.1.Version Extension

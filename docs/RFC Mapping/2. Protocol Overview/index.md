@@ -49,7 +49,6 @@ Auth | {CertificateVerify*}
 ///
 
 /// html | div[style='float: right;width: 50%; padding: 2px;']
-[markdown here]
 ///
 
 /// html | div[style='clear: both;']
