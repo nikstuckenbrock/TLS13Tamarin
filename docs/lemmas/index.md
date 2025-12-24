@@ -1,6 +1,7 @@
 # Lemmas
 
 All lemmas are located in the `src/lemmas` subfolder.
+They are splitted into several groups which then are
 
 ```mermaid
 graph LR
@@ -38,9 +39,9 @@ graph LR
 6. ab
 7. 
 8. Sanity checks to proof that all states are reachable.
-9. 
+9. Global restrictions for the model and also source lemmas.
 10. 
-11. 
+11. Checks that states are unique in a given session.
 
 Lemmas are related to TLS security properties as follows:
 
