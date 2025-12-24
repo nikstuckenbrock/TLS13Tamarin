@@ -96,12 +96,12 @@ The documentation is split into multiple sections:
 - [ ] 4.6.1.New Session Ticket Message
 - [ ] 4.6.2.Post-Handshake Authentication
 - [ ] 4.6.3.Key and Initialization Vector Update
-- [ ] 5.Record Protocol
-- [ ] 5.1.Record Layer
-- [ ] 5.2.Record Payload Protection
-- [ ] 5.3.Per-Record Nonce
-- [ ] 5.4.Record Padding
-- [ ] 5.5.Limits on Key Usage
+- [x] 5.Record Protocol
+- [x] 5.1.Record Layer
+- [x] 5.2.Record Payload Protection
+- [x] 5.3.Per-Record Nonce
+- [x] 5.4.Record Padding
+- [x] 5.5.Limits on Key Usage
 - [x] 6.Alert Protocol
 - [x] 6.1.Closure Alerts
 - [x] 6.2.Error Alerts
@@ -122,10 +122,10 @@ The documentation is split into multiple sections:
 - [ ] 9.2.Mandatory-to-Implement Extensions
 - [ ] 9.3.Protocol Invariants
 - [ ] 10.Security Considerations
-- [ ] 11.IANA Considerations
-- [ ] 12.References
-- [ ] 12.1.Normative References
-- [ ] 12.2.Informative References
+- [x] 11.IANA Considerations
+- [x] 12.References
+- [x] 12.1.Normative References
+- [x] 12.2.Informative References
 - [ ] A.State Machine
 - [ ] A.1.Client
 - [ ] A.2.Server
@@ -149,12 +149,12 @@ The documentation is split into multiple sections:
 - [ ] C.3.Implementation Pitfalls
 - [ ] C.4.Client Tracking Prevention
 - [ ] C.5.Unauthenticated Operation
-- [ ] D.Backward Compatibility
-- [ ] D.1.Negotiating with an Older Server
-- [ ] D.2.Negotiating with an Older Client
-- [ ] D.3.0-RTT Backward Compatibility
-- [ ] D.4.Middlebox Compatibility Mode
-- [ ] D.5.Security Restrictions Related to Backward Compatibility
+- [x] D.Backward Compatibility
+- [x] D.1.Negotiating with an Older Server
+- [x] D.2.Negotiating with an Older Client
+- [x] D.3.0-RTT Backward Compatibility
+- [x] D.4.Middlebox Compatibility Mode
+- [x] D.5.Security Restrictions Related to Backward Compatibility
 - [ ] E.Overview of Security Properties
 - [ ] E.1.Handshake
 - [ ] E.1.1.Key Derivation and HKDF

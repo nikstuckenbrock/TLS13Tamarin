@@ -4,3 +4,6 @@
 *[IETF]: Internet Engineering Task Force
 *[PSK]: Pre-Shared Key
 *[TLS]: Transport Layer Security
+*[DHE]: Diffie-Hellman
+*[EC]: Elliptic Curve
+*[IANA]: Internet Assigned Numbers Authority

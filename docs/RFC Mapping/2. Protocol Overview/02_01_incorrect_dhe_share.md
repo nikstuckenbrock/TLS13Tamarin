@@ -45,5 +45,5 @@ described in the following sections.
 
 /// html | div[style='float: left; width: 50%; padding: 5px;']
 The `HelloRetryRequest` mentioned in section 2.1. of the draft is actually a special `ServerHello` message which is defined in detail in [section 4.1.3.](https://datatracker.ietf.org/doc/html/rfc8446#section-4.1.3) of the RFC.
-You can find details of the modelled HelloRetryRequest [here](./../model/hello_retry_request.md).
+You can find details of the modelled HelloRetryRequest [here](./../../model/hello_retry_request.md).
 ///

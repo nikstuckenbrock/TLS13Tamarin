@@ -1,4 +1,4 @@
-# 5.1. Record Layer
+# [5.1. Record Layer](https://datatracker.ietf.org/doc/html/rfc8446#section-5.1)
 
 /// html | div[style='float: left; width: 50%; padding: 5px;']
 ```title="RFC 8446"
@@ -21,7 +21,7 @@ struct {
 ///
 
 /// html | div[style='float: left; width: 50%; padding: 5px;']
-```title="macros.splib"
+```title="src/model/macros.splib"
 DataRecord(data) = <data, '23'>
 ```
 ///
@@ -33,7 +33,7 @@ Sending and receiving data is modelled by sending and receiving some fresh term 
 The keys used for encryption are stored in the `SendStream` and `RecvStream` facts which are introduced [here]().
 
 /// html | div[style='float: left; width: 50%; padding: 5px;']
-```title="record.splib"
+```title="src/model/record.splib"
 rule send:
     [
         SendStream(~tid, $actor, $peer, auth_status, app_key_out),
@@ -51,7 +51,7 @@ rule send:
 ///
 
 /// html | div[style='float: left; width: 50%; padding: 5px;']
-```title="record.splib"
+```title="src/model/record.splib"
 rule recv:
     [
         RecvStream(~tid, $actor, $peer, auth_status, app_key_in),
