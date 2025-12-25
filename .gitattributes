@@ -1,0 +1,2 @@
+*development.spthy filter=lfs diff=lfs merge=lfs -text
+*stable.spthy filter=lfs diff=lfs merge=lfs -text
