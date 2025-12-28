@@ -1,0 +1,28 @@
+#include "oneOf.splib"
+
+lemma tid_invariant [use_induction, reuse]:
+  "All tid actor role #i. Instance(tid, actor, role)@i==>
+      (Ex #j. Start(tid, actor, role)@j & (#j < #i))"
+
+lemma one_start_per_tid [reuse]:
+  "All tid actor actor2 role role2 #i #j. Start(tid, actor, role)@i & Start(tid, actor2, role2)@j ==>#i=#j"
+
+lemma dh_exp_invariant  [use_induction, reuse]:
+  "All tid actor x #i. RevDHExp(tid, actor, x)@i ==>
+    Ex #j. DH(tid, actor, x)@j & #j < i"
+
+lemma one_dh_per_x  [reuse]:
+  "All tid tid2 x actor actor2 #i #j. 
+    DH(tid, actor, x)@i & DH(tid2, actor2, x)@j ==> #i = #j"
+
+lemma rev_dh_ordering  [reuse, use_induction]:
+  "All tid actor x #j. 
+    DeleteDH(tid, actor, x)@j==>
+      ((Ex #i. DH(tid, actor, x) @ i & i < j) & 
+       (All #r. RevDHExp(tid, actor, x) @ r  ==>  r < j))"
+
+lemma rev_dh_before_hs  [reuse]:
+  "All tid actor role hs x #i #j.
+    RHS(tid, actor, role, <hs>)@j &
+    RevDHExp(tid, actor, x)@i ==>
+    #i < #j"

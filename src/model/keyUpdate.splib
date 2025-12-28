@@ -1,0 +1,502 @@
+rule update_req_client:
+    let
+        cats = Expand(p_cats, <'ats', '0'>, '32')
+        app_keyc = Expand(cats, <'TLS13applicationdatakeyexpansion_key', '0'>, '32')
+        message = KeyUpdate(KeyUpdateUpdateRequested())
+    in
+    [
+        SendStream(~tid, $C, $S, p_auth_status, p_app_keyc),
+        F_State_C4(
+            ~tid,
+            $C,
+            $S,
+            p_res_psk,
+            p_messages,
+            p_nc,
+            p_ns,
+            p_g,
+            p_sg,
+            p_hrr,
+            p_x,
+            p_y,
+            p_gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            p_hs,
+            p_ms,
+            p_cats,
+            p_sats,
+            p_hs_keyc,
+            p_hs_keys,
+            p_auth_status,
+            p_ems,
+            p_rms,
+            p_cert_req
+        )
+    ]
+    --[
+        C4_update_req(~tid),
+        Instance(~tid, $C, 'client'),
+        RPostHS(~tid, $C, 'client', <p_hs, p_rms, $S, p_auth_status, p_messages>)
+    ]->
+    [
+        MessageOut(senc{message}p_app_keyc),
+        SendStream(~tid, $C, $S, p_auth_status, app_keyc),
+        F_State_C4(
+            ~tid,
+            $C,
+            $S,
+            p_res_psk,
+            p_messages,
+            p_nc,
+            p_ns,
+            p_g,
+            p_sg,
+            p_hrr,
+            p_x,
+            p_y,
+            p_gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            p_hs,
+            p_ms,
+            cats,
+            p_sats,
+            p_hs_keyc,
+            p_hs_keys,
+            p_auth_status,
+            p_ems,
+            p_rms,
+            p_cert_req
+        )
+    ]
+
+rule update_recv_server:
+    let
+        receivedMessage = KeyUpdate(KeyUpdateUpdateRequested())
+
+        cats = Expand(p_cats, <'ats', '0'>, '32')
+        sats = Expand(p_sats, <'ats', '0'>, '32')
+        app_keyc = Expand(cats, <'TLS13applicationdatakeyexpansion_key', '0'>, '32')
+        app_keys = Expand(sats, <'TLS13applicationdatakeyexpansion_key', '0'>, '32')
+
+        message = KeyUpdate(KeyUpdateUpdateNotRequested())
+    in
+    [
+        F_State_S4(
+            ~tid,
+            $S,
+            $C,
+            p_res_psk,
+            p_messages,
+            p_nc,
+            p_ns,
+            p_g,
+            p_sg,
+            p_hrr,
+            p_x,
+            p_y,
+            p_gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            p_hs,
+            p_ms,
+            p_cats,
+            p_sats,
+            p_hs_keyc,
+            p_hs_keys,
+            p_auth_status,
+            p_ems,
+            p_rms,
+            p_cert_req
+        ),
+        RecvStream(~tid, $S, $C, p_auth_status, p_app_keyc),
+        SendStream(~tid, $S, $C, p_auth_status, p_app_keys),
+        F_MessageIn(senc{receivedMessage}p_app_keyc)
+    ]
+    --[
+        S4_update_recv(~tid),
+        Instance(~tid, $S, 'server'),
+        RPostHS(~tid, $S, 'server', <p_hs, p_rms, $C, p_auth_status, p_messages>)
+    ]->
+    [
+        RecvStream(~tid, $S, $C, p_auth_status, app_keyc),
+        SendStream(~tid, $S, $C, p_auth_status, app_keys),
+        MessageOut(senc{message}p_app_keys),
+        F_State_S4(
+            ~tid,
+            $S,
+            $C,
+            p_res_psk,
+            p_messages,
+            p_nc,
+            p_ns,
+            p_g,
+            p_sg,
+            p_hrr,
+            p_x,
+            p_y,
+            p_gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            p_hs,
+            p_ms,
+            cats,
+            sats,
+            p_hs_keyc,
+            p_hs_keys,
+            p_auth_status,
+            p_ems,
+            p_rms,
+            p_cert_req
+        )
+    ]
+
+rule update_fin_client:
+    let
+        sats = Expand(p_sats, <'ats', '0'>, '32')
+        app_keys = Expand(sats, <'TLS13applicationdatakeyexpansion_key', '0'>, '32')
+
+        receivedMessage = KeyUpdate(KeyUpdateUpdateNotRequested())
+    in
+    [
+        RecvStream(~tid, $C, $S, p_auth_status, p_app_keys),
+        F_MessageIn(senc{receivedMessage}p_app_keys),
+        F_State_C4(
+            ~tid,
+            $C,
+            $S,
+            p_res_psk,
+            p_messages,
+            p_nc,
+            p_ns,
+            p_g,
+            p_sg,
+            p_hrr,
+            p_x,
+            p_y,
+            p_gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            p_hs,
+            p_ms,
+            p_cats,
+            p_sats,
+            p_hs_keyc,
+            p_hs_keys,
+            p_auth_status,
+            p_ems,
+            p_rms,
+            p_cert_req
+        )
+    ]
+    --[
+        C4_update_fin(~tid),
+        Instance(~tid, $C, 'client'),
+        RPostHS(~tid, $C, 'client', <p_hs, p_rms, $S, p_auth_status, p_messages>)
+    ]->
+    [
+        RecvStream(~tid, $C, $S, p_auth_status, app_keys),
+        F_State_C4(
+            ~tid,
+            $C,
+            $S,
+            p_res_psk,
+            p_messages,
+            p_nc,
+            p_ns,
+            p_g,
+            p_sg,
+            p_hrr,
+            p_x,
+            p_y,
+            p_gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            p_hs,
+            p_ms,
+            p_cats,
+            sats,
+            p_hs_keyc,
+            p_hs_keys,
+            p_auth_status,
+            p_ems,
+            p_rms,
+            p_cert_req
+        )
+    ]
+
+rule update_req_server:
+    let
+        sats = Expand(p_sats, <'ats', '0'>, '32')
+        app_keys = Expand(sats, <'TLS13applicationdatakeyexpansion_key', '0'>, '32')
+        message = KeyUpdate(KeyUpdateUpdateRequested())
+    in
+    [
+        SendStream(~tid, $S, $C, p_auth_status, p_app_keys),
+        F_State_S4(
+            ~tid,
+            $S,
+            $C,
+            p_res_psk,
+            p_messages,
+            p_nc,
+            p_ns,
+            p_g,
+            p_sg,
+            p_hrr,
+            p_x,
+            p_y,
+            p_gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            p_hs,
+            p_ms,
+            p_cats,
+            p_sats,
+            p_hs_keyc,
+            p_hs_keys,
+            p_auth_status,
+            p_ems,
+            p_rms,
+            p_cert_req
+        )
+    ]
+    --[
+        S4_update_req(~tid),
+        Instance(~tid, $S, 'server'),
+        RPostHS(~tid, $S, 'server', <p_hs, p_rms, $C, p_auth_status, p_messages>)
+    ]->
+    [
+        MessageOut(senc{message}p_app_keys),
+        F_State_S4(
+            ~tid,
+            $S,
+            $C,
+            p_res_psk,
+            p_messages,
+            p_nc,
+            p_ns,
+            p_g,
+            p_sg,
+            p_hrr,
+            p_x,
+            p_y,
+            p_gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            p_hs,
+            p_ms,
+            p_cats,
+            sats,
+            p_hs_keyc,
+            p_hs_keys,
+            p_auth_status,
+            p_ems,
+            p_rms,
+            p_cert_req
+        )
+    ]
+
+rule update_recv_client:
+    let
+        receivedMessage = KeyUpdate(KeyUpdateUpdateRequested())
+
+        cats = Expand(p_cats, <'ats', '0'>, '32')
+        sats = Expand(p_sats, <'ats', '0'>, '32')
+        app_keyc = Expand(cats, <'TLS13applicationdatakeyexpansion_key', '0'>, '32')
+        app_keys = Expand(sats, <'TLS13applicationdatakeyexpansion_key', '0'>, '32')
+
+        message = KeyUpdate(KeyUpdateUpdateNotRequested())
+    in
+    [
+        RecvStream(~tid, $C, $S, p_auth_status, p_app_keys),
+        SendStream(~tid, $C, $S, p_auth_status, p_app_keyc),
+        F_MessageIn(senc{receivedMessage}p_app_keys),
+        F_State_C4(
+            ~tid,
+            $C,
+            $S,
+            p_res_psk,
+            p_messages,
+            p_nc,
+            p_ns,
+            p_g,
+            p_sg,
+            p_hrr,
+            p_x,
+            p_y,
+            p_gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            p_hs,
+            p_ms,
+            p_cats,
+            p_sats,
+            p_hs_keyc,
+            p_hs_keys,
+            p_auth_status,
+            p_ems,
+            p_rms,
+            p_cert_req
+        )
+    ]
+    --[
+        C4_update_recv(~tid),
+        Instance(~tid, $C, 'client'),
+        RPostHS(~tid, $C, 'client', <p_hs, p_rms, $S, p_auth_status, p_messages>)
+    ]->
+    [
+        RecvStream(~tid, $C, $S, p_auth_status, app_keys),
+        SendStream(~tid, $C, $S, p_auth_status, app_keyc),
+        MessageOut(senc{message}p_app_keyc),
+        F_State_C4(
+            ~tid,
+            $C,
+            $S,
+            p_res_psk,
+            p_messages,
+            p_nc,
+            p_ns,
+            p_g,
+            p_sg,
+            p_hrr,
+            p_x,
+            p_y,
+            p_gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            p_hs,
+            p_ms,
+            cats,
+            sats,
+            p_hs_keyc,
+            p_hs_keys,
+            p_auth_status,
+            p_ems,
+            p_rms,
+            p_cert_req
+        )
+    ]
+
+rule update_fin_server:
+    let
+        receivedMessage = KeyUpdate(KeyUpdateUpdateNotRequested())
+
+        cats = Expand(p_cats, <'ats', '0'>, '32')
+        app_keyc = Expand(cats, <'TLS13applicationdatakeyexpansion_key', '0'>, '32')
+    in
+    [
+        F_MessageIn(senc{receivedMessage}p_app_keyc),
+        RecvStream(~tid, $S, $C, p_auth_status, p_app_keyc),
+        F_State_S4(
+            ~tid,
+            $S,
+            $C,
+            p_res_psk,
+            p_messages,
+            p_nc,
+            p_ns,
+            p_g,
+            p_sg,
+            p_hrr,
+            p_x,
+            p_y,
+            p_gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            p_hs,
+            p_ms,
+            p_cats,
+            p_sats,
+            p_hs_keyc,
+            p_hs_keys,
+            p_auth_status,
+            p_ems,
+            p_rms,
+            p_cert_req
+        )
+    ]
+    --[
+        S4_update_fin(~tid),
+        Instance(~tid, $S, 'server'),
+        RPostHS(~tid, $S, 'server', <p_hs, p_rms, $C, p_auth_status, p_messages>)
+    ]->
+    [
+        RecvStream(~tid, $S, $C, p_auth_status, app_keyc),
+        F_State_S4(
+            ~tid,
+            $S,
+            $C,
+            p_res_psk,
+            p_messages,
+            p_nc,
+            p_ns,
+            p_g,
+            p_sg,
+            p_hrr,
+            p_x,
+            p_y,
+            p_gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            p_hs,
+            p_ms,
+            cats,
+            p_sats,
+            p_hs_keyc,
+            p_hs_keys,
+            p_auth_status,
+            p_ems,
+            p_rms,
+            p_cert_req
+        )
+    ]

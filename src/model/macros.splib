@@ -1,0 +1,60 @@
+macros:
+    // https://datatracker.ietf.org/doc/html/rfc8446#section-4
+    Handshake(msg_type, content) = <msg_type, content>,
+
+    // https://datatracker.ietf.org/doc/html/rfc8446#appendix-B.3
+    HandshakeMessageTypeClientHello() = '1',
+    HandshakeMessageTypeServerHello() = '2',
+    HandshakeMessageTypeNewSessionTicket() = '4',
+    HandshakeMessageTypeHelloRetryRequest() = '6',
+    HandshakeMessageTypeEncryptedExtensions() = '8',
+    HandshakeMessageTypeCertificate() = '11',
+    HandshakeMessageTypeCertificateRequest() = '13',
+    HandshakeMessageTypeCertificateVerify() = '15',
+    HandshakeMessageTypeFinished() = '20',
+    HandshakeMessageTypeKeyUpdate() = '24',
+
+    ProtocolVersion() = '0x0303',
+
+    Extension(extension_type, extension_data) = <extension_type, extension_data>,
+    ExtensionSupportedVersions() = Extension('43', ProtocolVersion()),
+    ExtensionNamedGroupdList(supported_groups) = Extension('10', supported_groups),
+    ExtensionSignatureSchemeList(supported_signature_algorithms) = Extension('13', supported_signature_algorithms),
+    KeyShareEntry(named_group, key_exchange) = <named_group, key_exchange>,
+    ExtensionKeyShareClientHello(client_shares) = Extension('51', client_shares),
+    ExtensionKeyShareHelloRetryRequest(new_group) = Extension('51', new_group),
+    ExtensionKeyShareServerHello(server_share) = Extension('51', server_share),
+    ExtensionEarlyDataIndication() = Extension('42', <'0'>),
+    ExtensionPskKeyExchangeModes(ke_mode) = Extension('45', ke_mode),
+    ExtensionPreSharedKeyClientHello(identities, binders) = Extension('41', <identities, <binders>>),
+
+    // https://datatracker.ietf.org/doc/html/rfc8446#appendix-B.3.1
+    ClientHello(random, legacy_session_id, cipher_suites, legacy_compression_methods, extensions) = Handshake(HandshakeMessageTypeClientHello(), <random, legacy_session_id, cipher_suites, legacy_compression_methods, extensions>),
+
+    // https://datatracker.ietf.org/doc/html/rfc8446#section-4.1.3
+    ServerHello(random, legacy_session_id_echo, cipher_suite, legacy_compression_method, extensions) = Handshake(HandshakeMessageTypeServerHello(), <random, legacy_session_id_echo, cipher_suite, legacy_compression_method, extensions>),
+
+    HelloRetryRequest(extensions) = Handshake(HandshakeMessageTypeHelloRetryRequest(), <extensions>),
+
+    EncryptedExtensions(extensions) = Handshake(HandshakeMessageTypeEncryptedExtensions(), <extensions>),
+
+    // https://datatracker.ietf.org/doc/html/rfc8446#appendix-B.3.3
+    Certificate(certificate_request_context, certificate) = Handshake(HandshakeMessageTypeCertificate(), <certificate_request_context, certificate>),
+
+    // https://datatracker.ietf.org/doc/html/rfc8446#section-4.3.2
+    CertificateRequest(certificate_request_context, data) = Handshake(HandshakeMessageTypeCertificateRequest(), <certificate_request_context, data>),
+
+    // https://datatracker.ietf.org/doc/html/rfc8446#appendix-B.3.3
+    CertificateVerify(signature) = Handshake(HandshakeMessageTypeCertificateVerify(), <signature>),
+
+    // https://datatracker.ietf.org/doc/html/rfc8446#section-4.4.4
+    Finished(verify_data) = Handshake(HandshakeMessageTypeFinished(), <verify_data>),
+    
+    // https://datatracker.ietf.org/doc/html/rfc8446#section-4.6.3
+    KeyUpdateUpdateNotRequested() = '0',
+    KeyUpdateUpdateRequested() = '1',
+    KeyUpdate(update_requested) = Handshake(HandshakeMessageTypeKeyUpdate(), <update_requested>),
+
+    NewSessionTicket(ticket_lifetime, ticket_age_add, ticket, ticket_extension) = Handshake(HandshakeMessageTypeNewSessionTicket(), <ticket_lifetime, ticket_age_add, ticket, ticket_extension>),
+
+    DataRecord(data) = <data, '23'>

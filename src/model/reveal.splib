@@ -1,0 +1,16 @@
+rule Reveal_Ltk:
+  [
+    !Ltk($A, ~ltkA)
+  ]
+  --[
+    RevLtk($A)
+  ]->
+  [
+    MessageOut(~ltkA)
+  ]
+
+rule reveal_dh_exp:
+  [ DHExp(~x, ~tid, $A) ] --[ RevDHExp(~tid, $A,~x) ]-> [ MessageOut(~x), DHExp(~x, ~tid, $A) ]
+
+rule reveal_psk:
+    [ F_SecretPSK($A,res_psk)]--[ RevealPSK($A, res_psk) ]->[MessageOut(res_psk)]

@@ -1,0 +1,92 @@
+restriction one_actor_per_role:
+    "All actor actor2 nc nc2 role #i #j. Instance(nc, actor, role)@i & Instance(nc2, actor2, role)@j ==> actor = actor2"
+
+lemma exists_C0: exists-trace
+    "Ex tid #i. C0(tid)@i"
+
+lemma exists_S0: exists-trace
+    "Ex tid #i. S0(tid)@i"
+
+lemma exists_S1: exists-trace
+    "Ex tid #i. S1(tid)@i"
+
+lemma exists_S1_retry: exists-trace
+    "Ex tid #i. S1_retry(tid)@i"
+
+lemma exists_C1: exists-trace
+    "Ex tid #i. C1(tid)@i"
+
+lemma exists_C1_retry: exists-trace
+    "Ex tid #i. C1_retry(tid)@i"
+
+lemma exists_C1_PSK: exists-trace
+    "Ex tid #i. C1_PSK(tid)@i"
+
+lemma exists_C1_PSK_DHE: exists-trace
+    "Ex tid #i. C1_PSK_DHE(tid)@i"
+
+lemma exists_C1_retry_PSK: exists-trace
+    "Ex tid #i. C1_retry_PSK(tid)@i"
+
+lemma exists_C2a: exists-trace
+    "Ex tid #i. C2a(tid)@i"
+
+lemma exists_C2b: exists-trace
+    "Ex tid #i. C2b(tid)@i"
+
+lemma exists_C2c: exists-trace
+    "Ex tid #i. C2c(tid)@i"
+
+lemma exists_C2d: exists-trace
+    "Ex tid #i. C2d(tid)@i"
+
+lemma exists_C3: exists-trace
+    "Ex tid #i. C3(tid)@i"
+
+lemma exists_C0_PSK: exists-trace
+    "Ex tid #i. C0_PSK(tid)@i"
+
+lemma exists_S2a: exists-trace
+    "Ex tid #i. S2a(tid)@i"
+
+lemma exists_S2b: exists-trace
+    "Ex tid #i. S2b(tid)@i"
+
+lemma exists_S2c: exists-trace
+    "Ex tid #i. S2c(tid)@i"
+
+lemma exists_S2d: exists-trace
+    "Ex tid #i. S2d(tid)@i"
+
+lemma exists_S3: exists-trace
+    "Ex tid #i. S3(tid)@i"
+
+lemma exists_S3_cert: exists-trace
+    "Ex tid #i. S3_cert(tid)@i"
+
+lemma exists_S0_PSK: exists-trace
+    "Ex tid #i. S0_PSK(tid)@i"
+
+lemma exists_S1_PSK: exists-trace
+    "Ex tid #i. S1_PSK(tid)@i"
+
+lemma exists_S1_PSK_DHE: exists-trace
+    "Ex tid #i. S1_PSK_DHE(tid)@i"
+
+lemma exists_S2c_req: exists-trace
+    "Ex tid #i. S2c_req(tid)@i"
+
+lemma exists_C2c_req: exists-trace
+    "Ex tid #i. C2c_req(tid)@i"
+
+lemma exists_S2d_PSK: exists-trace
+    "Ex tid #i. S2d_PSK(tid)@i"
+
+lemma exists_C2d_PSK: exists-trace
+    "Ex tid #i. C2d_PSK(tid)@i"
+
+lemma exists_S4_NST: exists-trace
+    "Ex tid #i. S4_NST(tid)@i"
+
+lemma exists_C4_NST: exists-trace
+    "Ex tid #i. C4_NST(tid)@i"

@@ -1,0 +1,64 @@
+theory tls13
+begin
+
+builtins: diffie-hellman, hashing, symmetric-encryption, signing
+
+functions: Expand/3, Extract/2, hmac/1, mac/1, mask/2, unmask/2
+
+equations: unmask(mask(x, y), y) = x, unmask(mask(x, y), x) = y
+
+#include "lemmas/restrictions.splib"
+
+#ifdef reachability
+rule message_out_to_in:
+    [ MessageOut(message) ] --> [ F_MessageIn(message) ]
+#else
+rule message_out_to_out:
+    [ MessageOut(message) ] --> [ Out(message) ]
+
+rule message_in_to_in:
+    [ In(message) ] --> [ F_MessageIn(message) ]
+#endif
+
+#ifdef reachability
+#include "lemmas/onePerTid.splib"
+#include "lemmas/atMostOf.splib"
+#endif
+
+#include "model/reveal.splib"
+#include "model/earlyData.splib"
+#include "model/publicKeyInfrastructure.splib"
+#include "model/macros.splib"
+#include "model/client.splib"
+#include "model/clientPsk.splib"
+#include "model/server.splib"
+#include "model/serverPsk.splib"
+#include "model/postHandshake.splib"
+#include "model/keyUpdate.splib"
+#include "model/record.splib"
+
+#ifdef reachability
+#include "lemmas/reachability.splib"
+#endif
+
+#ifdef uniqueness
+#include "lemmas/uniqueness.splib"
+#endif
+
+#ifdef invariants
+#include "lemmas/invariants.splib"
+#endif
+
+#ifdef authHelpers
+#include "lemmas/authHelpers.splib"
+#endif
+
+#ifdef dhInj
+#include "lemmas/dhInj.splib"
+#endif
+
+#ifdef dhCal
+#include "lemmas/dhCal.splib"
+#endif
+
+end

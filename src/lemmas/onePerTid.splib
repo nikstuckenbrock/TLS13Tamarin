@@ -1,0 +1,140 @@
+restriction one_C0_per_tid:
+    "All tid #i #j. C0(tid)@i & C0(tid)@j ==> #i = #j"
+
+restriction one_C1_retry_per_tid:
+    "All tid #i #j. C1_retry(tid)@i & C1_retry(tid)@j ==> #i = #j"
+
+restriction one_S1_per_tid:
+    "All tid #i #j. S1(tid)@i & S1(tid)@j ==> #i = #j"
+
+restriction one_C1_per_tid:
+    "All tid #i #j. C1(tid)@i & C1(tid)@j ==> #i = #j"
+
+restriction one_S2a_per_tid:
+    "All tid #i #j. S2a(tid)@i & S2a(tid)@j ==> #i = #j"
+
+restriction one_S2b_per_tid:
+    "All tid #i #j. S2b(tid)@i & S2b(tid)@j ==> #i = #j"
+
+restriction one_S2c_per_tid:
+    "All tid #i #j. S2c(tid)@i & S2c(tid)@j ==> #i = #j"
+
+restriction one_S2c_req_per_tid:
+    "All tid #i #j. S2c_req(tid)@i & S2c_req(tid)@j ==> #i = #j"
+
+restriction one_S2d_per_tid:
+    "All tid #i #j. S2d(tid)@i & S2d(tid)@j ==> #i = #j"
+
+restriction one_C2a_per_tid:
+    "All tid #i #j. C2a(tid)@i & C2a(tid)@j ==> #i = #j"
+
+restriction one_C2b_per_tid:
+    "All tid #i #j. C2b(tid)@i & C2b(tid)@j ==> #i = #j"
+
+restriction one_C2c_per_tid:
+    "All tid #i #j. C2c(tid)@i & C2c(tid)@j ==> #i = #j"
+
+restriction one_C2c_req_per_tid:
+    "All tid #i #j. C2c_req(tid)@i & C2c_req(tid)@j ==> #i = #j"
+
+restriction one_C2d_per_tid:
+    "All tid #i #j. C2d(tid)@i & C2d(tid)@j ==> #i = #j"
+
+restriction one_C3_per_tid:
+    "All tid #i #j. C3(tid)@i & C3(tid)@j ==> #i = #j"
+
+restriction one_C3_cert_per_tid:
+    "All tid #i #j. C3_cert(tid)@i & C3_cert(tid)@j ==> #i = #j"
+
+restriction one_S3_per_tid:
+    "All tid #i #j. S3(tid)@i & S3(tid)@j ==> #i = #j"
+
+restriction one_S3_cert_per_tid:
+    "All tid #i #j. S3_cert(tid)@i & S3_cert(tid)@j ==> #i = #j"
+
+restriction one_Send_per_tid:
+    "All tid #i #j. Send(tid)@i & Send(tid)@j ==> #i = #j"
+
+restriction one_Recv_per_tid:
+    "All tid #i #j. Recv(tid)@i & Recv(tid)@j ==> #i = #j"
+
+restriction one_S4_NST_per_tid:
+    "All tid #i #j. S4_NST(tid)@i & S4_NST(tid)@j ==> #i = #j"
+
+restriction one_C4_NST_per_tid:
+    "All tid #i #j. C4_NST(tid)@i & C4_NST(tid)@j ==> #i = #j"
+
+restriction one_C0_PSK_per_tid:
+    "All tid #i #j. C0_PSK(tid)@i & C0_PSK(tid)@j ==> #i = #j"
+
+restriction one_S0_PSK_per_tid:
+    "All tid #i #j. S0_PSK(tid)@i & S0_PSK(tid)@j ==> #i = #j"
+
+restriction one_C_ZeroRTT_Auth_per_tid:
+    "All tid #i #j. C_ZeroRTT_Auth(tid)@i & C_ZeroRTT_Auth(tid)@j ==> #i = #j"
+
+restriction one_S_RecvZeroRTTAuth_per_tid:
+    "All tid #i #j. S_RecvZeroRTTAuth(tid)@i & S_RecvZeroRTTAuth(tid)@j ==> #i = #j"
+
+restriction one_C_EndZeroRTT_per_tid:
+    "All tid #i #j. C_EndZeroRTT(tid)@i & C_EndZeroRTT(tid)@j ==> #i = #j"
+
+restriction one_S_RecvEndZeroRTT_per_tid:
+    "All tid #i #j. S_RecvEndZeroRTT(tid)@i & S_RecvEndZeroRTT(tid)@j ==> #i = #j"
+
+restriction one_C_SendZeroRTT_per_tid:
+    "All tid #i #j. C_SendZeroRTT(tid)@i & C_SendZeroRTT(tid)@j ==> #i = #j"
+
+restriction one_S_RecvZeroRTT_per_tid:
+    "All tid #i #j. S_RecvZeroRTT(tid)@i & S_RecvZeroRTT(tid)@j ==> #i = #j"
+
+restriction one_S1_PSK_per_tid:
+    "All tid #i #j. S1_PSK(tid)@i & S1_PSK(tid)@j ==> #i = #j"
+
+restriction one_S1_PSK_DHE_per_tid:
+    "All tid #i #j. S1_PSK_DHE(tid)@i & S1_PSK_DHE(tid)@j ==> #i = #j"
+
+restriction one_C1_PSK_per_tid:
+    "All tid #i #j. C1_PSK(tid)@i & C1_PSK(tid)@j ==> #i = #j"
+
+restriction one_C1_retry_PSK_per_tid:
+    "All tid #i #j. C1_retry_PSK(tid)@i & C1_retry_PSK(tid)@j ==> #i = #j"
+
+restriction one_C1_PSK_DHE_per_tid:
+    "All tid #i #j. C1_PSK_DHE(tid)@i & C1_PSK_DHE(tid)@j ==> #i = #j"
+
+restriction one_S2d_PSK_per_tid:
+    "All tid #i #j. S2d_PSK(tid)@i & S2d_PSK(tid)@j ==> #i = #j"
+
+restriction one_C2d_PSK_per_tid:
+    "All tid #i #j. C2d_PSK(tid)@i & C2d_PSK(tid)@j ==> #i = #j"
+
+restriction one_S4_req_per_tid:
+    "All tid #i #j. S4_req(tid)@i & S4_req(tid)@j ==> #i = #j"
+
+restriction one_C4_req_per_tid:
+    "All tid #i #j. C4_req(tid)@i & C4_req(tid)@j ==> #i = #j"
+
+restriction one_S4_cert_per_tid:
+    "All tid #i #j. S4_cert(tid)@i & S4_cert(tid)@j ==> #i = #j"
+
+restriction one_C4_cert_per_tid:
+    "All tid #i #j. C4_cert(tid)@i & C4_cert(tid)@j ==> #i = #j"
+
+restriction one_C4_update_req_per_tid:
+    "All tid #i #j. C4_update_req(tid)@i & C4_update_req(tid)@j ==> #i = #j"
+
+restriction one_C4_update_recv_per_tid:
+    "All tid #i #j. C4_update_recv(tid)@i & C4_update_recv(tid)@j ==> #i = #j"
+
+restriction one_C4_update_fin_per_tid:
+    "All tid #i #j. C4_update_fin(tid)@i & C4_update_fin(tid)@j ==> #i = #j"
+
+restriction one_S4_update_req_per_tid:
+    "All tid #i #j. S4_update_req(tid)@i & S4_update_req(tid)@j ==> #i = #j"
+
+restriction one_S4_update_recv_per_tid:
+    "All tid #i #j. S4_update_recv(tid)@i & S4_update_recv(tid)@j ==> #i = #j"
+
+restriction one_S4_update_fin_per_tid:
+    "All tid #i #j. S4_update_fin(tid)@i & S4_update_fin(tid)@j ==> #i = #j"

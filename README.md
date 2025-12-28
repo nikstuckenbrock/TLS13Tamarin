@@ -1,12 +1,6 @@
-# TLS13Tamarin
-This is a Tamarin model of TLS 1.3
+# TLS 1.3 Tamarin model
 
-The most recent code is included in [src/rev21](src/rev21), however we provide previous
-versions for reference.
-
-For a detailed comparison between the specification and our model, please see:
-https://samscott89.github.io/TLS13_Tamarin
-
-For more background information, including our previous publication, please visit our [project page](http://tls13tamarin.github.io/TLS13Tamarin/).
-
-Proofs of the reproved lemmas can be found [here](https://github.com/nikstuckenbrock/TLS13Tamarin-proofs/tree/main/base-draft-21).
+This is a Tamarin Prover model of TLS 1.3.
+It is based on the [work from Cas Cremers, Marko Horvat, Jonathan Hoyland, Sam Scott and Thyla van der Merwe](https://tls13tamarin.github.io/TLS13Tamarin/).
+For a detailed information take a look at the [documentation](https://nikstuckenbrock.github.io/TLS13Tamarin/).
+The proofs generated for this model are too large to track in a forked repository, therefor the repository [nikstuckenbrock/TLS13Tamarin-proofs](https://github.com/nikstuckenbrock/TLS13Tamarin-proofs) holds all proofs.

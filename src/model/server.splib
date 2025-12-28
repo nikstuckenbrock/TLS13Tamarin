@@ -1,0 +1,1020 @@
+rule start_server:
+    [
+        Fr(~tid)
+    ]
+    --[
+        Start(~tid, $S, 'server'),
+        RIdentity(~tid, $S, 'server', <$S>)
+    ]->
+    [
+        F_State_S0(
+            ~tid,
+            $S,
+            $C,
+            '0',
+            '0',
+            '0',
+            '0',
+            '0',
+            $g,
+            '0',
+            '0',
+            '0',
+            '0',
+            '0',
+            '0',
+            'na',
+            '0',
+            '0',
+            '0',
+            '0',
+            '0',
+            '0',
+            '0',
+            '0',
+            '0',
+            <'0', '0'>,
+            '0',
+            '0',
+            '0'
+        )
+    ]
+
+rule recv_client_hello:
+    let
+        psk_ke_mode = 'na'
+        supported_groups = <$g1, $g2>
+        gx = $new_g^new_x
+        extensions = <
+            ExtensionSupportedVersions(),
+            ExtensionNamedGroupdList(supported_groups),
+            ExtensionSignatureSchemeList($sig_algs),
+            ExtensionKeyShareClientHello(KeyShareEntry($new_g, gx))
+        >
+        receivedMessage = ClientHello(new_nc, '0', $cipher_suites, '0', extensions)
+        messages = <p_messages, receivedMessage>
+        group = $new_g
+    in
+    [
+        F_MessageIn(receivedMessage),
+        Fr(~new_ns),
+        F_State_S0(
+            ~tid,
+            $S,
+            $C,
+            p_res_psk,
+            p_messages,
+            p_nc,
+            p_ns,
+            p_g,
+            p_sg,
+            p_hrr,
+            p_x,
+            p_y,
+            p_gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            p_hs,
+            p_ms,
+            p_cats,
+            p_sats,
+            p_hs_keyc,
+            p_hs_keys,
+            p_auth_status,
+            p_ems,
+            p_rms,
+            p_cert_req
+        )
+    ]
+    --[
+        S0(~tid),
+        Neq($g1, $g2)
+    ]->
+    [
+        F_State_S1(
+            ~tid,
+            $S,
+            $C,
+            p_res_psk,
+            messages,
+            new_nc,
+            ~new_ns,
+            group,
+            p_sg,
+            p_hrr,
+            p_x,
+            p_y,
+            gx,
+            p_gy,
+            p_gxy,
+            psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            p_hs,
+            p_ms,
+            p_cats,
+            p_sats,
+            p_hs_keyc,
+            p_hs_keys,
+            p_auth_status,
+            p_ems,
+            p_rms,
+            p_cert_req
+        )
+    ]
+
+rule hello_retry_request:
+    let
+        p_hrr = '0'
+
+        p_sg = $p_sg // TODO: unsure
+
+        hrr = 'hrr'
+        new_g = p_sg
+        g = p_sg
+
+        extensions = <
+            ExtensionSupportedVersions(),
+            ExtensionKeyShareHelloRetryRequest(new_g)
+        >
+        message = HelloRetryRequest(extensions)
+        messages = <p_messages, message>
+    in
+    [
+        F_State_S1(
+            ~tid,
+            $S,
+            $C,
+            p_res_psk,
+            p_messages,
+            p_nc,
+            p_ns,
+            p_g,
+            p_sg,
+            p_hrr,
+            p_x,
+            p_y,
+            p_gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            p_hs,
+            p_ms,
+            p_cats,
+            p_sats,
+            p_hs_keyc,
+            p_hs_keys,
+            p_auth_status,
+            p_ems,
+            p_rms,
+            p_cert_req
+        )
+    ]
+    --[
+        S1_retry(~tid),
+        Neq(p_g, p_sg),
+        Instance(~tid, $S, 'server')
+    ]->
+    [
+        MessageOut(message),
+        F_State_S0(
+            ~tid,
+            $S,
+            $C,
+            p_res_psk,
+            messages,
+            p_nc,
+            p_ns,
+            g,
+            p_sg,
+            hrr,
+            p_x,
+            p_y,
+            p_gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            p_hs,
+            p_ms,
+            p_cats,
+            p_sats,
+            p_hs_keyc,
+            p_hs_keys,
+            p_auth_status,
+            p_ems,
+            p_rms,
+            p_cert_req
+        )
+    ]
+
+rule server_hello:
+    let
+        p_gx = $p_g^some_x
+        auth_status = <'0', '0'>
+        gy = $p_g^~y
+        gxy = p_gx^~y
+        psk_ke_mode = 'na'
+        extensions = <
+            ExtensionSignatureSchemeList($sig_algs),
+            ExtensionKeyShareServerHello(KeyShareEntry($p_g, gy))
+        >
+        message = ServerHello(p_ns, '0', $cipher_suite, '0', extensions)
+        es = Extract(p_res_psk, '0')
+        messages = <p_messages, message>
+    in
+    [
+        F_State_S1(
+            ~tid,
+            $S,
+            $C, 
+            p_res_psk,
+            p_messages,
+            p_nc,
+            p_ns,
+            $p_g,
+            p_sg,
+            p_hrr,
+            p_x,
+            p_y,
+            p_gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            p_hs,
+            p_ms,
+            p_cats,
+            p_sats,
+            p_hs_keyc,
+            p_hs_keys,
+            p_auth_status,
+            p_ems,
+            p_rms,
+            p_cert_req
+        ),
+        Fr(~y)
+    ]
+    --[
+        S1(~tid),
+        Eq($p_g, p_sg),
+        Neq(p_gx, $p_g),
+        Neq(gxy, $p_g),
+        Instance(~tid, $S, 'server'),
+        RNonces(~tid, $S, 'server', <p_nc, p_ns>),
+        DHChal($p_g, some_x, ~y, p_gx, gy, gxy),
+        DH(~tid, $S, ~y)
+    ]->
+    [
+        F_State_S2a(
+            ~tid,
+            $S,
+            $C,
+            p_res_psk,
+            messages,
+            p_nc,
+            p_ns,
+            $p_g,
+            p_sg,
+            p_hrr,
+            p_x,
+            ~y,
+            p_gx,
+            gy,
+            gxy,
+            psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            es,
+            p_hs,
+            p_ms,
+            p_cats,
+            p_sats,
+            p_hs_keyc,
+            p_hs_keys,
+            auth_status,
+            p_ems,
+            p_rms,
+            p_cert_req
+        ),
+        DHExp(~y, ~tid, $S),
+        MessageOut(message)
+    ]
+
+rule server_gen_keys:
+    let
+        handshakeSecret = Extract(p_gxy, p_es)
+        masterSecret = Extract('0', handshakeSecret)
+        handshakeKeyClient = Expand(Expand(handshakeSecret, <'TLS13clienthandshaketrafficsecret', <h(p_messages)>>, '32'), <'TLS13handshakekeyexpansion_key', '0'>, '32')
+        handshakeKeyServer = Expand(Expand(handshakeSecret, <'TLS13serverhandshaketrafficsecret', <h(p_messages)>>, '32'), <'TLS13handshakekeyexpansion_key', '0'>, '32')
+    in
+    [
+        F_State_S2a(
+            ~tid,
+            $S,
+            $C,
+            p_res_psk,
+            p_messages,
+            p_nc,
+            p_ns,
+            p_g,
+            p_sg,
+            p_hrr,
+            p_x,
+            p_y,
+            p_gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            p_hs,
+            p_ms,
+            p_cats,
+            p_sats,
+            p_hs_keyc,
+            p_hs_keys,
+            p_auth_status,
+            p_ems,
+            p_rms,
+            p_cert_req
+        ),
+        DHExp(p_y, ~tid, $S)
+    ]
+    --[
+        S2a(~tid),
+        Extract('0', handshakeSecret),
+        Instance(~tid, $S, 'server'),
+        RHS(~tid, $S, 'server', <handshakeSecret>),
+        RMS(~tid, $S, 'server', <masterSecret>),
+        DeleteDH(~tid, $S, p_y)
+    ]->
+    [
+        F_State_S2b(
+            ~tid,
+            $S,
+            $C,
+            p_res_psk,
+            p_messages,
+            p_nc,
+            p_ns,
+            p_g,
+            p_sg,
+            p_hrr,
+            p_x,
+            p_y,
+            p_gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            handshakeSecret,
+            masterSecret,
+            p_cats,
+            p_sats,
+            handshakeKeyClient,
+            handshakeKeyServer,
+            p_auth_status,
+            p_ems,
+            p_rms,
+            p_cert_req
+        )
+    ]
+
+rule encrypted_extensions:
+    let
+        message = EncryptedExtensions($exts)
+        messages = <p_messages, message>
+    in
+    [
+        F_State_S2b(
+            ~tid,
+            $S,
+            $C,
+            p_res_psk,
+            p_messages,
+            p_nc,
+            p_ns,
+            p_g,
+            p_sg,
+            p_hrr,
+            p_x,
+            p_y,
+            p_gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            p_hs,
+            p_ms,
+            p_cats,
+            p_sats,
+            p_hs_keyc,
+            p_hs_keys,
+            p_auth_status,
+            p_ems,
+            p_rms,
+            p_cert_req
+        )
+    ]
+    --[
+        S2b(~tid),
+        Instance(~tid, $S, 'server')
+    ]->
+    [
+        F_State_S2c(
+            ~tid,
+            $S,
+            $C,
+            p_res_psk,
+            messages,
+            p_nc,
+            p_ns,
+            p_g,
+            p_sg,
+            p_hrr,
+            p_x,
+            p_y,
+            p_gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            p_hs,
+            p_ms,
+            p_cats,
+            p_sats,
+            p_hs_keyc,
+            p_hs_keys,
+            p_auth_status,
+            p_ems,
+            p_rms,
+            p_cert_req
+        ),
+        MessageOut(senc{message}p_hs_keys)
+    ]
+
+rule skip_certificate_request:
+    let
+        cert_req = '0'
+    in
+    [
+        F_State_S2c(
+            ~tid,
+            $S,
+            $C,
+            p_res_psk,
+            p_messages,
+            p_nc,
+            p_ns,
+            p_g,
+            p_sg,
+            p_hrr,
+            p_x,
+            p_y,
+            p_gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            p_hs,
+            p_ms,
+            p_cats,
+            p_sats,
+            p_hs_keyc,
+            p_hs_keys,
+            p_auth_status,
+            p_ems,
+            p_rms,
+            p_cert_req
+        )
+    ]
+    --[
+        S2c(~tid),
+        Instance(~tid, $S, 'server')
+    ]->
+    [
+        F_State_S2d(
+            ~tid,
+            $S,
+            $C,
+            p_res_psk,
+            p_messages,
+            p_nc,
+            p_ns,
+            p_g,
+            p_sg,
+            p_hrr,
+            p_x,
+            p_y,
+            p_gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            p_hs,
+            p_ms,
+            p_cats,
+            p_sats,
+            p_hs_keyc,
+            p_hs_keys,
+            p_auth_status,
+            p_ems,
+            p_rms,
+            cert_req
+        )
+    ]
+
+rule certificate_request:
+    let
+        p_psk_ke_mode = 'na'
+        certificate_request_context = '0'
+        cert_req = '1'
+        message = CertificateRequest(certificate_request_context, $certificate_extensions)
+        messages = <p_messages, message>
+    in
+    [
+        F_State_S2c(
+            ~tid,
+            $S,
+            $C,
+            p_res_psk,
+            p_messages,
+            p_nc,
+            p_ns,
+            p_g,
+            p_sg,
+            p_hrr,
+            p_x,
+            p_y,
+            p_gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            p_hs,
+            p_ms,
+            p_cats,
+            p_sats,
+            p_hs_keyc,
+            p_hs_keys,
+            p_auth_status,
+            p_ems,
+            p_rms,
+            p_cert_req
+        )
+    ]
+    --[
+        S2c_req(~tid),
+        Instance(~tid, $S, 'server'),
+        RCertReqCtxt(~tid, $S, 'server', <certificate_request_context>)
+    ]->[
+        F_State_S2d(
+            ~tid,
+            $S,
+            $C,
+            p_res_psk,
+            messages,
+            p_nc,
+            p_ns,
+            p_g,
+            p_sg,
+            p_hrr,
+            p_x,
+            p_y,
+            p_gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            p_hs,
+            p_ms,
+            p_cats,
+            p_sats,
+            p_hs_keyc,
+            p_hs_keys,
+            p_auth_status,
+            p_ems,
+            p_rms,
+            cert_req
+        ),
+        MessageOut(senc{message}p_hs_keys)
+    ]
+
+rule server_auth:
+    let
+
+        // Certificate
+        certificateMessage = Certificate('0', pk(~ltkS))
+        messages = <p_messages, certificateMessage>
+
+        // CertificateVerify
+        signature = sign{<'TLS13server_CertificateVerify', <h(messages)>>}~ltkS
+        certificateVerifyMessage = CertificateVerify(signature)
+        messages = <messages, certificateVerifyMessage>
+
+        // Finished
+        verify_data = hmac(Expand(Expand(p_hs, <'TLS13serverhandshaketrafficsecret', <h(messages)>>, '32'), <'TLS13finished', '0'>, '32'), h(messages))
+        finishedMessage = Finished(verify_data)
+        messages = <messages, finishedMessage>
+
+        earlyMasterSecret = Expand(p_ms, <'TLS13exportermastersecret', <h(messages)>>, '32')
+        clientApplicationTrafficSecret = Expand(p_ms, <'TLS13clientapplicationtrafficsecret', <h(messages)>>, '32')
+        serverApplicationTrafficSecret = Expand(p_ms, <'TLS13serverapplicationtrafficsecret', <h(messages)>>, '32')
+        serverApplicationTrafficKey = Expand(serverApplicationTrafficSecret, <'TLS13applicationdatakeyexpansion_key', '0'>, '32')
+        auth_status = <'auth', '0'>
+    in
+    [
+        F_State_S2d(
+            ~tid,
+            $S,
+            $C,
+            p_res_psk,
+            p_messages,
+            p_nc,
+            p_ns,
+            p_g,
+            p_sg,
+            p_hrr,
+            p_x,
+            p_y,
+            p_gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            p_hs,
+            p_ms,
+            p_cats,
+            p_sats,
+            p_hs_keyc,
+            p_hs_keys,
+            p_auth_status,
+            p_ems,
+            p_rms,
+            p_cert_req
+        ),
+        !Ltk($S, ~ltkS)
+    ]
+    --[
+        S2d(~tid),
+        Instance(~tid, $S, 'server'),
+        Eq(p_psk_ke_mode, 'na'),
+        UseLtk(~ltkS, signature),
+        RTranscript(~tid, $S, 'server', <messages>)
+    ]->
+    [
+        F_State_S3(
+            ~tid,
+            $S,
+            $C,
+            p_res_psk,
+            messages,
+            p_nc,
+            p_ns,
+            p_g,
+            p_sg,
+            p_hrr,
+            p_x,
+            p_y,
+            p_gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            p_hs,
+            p_ms,
+            clientApplicationTrafficSecret,
+            serverApplicationTrafficSecret,
+            p_hs_keyc,
+            p_hs_keys,
+            auth_status,
+            earlyMasterSecret,
+            p_rms,
+            p_cert_req
+        ),
+        SendStream(~tid, $S, $C, auth_status, serverApplicationTrafficKey),
+        MessageOut(senc{<certificateMessage,certificateVerifyMessage,finishedMessage>}p_hs_keys)
+    ]
+
+rule recv_client_auth:
+    let
+        p_cert_req = '0'
+        exp_verify_data = hmac(Expand(Expand(p_hs, <'TLS13clienthandshaketrafficsecret', <h(p_messages)>>, '32'), <'TLS13finished', '0'>, '32'), h(p_messages))
+        receivedFinished = Finished(verify_data)
+        messages = <p_messages, receivedFinished>
+        resumptionMasterSecret = Expand(p_ms, <'TLS13resumptionmastersecret', <h(messages)>>, '32')
+        clientApplicationTrafficKey = Expand(p_cats, <'TLS13applicationdatakeyexpansion_key', '0'>, '32')
+        serverApplicationTrafficKey = Expand(p_sats, <'TLS13applicationdatakeyexpansion_key', '0'>, '32')
+    in
+    [
+        F_State_S3(
+            ~tid,
+            $S,
+            $C,
+            p_res_psk,
+            p_messages,
+            p_nc,
+            p_ns,
+            p_g,
+            p_sg,
+            p_hrr,
+            p_x,
+            p_y,
+            p_gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            p_hs,
+            p_ms,
+            p_cats,
+            p_sats,
+            p_hs_keyc,
+            p_hs_keys,
+            p_auth_status,
+            p_ems,
+            p_rms,
+            p_cert_req
+        ),
+        F_MessageIn(senc{receivedFinished}p_hs_keyc)
+    ]
+    --[
+        S3(~tid),
+        Instance(~tid, $S, 'server'),
+        Eq(verify_data, exp_verify_data),
+        RMode(~tid, $S, 'server', <p_psk_ke_mode>),
+        CIdentity(~tid, $S, 'server', <$C, p_auth_status>),
+        CHS(~tid, $S, 'server', <p_hs>),
+        RHSMS(~tid, $S, 'server', <p_hs, p_ms>),
+        RRMS(~tid, $S, 'server', <$C, resumptionMasterSecret, messages>),
+        CTranscript(~tid, $S, 'server', <messages>),
+        CNonces(~tid, $S, 'server', <p_nc, p_ns>),
+        SessionKey(~tid, $S, $C, p_auth_status, <serverApplicationTrafficKey, clientApplicationTrafficKey>)
+    ]->
+    [
+        F_State_S4(
+            ~tid,
+            $S,
+            $C,
+            p_res_psk,
+            messages,
+            p_nc,
+            p_ns,
+            p_g,
+            p_sg,
+            p_hrr,
+            p_x,
+            p_y,
+            p_gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            p_hs,
+            p_ms,
+            p_cats,
+            p_sats,
+            p_hs_keyc,
+            p_hs_keys,
+            p_auth_status,
+            p_ems,
+            resumptionMasterSecret,
+            p_cert_req
+        ),
+        RecvStream(~tid, $S, $C, p_auth_status, clientApplicationTrafficKey)
+    ]
+
+rule recv_client_auth_cert:
+    let
+        p_cert_req = '1'
+        cert_req = '0'
+        auth_status = <'auth', 'auth'>
+
+        certificateMessage = Certificate('0', pk(~ltkC))
+        messages = <p_messages, certificateMessage>
+
+        sig_messages = <'TLS13client_CertificateVerify', <h(messages)>>
+        certificateVerifyMessage = CertificateVerify(signature)
+        messages = <messages, certificateVerifyMessage>
+
+        exp_verify_data = hmac(Expand(Expand(p_hs, <'TLS13clienthandshaketrafficsecret', <h(messages)>>, '32'), <'TLS13finished', '0'>, '32'), h(messages))
+
+        finishedMessage = Finished(verify_data)
+        messages = <messages, finishedMessage>
+
+        rms = Expand(p_ms, <'TLS13resumptionmastersecret', <h(messages)>>, '32')
+
+        receivedMessage = <certificateMessage, certificateVerifyMessage, finishedMessage>
+
+        app_keyc = Expand(p_cats, <'TLS13applicationdatakeyexpansion_key', '0'>, '32')
+        app_keys = Expand(p_sats, <'TLS13applicationdatakeyexpansion_key', '0'>, '32')
+    in
+    [
+        F_State_S3(
+            ~tid,
+            $S,
+            $C,
+            p_res_psk,
+            p_messages,
+            p_nc,
+            p_ns,
+            p_g,
+            p_sg,
+            p_hrr,
+            p_x,
+            p_y,
+            p_gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            p_hs,
+            p_ms,
+            p_cats,
+            p_sats,
+            p_hs_keyc,
+            p_hs_keys,
+            p_auth_status,
+            p_ems,
+            p_rms,
+            p_cert_req
+        ),
+        !Pk($C, pk(~ltkC)),
+        SendStream(~tid, $S, $C, p_auth_status, app_keys),
+        F_MessageIn(senc{receivedMessage}p_hs_keyc)
+    ]
+    --[
+        S3_cert(~tid),
+        Instance(~tid, $S, 'server'),
+        Eq(verify(signature, sig_messages, pk(~ltkC)), true),
+        Eq(verify_data, exp_verify_data),
+        RMode(~tid, $S, 'server', <p_psk_ke_mode>),
+        CIdentity(~tid, $S, 'server', <$C, auth_status>),
+        CHS(~tid, $S, 'server', <p_hs>),
+        RHSMS(~tid, $S, 'server', <p_hs, p_ms>),
+        RRMS(~tid, $S, 'server', <$C, rms, messages>),
+        CTranscript(~tid, $S, 'server', <messages>),
+        SessionKey(~tid, $S, $C, auth_status, <app_keys, app_keyc>),
+        CNonces(~tid, $S, 'server', <p_nc,p_ns>)
+    ]->
+    [
+        F_State_S4(
+            ~tid,
+            $S,
+            $C,
+            p_res_psk,
+            messages,
+            p_nc,
+            p_ns,
+            p_g,
+            p_sg,
+            p_hrr,
+            p_x,
+            p_y,
+            p_gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            p_hs,
+            p_ms,
+            p_cats,
+            p_sats,
+            p_hs_keyc,
+            p_hs_keys,
+            auth_status,
+            p_ems,
+            rms,
+            cert_req
+        ),
+        SendStream(~tid, $S, $C, auth_status, app_keys),
+        RecvStream(~tid, $S, $C, auth_status, app_keyc)
+    ]
+
+rule new_session_ticket:
+    let
+        p_rms = Expand(ms, <'TLS13resumptionmastersecret', <h(messages)>>, '32')
+        ticket_extension = <
+            <'46', $max_early_data_size>
+        >
+        message = NewSessionTicket($ticket_lifetime, ~ticket_age_add, ~ticket, ticket_extension)
+    in
+    [
+        F_State_S4(
+            ~tid,
+            $S,
+            $C,
+            p_res_psk,
+            p_messages,
+            p_nc,
+            p_ns,
+            p_g,
+            p_sg,
+            p_hrr,
+            p_x,
+            p_y,
+            p_gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            p_hs,
+            p_ms,
+            p_cats,
+            p_sats,
+            p_hs_keyc,
+            p_hs_keys,
+            p_auth_status,
+            p_ems,
+            p_rms,
+            p_cert_req
+        ),
+        SendStream(~tid, $S, $C, p_auth_status, serverApplicationTrafficKey),
+        Fr(~ticket),
+        Fr(~ticket_age_add)
+    ]
+    --[
+        S4_NST(~tid),
+        Instance(~tid, $S, 'server'),
+        RPostHS(~tid, $S, 'server', <p_hs, p_rms, $C, p_auth_status, p_messages>),
+        RNST(~tid, $S, 'server', <~ticket, ~ticket_age_add>)
+    ]->
+    [
+        F_State_S4(
+            ~tid,
+            $S,
+            $C,
+            p_rms,
+            p_messages,
+            p_nc,
+            p_ns,
+            p_g,
+            p_sg,
+            p_hrr,
+            p_x,
+            p_y,
+            p_gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            p_hs,
+            p_ms,
+            p_cats,
+            p_sats,
+            p_hs_keyc,
+            p_hs_keys,
+            p_auth_status,
+            p_ems,
+            p_rms,
+            p_cert_req
+        ),
+        SendStream(~tid, $S, $C, p_auth_status, serverApplicationTrafficKey),
+        !ServerPSK($S, $C, p_rms, p_auth_status, message, 'res'),
+        F_SecretPSK($S, p_rms),
+        MessageOut(senc{message}serverApplicationTrafficKey)
+    ]

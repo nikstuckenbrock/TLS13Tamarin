@@ -1,0 +1,361 @@
+rule certificate_request_post:
+    let
+        message = CertificateRequest(~cert_req_ctxt, $certificate_extensions)
+    in
+    [
+        F_State_S4(
+            ~tid,
+            $S,
+            $C,
+            p_res_psk,
+            p_messages,
+            p_nc,
+            p_ns,
+            p_g,
+            p_sg,
+            p_hrr,
+            p_x,
+            p_y,
+            p_gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            p_hs,
+            p_ms,
+            p_cats,
+            p_sats,
+            p_hs_keyc,
+            p_hs_keys,
+            p_auth_status,
+            p_ems,
+            p_rms,
+            p_cert_req
+        ),
+        SendStream(~tid, $S, $C, p_auth_status, app_keys),
+        Fr(~cert_req_ctxt)
+    ]
+    --[
+        S4_req(~tid),
+        Instance(~tid, $S, 'server'),
+        RCertReqCtxt(~tid, $S, 'server', <~cert_req_ctxt>),
+        RPostHS(~tid, $S, 'server', <p_hs, p_rms, $C, p_auth_status, p_messages>)
+    ]->
+    [
+        F_State_S4(
+            ~tid,
+            $S,
+            $C,
+            p_res_psk,
+            p_messages,
+            p_nc,
+            p_ns,
+            p_g,
+            p_sg,
+            p_hrr,
+            p_x,
+            p_y,
+            p_gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            p_hs,
+            p_ms,
+            p_cats,
+            p_sats,
+            p_hs_keyc,
+            p_hs_keys,
+            p_auth_status,
+            p_ems,
+            p_rms,
+            p_cert_req
+        ),
+        SendStream(~tid, $S, $C, p_auth_status, app_keys),
+        L_ServerCertReq(~tid, $S, $C, ~cert_req_ctxt),
+        MessageOut(senc{message}app_keys)
+    ]
+
+rule recv_certificate_request_post:
+    let
+        receivedMessage = CertificateRequest(certificate_request_context, $certificate_extensions)
+    in
+    [
+        F_State_C4(
+            ~tid,
+            $C,
+            $S,
+            p_res_psk,
+            p_messages,
+            p_nc,
+            p_ns,
+            p_g,
+            p_sg,
+            p_hrr,
+            p_x,
+            p_y,
+            p_gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            p_hs,
+            p_ms,
+            p_cats,
+            p_sats,
+            p_hs_keyc,
+            p_hs_keys,
+            p_auth_status,
+            p_ems,
+            p_rms,
+            p_cert_req
+        ),
+        RecvStream(~tid, $C, $S, p_auth_status, app_keys),
+        F_MessageIn(senc{receivedMessage}app_keys)
+    ]
+    --[
+        C4_req(~tid),
+        Neq(certificate_request_context, '0'),
+        Instance(~tid, $C, 'client'),
+        RPostHS(~tid, $C, 'client', <p_hs, p_rms, $S, p_auth_status, p_messages>)
+    ]->
+    [
+        F_State_C4(
+            ~tid,
+            $C,
+            $S,
+            p_res_psk,
+            p_messages,
+            p_nc,
+            p_ns,
+            p_g,
+            p_sg,
+            p_hrr,
+            p_x,
+            p_y,
+            p_gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            p_hs,
+            p_ms,
+            p_cats,
+            p_sats,
+            p_hs_keyc,
+            p_hs_keys,
+            p_auth_status,
+            p_ems,
+            p_rms,
+            p_cert_req
+        ),
+        RecvStream(~tid, $C, $S, p_auth_status, app_keys),
+        L_ClientCertReq(~tid, $C, $S, certificate_request_context)
+    ]
+
+rule client_auth_post:
+    let
+        p_auth_status = <p_cas, p_sas>
+        certificate = pk(~ltkC)
+
+        message = CertificateRequest(certificate_request_context, $certificate_extensions)
+        tmp_messages = <p_messages, message>
+        signature = sign{<'TLS13client_CertificateVerify', <h(tmp_messages)>>}~ltkC
+        verify_data = hmac(Expand(Expand(p_hs, <'TLS13fin_keychandshaketrafficsecret', <h(tmp_messages)>>, '32'), <'TLS13finished', '0'>, '32'), h(tmp_messages))
+
+        certificateMessage = Certificate(certificate_request_context, certificate)
+        certificateVerifyMessage = CertificateVerify(signature)
+        finishedMessage = Finished(verify_data)
+
+        messagesOut = <certificateMessage, certificateVerifyMessage, finishedMessage>
+
+        auth_status = <'auth', p_sas>
+    in
+    [
+        F_State_C4(
+            ~tid,
+            $C,
+            $S,
+            p_res_psk,
+            p_messages,
+            p_nc,
+            p_ns,
+            p_g,
+            p_sg,
+            p_hrr,
+            p_x,
+            p_y,
+            p_gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            p_hs,
+            p_ms,
+            p_cats,
+            p_sats,
+            p_hs_keyc,
+            p_hs_keys,
+            p_auth_status,
+            p_ems,
+            p_rms,
+            p_cert_req
+        ),
+        SendStream(~tid, $C, $S, p_auth_status, app_keyc),
+        !Ltk($C, ~ltkC),
+        L_ClientCertReq(~tid, $C, $S, certificate_request_context)
+    ]
+    --[
+        C4_cert(~tid),
+        Instance(~tid, $C, 'client'),
+        Neq(certificate_request_context, '0'),
+        UseLtk(~ltkC, signature),
+        RTranscriptPost(~tid, $C, 'client', <p_messages, certificate_request_context>),
+        RPostHS(~tid, $C, 'client', <p_hs, p_rms, $S, auth_status, p_messages>)
+    ]->
+    [
+        F_State_C4(
+            ~tid,
+            $C,
+            $S,
+            p_res_psk,
+            p_messages,
+            p_nc,
+            p_ns,
+            p_g,
+            p_sg,
+            p_hrr,
+            p_x,
+            p_y,
+            p_gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            p_hs,
+            p_ms,
+            p_cats,
+            p_sats,
+            p_hs_keyc,
+            p_hs_keys,
+            auth_status,
+            p_ems,
+            p_rms,
+            p_cert_req
+        ),
+        SendStream(~tid, $C, $S, auth_status, app_keyc),
+        MessageOut(senc{messagesOut}app_keyc)
+    ]
+
+rule recv_client_auth_post:
+    let
+        p_auth_status = <p_sas, p_cas>
+        certificate = pk(~ltkC)
+
+        message = CertificateRequest(~cert_req_ctxt, $certificate_extensions)
+        tmp_messages = <p_messages, message>
+        sig_messages = <'TLS13client_CertificateVerify', <h(tmp_messages)>>
+        exp_verify_data = hmac(Expand(Expand(p_hs, <'TLS13fin_keychandshaketrafficsecret', <h(tmp_messages)>>, '32'), <'TLS13finished', '0'>, '32'), h(tmp_messages))
+
+        certificateMessage = Certificate(~cert_req_ctxt, certificate)
+        certificateVerifyMessage = CertificateVerify(signature)
+        finishedMessage = Finished(verify_data)
+
+        receivedMessage = <certificateMessage, certificateVerifyMessage, finishedMessage>
+
+        auth_status = <p_sas, 'auth'>
+    in
+    [
+        F_State_S4(
+            ~tid,
+            $S,
+            $C,
+            p_res_psk,
+            p_messages,
+            p_nc,
+            p_ns,
+            p_g,
+            p_sg,
+            p_hrr,
+            p_x,
+            p_y,
+            p_gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            p_hs,
+            p_ms,
+            p_cats,
+            p_sats,
+            p_hs_keyc,
+            p_hs_keys,
+            p_auth_status,
+            p_ems,
+            p_rms,
+            p_cert_req
+        ),
+        RecvStream(~tid, $S, $C, p_auth_status, app_keyc),
+        !Pk($C, pk(~ltkC)),
+        L_ServerCertReq(~tid, $S, $C, ~cert_req_ctxt),
+        F_MessageIn(senc{receivedMessage}app_keyc)
+    ]
+    --[
+        S4_cert(~tid),
+        Instance(~tid, $S, 'server'),
+        Neq(~cert_req_ctxt, '0'),
+        Eq(verify(signature, sig_messages, pk(~ltkC)), true),
+        Eq(verify_data, exp_verify_data),
+        CIdentityPost(~tid, $S, 'server', <<$C, auth_status>>),
+        CTranscriptPost(~tid, $S, 'server', <p_messages, ~cert_req_ctxt>),
+        CHS(~tid, $S, 'server', <p_hs>),
+        RPostHS(~tid, $S, 'server', <p_hs, p_rms, $C, auth_status, p_messages>)
+    ]->
+    [
+        F_State_S4(
+            ~tid,
+            $S,
+            $C,
+            p_res_psk,
+            p_messages,
+            p_nc,
+            p_ns,
+            p_g,
+            p_sg,
+            p_hrr,
+            p_x,
+            p_y,
+            p_gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            p_hs,
+            p_ms,
+            p_cats,
+            p_sats,
+            p_hs_keyc,
+            p_hs_keys,
+            auth_status,
+            p_ems,
+            p_rms,
+            p_cert_req
+        ),
+        RecvStream(~tid, $S, $C, auth_status, app_keyc)
+    ]

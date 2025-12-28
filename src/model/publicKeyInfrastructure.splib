@@ -1,0 +1,35 @@
+rule Register_pk:
+    [
+        Fr(~ltkA)
+    ]
+    --[
+        GenLtk($A, ~ltkA),
+        HonestUse(~ltkA)
+    ]->
+    [
+        !Ltk($A, ~ltkA),
+        !Pk($A, pk(~ltkA)),
+        MessageOut(pk(~ltkA))
+    ]
+
+rule out_of_band_psk:
+    let
+        auth_status = <'oob_auth', 'oob_auth'>
+        sessionTicket = <'4', $ticket_lifetime, ~ticket_age_add, ~ticket, <<'46', $max_early_data_size>>>
+    in
+    [
+        Fr(~ticket),
+        Fr(~res_psk),
+        Fr(~ticket_age_add)
+    ]
+    --[
+        GenPSK($S, 'server'),
+        GenPSK($C, 'client'),
+        FreshPSK(~ticket, ~res_psk)
+    ]->
+    [
+        !ClientPSK($C, $S, ~res_psk, auth_status, sessionTicket, 'ext'),
+        !ServerPSK($S, $C, ~res_psk, auth_status, sessionTicket, 'ext'),
+        F_SecretPSK($S, ~res_psk),
+        F_SecretPSK($C, ~res_psk)
+    ]
