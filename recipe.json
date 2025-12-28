@@ -234,7 +234,12 @@
                     "name": "one_C3_cert_per_tid"
                 },
                 {
-                    "name": "one_S3_per_tid"
+                    "name": "one_S3_per_tid",
+                    "resources": {
+                        "max_cores": 24,
+                        "max_memory": 200,
+                        "timeout": 48000
+                    }
                 },
                 {
                     "name": "one_S3_cert_per_tid"
@@ -267,7 +272,12 @@
                     "name": "S2d_vs_S2d_PSK"
                 },
                 {
-                    "name": "C2d_vs_C2d_PSK"
+                    "name": "C2d_vs_C2d_PSK",
+                    "resources": {
+                        "max_cores": 24,
+                        "max_memory": 200,
+                        "timeout": 48000
+                    }
                 }
             ]
         },
@@ -332,7 +342,12 @@
                     }
                 },
                 {
-                    "name": "one_dh_per_x"
+                    "name": "one_dh_per_x",
+                    "resources": {
+                        "max_cores": 24,
+                        "max_memory": 200,
+                        "timeout": 48000
+                    }
                 },
                 {
                     "name": "rev_dh_before_hs"
@@ -390,6 +405,12 @@
                 },
                 {
                     "name": "unique_session_keys"
+                },
+                {
+                    "name": "entity_authentication"
+                },
+                {
+                    "name": "injective_mutual_entity_authentication"
                 }
             ]
         },
@@ -465,6 +486,12 @@
                 },
                 {
                     "name": "invariant_post_hs"
+                },
+                {
+                    "name": "matching_hsms"
+                },
+                {
+                    "name": "post_master_secret"
                 }
             ]
         }

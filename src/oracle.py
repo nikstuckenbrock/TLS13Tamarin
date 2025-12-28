@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import re
 from sys import argv, stdin
 
 def splitter(line):
@@ -119,6 +120,52 @@ elif argv[1] == "secret_session_keys":
         "F_SecretPSK",
         "ClientState",
         "ServerState"
+    ], lines)
+elif argv[1] == "matching_hsms":
+    match = match_against_list([
+        "CHS",
+        "RHSMS",
+        "RRMS",
+        "ClientState( ~tid, 'C3'"
+    ], lines)
+elif argv[1] == "post_master_secret":
+    match = match_against_list([
+        "!Pk",
+        "CHS",
+        "RPostHS",
+        "F_MessageIn(",
+        "UseLtk",
+        "!Ltk",
+        re.compile(r"(?s).*RevDHExp.*RevDHExp.*RevealPSK.*RevealPSK.*")
+    ], lines)
+elif argv[1] == "entity_authentication":
+    match = match_against_list([
+        "∀ tid actor peer nonces cas #i.",
+        "last(#i)",
+        "CNonces(",
+        re.compile(r"^\s*CIdentity\(\s*\~tid,"),
+        "!Pk",
+        "($S = $S.1)",
+        "F_MessageIn",
+        "∃ #j. (!KU( ~ltkS ) @ #j) ∧ #j < #vk)",
+        "∃ #j.   (!KU( Expand(Extract('0'",
+        "∃ #j.6.   (!KU( Extract('0',",
+        "∃ #j",
+        re.compile(r"^\s*F\_SecretPSK"),
+        re.compile(r"(?s).*RevLtk.*RevDHExp.*RevDHExp.*RevealPSK.*RevealPSK.*"),
+        "UseLtk",
+        "!Ltk",
+        "ClientState( ~tid, 'C2d'",
+        "!KU( senc(<'20'", # may make problems before
+        re.compile(r"(?s).*CIdentity.*CIdentityPost.*"),
+        "ServerState( ~tid.1, 'S2d'"
+    ], lines)
+elif argv[1] == "injective_mutual_entity_authentication":
+    match = match_against_list([
+        "CNonces",
+        "CIdentity",
+        re.compile(r"(?s).*RevLtk.*RevDHExp.*RevDHExp.*RevealPSK.*RevealPSK.*.RNonces.*"),
+        re.compile(r"(?s).*RevLtk.*RevDHExp.*RevDHExp.*RevealPSK.*RevealPSK.*.RTranscript.*")
     ], lines)
 elif argv[1] == "secret_session_keys_pfs":
     match = match_against_list([

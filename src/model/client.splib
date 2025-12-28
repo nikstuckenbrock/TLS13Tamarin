@@ -7,7 +7,7 @@ rule client_hello:
             ExtensionSupportedVersions(),
             ExtensionNamedGroupdList(supported_groups),
             ExtensionSignatureSchemeList($sig_algs),
-            ExtensionKeyShareClientHello(KeyShareEntry($g1, gx))
+            ExtensionKeyShare(KeyShareEntry($g1, gx))
         >
         message = ClientHello(~nc, '0', $cipher_suites, '0', extensions)
         messages = <messages, message>
@@ -75,15 +75,15 @@ rule recv_hello_retry_request:
         gx = $g2^~new_x
         receivedExtensions = <
             ExtensionSupportedVersions(),
-            ExtensionKeyShareHelloRetryRequest($g2)
+            ExtensionKeyShare($g2)
         >
-        receivedMessage = HelloRetryRequest(receivedExtensions)
+        receivedMessage = ServerHello(HelloRetryRequestRandom(), '0', $cipher_suites, '0', receivedExtensions)
         messages = <p_messages, receivedMessage>
         extensions = <
             ExtensionSupportedVersions(),
             ExtensionNamedGroupdList(supported_groups),
             ExtensionSignatureSchemeList($supported_signature_algorithms),
-            ExtensionKeyShareClientHello(KeyShareEntry($g2, gx))
+            ExtensionKeyShare(KeyShareEntry($g2, gx))
         >
         message = ClientHello(p_nc, '0', $cipher_suites, '0', extensions)
         messages = <messages, message>
@@ -180,7 +180,7 @@ rule recv_server_hello:
         gxy = gy^p_x
         extensions = <
             ExtensionSignatureSchemeList($sig_algs),
-            ExtensionKeyShareServerHello(KeyShareEntry($g, gy))
+            ExtensionKeyShare(KeyShareEntry($g, gy))
         >
         receivedMessage = ServerHello(serverRandom, '0', $cipher_suite, '0', extensions)
         psk_ke_mode = 'na'
@@ -227,6 +227,7 @@ rule recv_server_hello:
         Instance(~tid, $C, 'client'),
         Neq(gy, $g),
         Neq(gxy, $g),
+        Neq(serverRandom, HelloRetryRequestRandom()),
         DHChal($g, p_x, new_y, p_gx, gy, gxy),
         RNonces(~tid, $C, 'client', <p_nc, serverRandom>)
     ]->

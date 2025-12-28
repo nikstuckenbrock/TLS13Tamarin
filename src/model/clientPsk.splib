@@ -4,7 +4,7 @@ rule client_hello_psk:
         binder = '0'
         supported_groups = <$g1, $g2>
         gx = $g1^~x
-        psk_ke_mode = <'0', '1'>
+        psk_ke_mode = <PskKeyExchangeModePskKe(), PskKeyExchangeModePskDheKe()>
         obfuscated_ticket_age = mask(ticket_age_add, $ticket_age)
         identities = <<ticket, obfuscated_ticket_age>>
         es = Extract(res_psk, '0')
@@ -12,7 +12,7 @@ rule client_hello_psk:
         binder_extensions = <
             ExtensionSupportedVersions(),
             ExtensionNamedGroupdList(supported_groups),
-            ExtensionKeyShareClientHello(KeyShareEntry($g1, gx)),
+            ExtensionKeyShare(KeyShareEntry($g1, gx)),
             ExtensionPskKeyExchangeModes(psk_ke_mode),
             edi,
             ExtensionPreSharedKeyClientHello(identities, binder)
@@ -23,7 +23,7 @@ rule client_hello_psk:
         extensions = <
             ExtensionSupportedVersions(),
             ExtensionNamedGroupdList(supported_groups),
-            ExtensionKeyShareClientHello(KeyShareEntry($g1, gx)),
+            ExtensionKeyShare(KeyShareEntry($g1, gx)),
             ExtensionPskKeyExchangeModes(psk_ke_mode),
             edi,
             ExtensionPreSharedKeyClientHello(identities, binder)
@@ -89,7 +89,7 @@ rule recv_hello_retry_request_psk:
     let
         p_g = $g1
         p_hrr = '0'
-        p_psk_ke_mode = <'0', '1'>
+        p_psk_ke_mode = <PskKeyExchangeModePskKe(), PskKeyExchangeModePskDheKe()>
         edi = '0'
 
         hrr = 'hrr'
@@ -101,9 +101,9 @@ rule recv_hello_retry_request_psk:
 
         receivedExtensions = <
             ExtensionSupportedVersions(),
-            ExtensionKeyShareHelloRetryRequest($g2)
+            ExtensionKeyShare($g2)
         >
-        receivedMessage = HelloRetryRequest(receivedExtensions)
+        receivedMessage = ServerHello(HelloRetryRequestRandom(), '0', $cipher_suites, '0', receivedExtensions)
         messages = <p_messages, receivedMessage>
 
         obfuscated_ticket_age = mask(ticket_age_add, '1')
@@ -116,7 +116,7 @@ rule recv_hello_retry_request_psk:
         binder_extensions = <
             ExtensionSupportedVersions(),
             ExtensionNamedGroupdList(supported_groups),
-            ExtensionKeyShareClientHello(KeyShareEntry($g2, gx)),
+            ExtensionKeyShare(KeyShareEntry($g2, gx)),
             ExtensionPskKeyExchangeModes(p_psk_ke_mode),
             edi,
             ExtensionPreSharedKeyClientHello(identities, binder)
@@ -128,7 +128,7 @@ rule recv_hello_retry_request_psk:
         extensions = <
             ExtensionSupportedVersions(),
             ExtensionNamedGroupdList(supported_groups),
-            ExtensionKeyShareClientHello(KeyShareEntry($g2, gx)),
+            ExtensionKeyShare(KeyShareEntry($g2, gx)),
             ExtensionPskKeyExchangeModes(p_psk_ke_mode),
             edi,
             ExtensionPreSharedKeyClientHello(identities, binder)
@@ -271,7 +271,8 @@ rule recv_server_hello_psk:
     --[
         C1_PSK(~tid),
         Instance(~tid, $C, 'client'),
-        RNonces(~tid, $C, 'client', <p_nc ,new_ns>)
+        RNonces(~tid, $C, 'client', <p_nc ,new_ns>),
+        Neq(new_ns, HelloRetryRequestRandom())
     ]->
     [
         ClientState(
@@ -317,7 +318,7 @@ rule recv_server_hello_psk_dhe:
         gxy = gy^p_g
         receivedExtensions = <
             ExtensionSignatureSchemeList($sig_algs),
-            ExtensionKeyShareServerHello(KeyShareEntry(p_g, gy)),
+            ExtensionKeyShare(KeyShareEntry(p_g, gy)),
             <'41', '0'>,
             p_edi
         >
@@ -364,7 +365,8 @@ rule recv_server_hello_psk_dhe:
         Neq(gy, $g),
         Instance(~tid, $C, 'client'),
         DHChal($g, ~x, new_y, p_gx, gy, gxy),
-        RNonces(~tid, $C, 'client', <p_nc, new_ns>)
+        RNonces(~tid, $C, 'client', <p_nc, new_ns>),
+        Neq(new_ns, HelloRetryRequestRandom())
     ]->
     [
         ClientState(
