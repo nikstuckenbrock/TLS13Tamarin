@@ -3,8 +3,9 @@ rule certificate_request_post:
         message = CertificateRequest(~cert_req_ctxt, $certificate_extensions)
     in
     [
-        F_State_S4(
+        ServerState(
             ~tid,
+            'S4',
             $S,
             $C,
             p_res_psk,
@@ -44,8 +45,9 @@ rule certificate_request_post:
         RPostHS(~tid, $S, 'server', <p_hs, p_rms, $C, p_auth_status, p_messages>)
     ]->
     [
-        F_State_S4(
+        ServerState(
             ~tid,
+            'S4',
             $S,
             $C,
             p_res_psk,
@@ -85,8 +87,9 @@ rule recv_certificate_request_post:
         receivedMessage = CertificateRequest(certificate_request_context, $certificate_extensions)
     in
     [
-        F_State_C4(
+        ClientState(
             ~tid,
+            'C4',
             $C,
             $S,
             p_res_psk,
@@ -126,8 +129,9 @@ rule recv_certificate_request_post:
         RPostHS(~tid, $C, 'client', <p_hs, p_rms, $S, p_auth_status, p_messages>)
     ]->
     [
-        F_State_C4(
+        ClientState(
             ~tid,
+            'C4',
             $C,
             $S,
             p_res_psk,
@@ -180,8 +184,9 @@ rule client_auth_post:
         auth_status = <'auth', p_sas>
     in
     [
-        F_State_C4(
+        ClientState(
             ~tid,
+            'C4',
             $C,
             $S,
             p_res_psk,
@@ -224,8 +229,9 @@ rule client_auth_post:
         RPostHS(~tid, $C, 'client', <p_hs, p_rms, $S, auth_status, p_messages>)
     ]->
     [
-        F_State_C4(
+        ClientState(
             ~tid,
+            'C4',
             $C,
             $S,
             p_res_psk,
@@ -278,8 +284,9 @@ rule recv_client_auth_post:
         auth_status = <p_sas, 'auth'>
     in
     [
-        F_State_S4(
+        ServerState(
             ~tid,
+            'S4',
             $S,
             $C,
             p_res_psk,
@@ -326,8 +333,9 @@ rule recv_client_auth_post:
         RPostHS(~tid, $S, 'server', <p_hs, p_rms, $C, auth_status, p_messages>)
     ]->
     [
-        F_State_S4(
+        ServerState(
             ~tid,
+            'S4',
             $S,
             $C,
             p_res_psk,

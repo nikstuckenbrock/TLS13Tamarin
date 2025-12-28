@@ -27,8 +27,9 @@ rule client_hello:
         HonestUse(gx)
     ]->
     [
-        F_State_C1(
+        ClientState(
             ~nc,
+            'C1',
             $C,
             $S,
             '0',
@@ -88,8 +89,9 @@ rule recv_hello_retry_request:
         es = Extract(p_res_psk, '0')
     in
     [
-        F_State_C1(
+        ClientState(
             ~tid,
+            'C1',
             $C,
             $S,
             p_res_psk,
@@ -133,8 +135,9 @@ rule recv_hello_retry_request:
     [
         MessageOut(message),
         DHExp(~new_x, ~tid, $C),
-        F_State_C1(
+        ClientState(
             ~tid,
+            'C1',
             $C,
             $S,
             p_res_psk,
@@ -183,8 +186,9 @@ rule recv_server_hello:
         messages = <p_messages, receivedMessage>
     in
     [
-        F_State_C1(
+        ClientState(
             ~tid,
+            'C1',
             $C,
             $S,
             p_res_psk,
@@ -225,8 +229,9 @@ rule recv_server_hello:
         RNonces(~tid, $C, 'client', <p_nc, serverRandom>)
     ]->
     [
-        F_State_C2a(
+        ClientState(
             ~tid,
+            'C2a',
             $C,
             $S,
             p_res_psk,
@@ -266,8 +271,9 @@ rule client_gen_keys:
         handshakeKeyServer = Expand(Expand(handshakeSecret, <'TLS13serverhandshaketrafficsecret', <h(p_messages)>>, '32'), <'TLS13handshakekeyexpansion_key', '0'>, '32')
     in
     [
-        F_State_C2a(
+        ClientState(
             ~tid,
+            'C2a',
             $C,
             $S,
             p_res_psk,
@@ -307,8 +313,9 @@ rule client_gen_keys:
         DeleteDH(~tid, $C, p_x)
     ]->
     [
-        F_State_C2b(
+        ClientState(
             ~tid,
+            'C2b',
             $C,
             $S,
             p_res_psk,
@@ -346,8 +353,9 @@ rule recv_encrypted_extensions:
         messages = <p_messages, receivedMessage>
     in
     [
-        F_State_C2b(
+        ClientState(
             ~tid,
+            'C2b',
             $C,
             $S,
             p_res_psk,
@@ -384,8 +392,9 @@ rule recv_encrypted_extensions:
         Instance(~tid, $C, 'client')
     ]->
     [
-        F_State_C2c(
+        ClientState(
             ~tid,
+            'C2c',
             $C,
             $S,
             p_res_psk,
@@ -422,8 +431,9 @@ rule skip_recv_certificate_request:
         cert_req = '0'
     in
     [
-        F_State_C2c(
+        ClientState(
             ~tid,
+            'C2c',
             $C,
             $S,
             p_res_psk,
@@ -459,8 +469,9 @@ rule skip_recv_certificate_request:
         Instance(~tid, $C, 'client')
     ]->
     [
-        F_State_C2d(
+        ClientState(
             ~tid,
+            'C2d',
             $C,
             $S,
             p_res_psk,
@@ -501,8 +512,9 @@ rule recv_certificate_request:
         messages = <p_messages, receivedMessage>
     in
     [
-        F_State_C2c(
+        ClientState(
             ~tid,
+            'C2c',
             $C,
             $S,
             p_res_psk,
@@ -539,8 +551,9 @@ rule recv_certificate_request:
         Instance(~tid, $C, 'client')
     ]->
     [
-        F_State_C2d(
+        ClientState(
             ~tid,
+            'C2d',
             $C,
             $S,
             p_res_psk,
@@ -599,8 +612,9 @@ rule recv_server_auth:
         auth_status = <'0', 'auth'>
     in
     [      
-        F_State_C2d(
+        ClientState(
             ~tid,
+            'C2d',
             $C,
             $S,
             p_res_psk,
@@ -646,8 +660,9 @@ rule recv_server_auth:
         CNonces(~tid, $C, 'client', <p_nc, p_ns>)
     ]->
     [
-        F_State_C3(
+        ClientState(
             ~tid,
+            'C3',
             $C,
             $S,
             p_res_psk,
@@ -692,8 +707,9 @@ rule client_auth:
         serverApplicationTrafficKey = Expand(p_sats, <'TLS13applicationdatakeyexpansion_key', '0'>, '32')
     in
     [
-        F_State_C3(
+        ClientState(
             ~tid,
+            'C3',
             $C,
             $S,
             p_res_psk,
@@ -734,8 +750,9 @@ rule client_auth:
         SessionKey(~tid, $C, $S, p_auth_status, <clientApplicationTrafficKey, serverApplicationTrafficKey>)
     ]->
     [
-        F_State_C4(
+        ClientState(
             ~tid,
+            'C4',
             $C,
             $S,
             p_res_psk,
@@ -797,8 +814,9 @@ rule client_auth_cert:
         cert_req = '0'
     in
     [
-        F_State_C3(
+        ClientState(
             ~tid,
+            'C3',
             $C,
             $S,
             p_res_psk,
@@ -842,8 +860,9 @@ rule client_auth_cert:
         SessionKey(~tid, $C, $S, auth_status, <clientApplicationTrafficKey, serverApplicationTrafficKey>)
     ]->
     [
-        F_State_C4(
+        ClientState(
             ~tid,
+            'C4',
             $C,
             $S,
             p_res_psk,
@@ -887,8 +906,9 @@ rule recv_new_session_ticket:
         receivedMessage = NewSessionTicket($ticket_lifetime, ~ticket_age_add, ~ticket, ticket_extension)
     in
     [
-        F_State_C4(
+        ClientState(
             ~tid,
+            'C4',
             $C,
             $S,
             p_res_psk,
@@ -927,8 +947,9 @@ rule recv_new_session_ticket:
         RPostHS(~tid, $C, 'client', <p_hs, p_rms, $S, p_auth_status, p_messages>)
     ]->
     [
-        F_State_C4(
+        ClientState(
             ~tid,
+            'C4',
             $C,
             $S,
             p_rms,

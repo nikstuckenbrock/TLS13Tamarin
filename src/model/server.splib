@@ -7,8 +7,9 @@ rule start_server:
         RIdentity(~tid, $S, 'server', <$S>)
     ]->
     [
-        F_State_S0(
+        ServerState(
             ~tid,
+            'S0',
             $S,
             $C,
             '0',
@@ -58,8 +59,9 @@ rule recv_client_hello:
     [
         F_MessageIn(receivedMessage),
         Fr(~new_ns),
-        F_State_S0(
+        ServerState(
             ~tid,
+            'S0',
             $S,
             $C,
             p_res_psk,
@@ -95,8 +97,9 @@ rule recv_client_hello:
         Neq($g1, $g2)
     ]->
     [
-        F_State_S1(
+        ServerState(
             ~tid,
+            'S1',
             $S,
             $C,
             p_res_psk,
@@ -146,8 +149,9 @@ rule hello_retry_request:
         messages = <p_messages, message>
     in
     [
-        F_State_S1(
+        ServerState(
             ~tid,
+            'S1',
             $S,
             $C,
             p_res_psk,
@@ -185,8 +189,9 @@ rule hello_retry_request:
     ]->
     [
         MessageOut(message),
-        F_State_S0(
+        ServerState(
             ~tid,
+            'S0',
             $S,
             $C,
             p_res_psk,
@@ -234,8 +239,9 @@ rule server_hello:
         messages = <p_messages, message>
     in
     [
-        F_State_S1(
+        ServerState(
             ~tid,
+            'S1',
             $S,
             $C, 
             p_res_psk,
@@ -278,8 +284,9 @@ rule server_hello:
         DH(~tid, $S, ~y)
     ]->
     [
-        F_State_S2a(
+        ServerState(
             ~tid,
+            'S2a',
             $S,
             $C,
             p_res_psk,
@@ -321,8 +328,9 @@ rule server_gen_keys:
         handshakeKeyServer = Expand(Expand(handshakeSecret, <'TLS13serverhandshaketrafficsecret', <h(p_messages)>>, '32'), <'TLS13handshakekeyexpansion_key', '0'>, '32')
     in
     [
-        F_State_S2a(
+        ServerState(
             ~tid,
+            'S2a',
             $S,
             $C,
             p_res_psk,
@@ -363,8 +371,9 @@ rule server_gen_keys:
         DeleteDH(~tid, $S, p_y)
     ]->
     [
-        F_State_S2b(
+        ServerState(
             ~tid,
+            'S2b',
             $S,
             $C,
             p_res_psk,
@@ -402,8 +411,9 @@ rule encrypted_extensions:
         messages = <p_messages, message>
     in
     [
-        F_State_S2b(
+        ServerState(
             ~tid,
+            'S2b',
             $S,
             $C,
             p_res_psk,
@@ -439,8 +449,9 @@ rule encrypted_extensions:
         Instance(~tid, $S, 'server')
     ]->
     [
-        F_State_S2c(
+        ServerState(
             ~tid,
+            'S2c',
             $S,
             $C,
             p_res_psk,
@@ -478,8 +489,9 @@ rule skip_certificate_request:
         cert_req = '0'
     in
     [
-        F_State_S2c(
+        ServerState(
             ~tid,
+            'S2c',
             $S,
             $C,
             p_res_psk,
@@ -515,8 +527,9 @@ rule skip_certificate_request:
         Instance(~tid, $S, 'server')
     ]->
     [
-        F_State_S2d(
+        ServerState(
             ~tid,
+            'S2d',
             $S,
             $C,
             p_res_psk,
@@ -557,8 +570,9 @@ rule certificate_request:
         messages = <p_messages, message>
     in
     [
-        F_State_S2c(
+        ServerState(
             ~tid,
+            'S2c',
             $S,
             $C,
             p_res_psk,
@@ -594,8 +608,9 @@ rule certificate_request:
         Instance(~tid, $S, 'server'),
         RCertReqCtxt(~tid, $S, 'server', <certificate_request_context>)
     ]->[
-        F_State_S2d(
+        ServerState(
             ~tid,
+            'S2d',
             $S,
             $C,
             p_res_psk,
@@ -652,8 +667,9 @@ rule server_auth:
         auth_status = <'auth', '0'>
     in
     [
-        F_State_S2d(
+        ServerState(
             ~tid,
+            'S2d',
             $S,
             $C,
             p_res_psk,
@@ -693,8 +709,9 @@ rule server_auth:
         RTranscript(~tid, $S, 'server', <messages>)
     ]->
     [
-        F_State_S3(
+        ServerState(
             ~tid,
+            'S3',
             $S,
             $C,
             p_res_psk,
@@ -739,8 +756,9 @@ rule recv_client_auth:
         serverApplicationTrafficKey = Expand(p_sats, <'TLS13applicationdatakeyexpansion_key', '0'>, '32')
     in
     [
-        F_State_S3(
+        ServerState(
             ~tid,
+            'S3',
             $S,
             $C,
             p_res_psk,
@@ -786,8 +804,9 @@ rule recv_client_auth:
         SessionKey(~tid, $S, $C, p_auth_status, <serverApplicationTrafficKey, clientApplicationTrafficKey>)
     ]->
     [
-        F_State_S4(
+        ServerState(
             ~tid,
+            'S4',
             $S,
             $C,
             p_res_psk,
@@ -846,8 +865,9 @@ rule recv_client_auth_cert:
         app_keys = Expand(p_sats, <'TLS13applicationdatakeyexpansion_key', '0'>, '32')
     in
     [
-        F_State_S3(
+        ServerState(
             ~tid,
+            'S3',
             $S,
             $C,
             p_res_psk,
@@ -896,8 +916,9 @@ rule recv_client_auth_cert:
         CNonces(~tid, $S, 'server', <p_nc,p_ns>)
     ]->
     [
-        F_State_S4(
+        ServerState(
             ~tid,
+            'S4',
             $S,
             $C,
             p_res_psk,
@@ -940,8 +961,9 @@ rule new_session_ticket:
         message = NewSessionTicket($ticket_lifetime, ~ticket_age_add, ~ticket, ticket_extension)
     in
     [
-        F_State_S4(
+        ServerState(
             ~tid,
+            'S4',
             $S,
             $C,
             p_res_psk,
@@ -982,8 +1004,9 @@ rule new_session_ticket:
         RNST(~tid, $S, 'server', <~ticket, ~ticket_age_add>)
     ]->
     [
-        F_State_S4(
+        ServerState(
             ~tid,
+            'S4',
             $S,
             $C,
             p_rms,

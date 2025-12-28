@@ -37,8 +37,9 @@ rule recv_client_hello_psk:
         ead_keyc = Expand(Expand(es, <'TLS13clientearlytrafficsecret', <h(messages)>> , '32'), <'TLS13earlyapplicationdatakeyexpansion_key', '0'> , '32')
     in
     [
-        F_State_S0(
+        ServerState(
             ~tid,
+            'S0',
             $S,
             $C,
             p_res_psk,
@@ -81,8 +82,9 @@ rule recv_client_hello_psk:
         Neq(psk_res_psk, '0')
     ]->
     [
-        F_State_S1(
+        ServerState(
             ~tid,
+            'S1',
             $S,
             $C,
             res_psk,
@@ -129,8 +131,9 @@ rule server_hello_psk:
         messages = <p_messages, message>
     in
     [
-        F_State_S1(
+        ServerState(
             ~tid,
+            'S1',
             $S,
             $C,
             p_res_psk,
@@ -169,8 +172,9 @@ rule server_hello_psk:
         DH(~tid, $S, ~y_ignored)
     ]->
     [
-        F_State_S2a(
+        ServerState(
             ~tid,
+            'S2a',
             $S,
             $C,
             p_res_psk,
@@ -223,8 +227,9 @@ rule server_hello_psk_dhe:
         messages = <p_messages, message>
     in
     [
-        F_State_S1(
+        ServerState(
             ~tid,
+            'S1',
             $S,
             $C,
             p_res_psk,
@@ -266,8 +271,9 @@ rule server_hello_psk_dhe:
         DH(~tid, $S, ~y)
     ]->
     [
-        F_State_S2a(
+        ServerState(
             ~tid,
+            'S2a',
             $S,
             $C,
             p_res_psk,
@@ -297,7 +303,7 @@ rule server_hello_psk_dhe:
             p_rms,
             p_cert_req
         ),
-        DHExp(~y, ~tid, $S ),
+        DHExp(~y, ~tid, $S),
         MessageOut(message)
     ]
 
@@ -313,8 +319,9 @@ rule server_auth_psk:
         earlyMasterSecret = Expand(p_ms, <'TLS13exportermastersecret', <h(messages)>>, '32')
     in
     [
-        F_State_S2d(
+        ServerState(
             ~tid,
+            'S2d',
             $S,
             $C,
             p_res_psk,
@@ -352,8 +359,9 @@ rule server_auth_psk:
         RTranscript(~tid, $S, 'server', <messages>)
     ]->
     [
-        F_State_S3(
+        ServerState(
             ~tid,
+            'S3',
             $S,
             $C,
             p_res_psk,
