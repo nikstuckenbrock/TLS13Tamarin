@@ -6,7 +6,7 @@ rule client_hello_psk:
         gx = $g1^~x
         psk_ke_mode = <'0', '1'>
         obfuscated_ticket_age = mask(ticket_age_add, $ticket_age)
-        identities = <<~ticket, obfuscated_ticket_age>>
+        identities = <<ticket, obfuscated_ticket_age>>
         es = Extract(res_psk, '0')
         edi = ExtensionEarlyDataIndication()
         binder_extensions = <
@@ -36,7 +36,7 @@ rule client_hello_psk:
     [
         Fr(~nc),
         Fr(~x),
-        !ClientPSK($C, $S, res_psk, auth_status, <'4',$ticket_lifetime, ticket_age_add, ~ticket,<<'46',$max_early_data_size>> >, psk_type)
+        !ClientPSK($C, $S, res_psk, auth_status, <'4',$ticket_lifetime, ticket_age_add, ticket,<<'46',$max_early_data_size>> >, psk_type)
     ]
     --[
         C0_PSK(~nc),
@@ -64,7 +64,7 @@ rule client_hello_psk:
             '0',
             '0',
             psk_ke_mode,
-            ~ticket,
+            ticket,
             edi,
             es,
             '0',
@@ -78,9 +78,10 @@ rule client_hello_psk:
             '0',
             '0'
         ),
-        F_CachePSK(~nc, $S, res_psk, auth_status, <'4', $ticket_lifetime, ticket_age_add, ~ticket, <<'46',$max_early_data_size>> >,psk_type),
+        F_CachePSK(~nc, $S, res_psk, auth_status, <'4', $ticket_lifetime, ticket_age_add, ticket, <<'46',$max_early_data_size>> >,psk_type),
         EarlySendStream(~nc, $C, $S, auth_status, ead_keyc, edi),
         DHExp(~x, ~nc, $C),
+        !DHEx(~x, ~nc, $C),
         MessageOut(message)
     ]
 
@@ -185,6 +186,7 @@ rule recv_hello_retry_request_psk:
     [
         MessageOut(message),
         DHExp(~new_x, ~tid, $C),
+        !DHEx(~new_x, ~tid, $C),
         ClientState(
             ~tid,
             'C1',

@@ -205,6 +205,7 @@ rule server_hello_psk:
             p_cert_req
         ),
         DHExp(~y_ignored, ~tid, $S),
+        !DHEx(~y_ignored, ~tid, $S),
         MessageOut(message)
     ]
 
@@ -304,6 +305,7 @@ rule server_hello_psk_dhe:
             p_cert_req
         ),
         DHExp(~y, ~tid, $S),
+        !DHEx(~y, ~tid, $S),
         MessageOut(message)
     ]
 

@@ -317,6 +317,7 @@ rule server_hello:
             p_cert_req
         ),
         DHExp(~y, ~tid, $S),
+        !DHEx(~y, ~tid, $S),
         MessageOut(message)
     ]
 

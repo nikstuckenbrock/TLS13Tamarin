@@ -60,6 +60,7 @@ rule client_hello:
             '0'
         ),
         DHExp(~x, ~nc, $C),
+        !DHEx(~x, ~nc, $C),
         MessageOut(message)
     ]
 
@@ -135,6 +136,7 @@ rule recv_hello_retry_request:
     [
         MessageOut(message),
         DHExp(~new_x, ~tid, $C),
+        !DHEx(~new_x, ~tid, $C),
         ClientState(
             ~tid,
             'C1',
@@ -903,7 +905,7 @@ rule recv_new_session_ticket:
         ticket_extension = <
             <'46', $max_early_data_size>
         >
-        receivedMessage = NewSessionTicket($ticket_lifetime, ~ticket_age_add, ~ticket, ticket_extension)
+        receivedMessage = NewSessionTicket($ticket_lifetime, ticket_age_add, ticket, ticket_extension)
     in
     [
         ClientState(
