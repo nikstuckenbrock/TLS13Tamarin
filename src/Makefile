@@ -55,8 +55,8 @@ authHelpers:
 dhInj:
 	$(TAMARIN) -DdhInj --prove=dh_exp_invariant tls13.spthy --output=../proofs/dh_inj.dh_exp_invariant.spthy >> ../logs/dh_inj.log 2>&1
 	$(TAMARIN) -DdhInj --prove=one_dh_per_x tls13.spthy --output=../proofs/dh_inj.one_dh_per_x.spthy >> ../logs/dh_inj.log 2>&1
-	#not_working_anymore$(TAMARIN) -DdhInj --prove=rev_dh_ordering tls13.spthy --output=../proofs/dh_inj.rev_dh_ordering.spthy >> ../logs/dh_inj.log 2>&1
-	#not_working_anymore$(TAMARIN) -DdhInj --prove=rev_dh_before_hs tls13.spthy --output=../proofs/dh_inj.rev_dh_before_hs.spthy >> ../logs/dh_inj.log 2>&1
+	#now_restriction$(TAMARIN) -DdhInj --prove=rev_dh_ordering tls13.spthy --output=../proofs/dh_inj.rev_dh_ordering.spthy >> ../logs/dh_inj.log 2>&1
+	$(TAMARIN) -DdhInj --prove=rev_dh_before_hs tls13.spthy --output=../proofs/dh_inj.rev_dh_before_hs.spthy >> ../logs/dh_inj.log 2>&1
 
 dhCal:
 	$(TAMARIN) -DdhCal --prove=dh_chal_dual tls13.spthy --output=../proofs/dh_chal.spthy >> ../logs/dh_cal.log 2>&1
@@ -75,7 +75,9 @@ secretHelpers:
 	$(TAMARIN) -DsecretHelpers --prove=matching_transcripts_posths tls13.spthy --output=../proofs/secret_helpers.matching_transcripts_posths.spthy >> ../logs/secret_helpers.log 2>&1
 	$(TAMARIN) -DsecretHelpers --prove=matching_rms_actors tls13.spthy --output=../proofs/secret_helpers.matching_rms_actors.spthy >> ../logs/secret_helpers.log 2>&1
 	$(TAMARIN) -DsecretHelpers --prove=matching_sessions tls13.spthy --output=../proofs/secret_helpers.matching_sessions.spthy >> ../logs/secret_helpers.log 2>&1
+	$(TAMARIN) -DsecretHelpers --prove=invariant_post_hs tls13.spthy --output=../proofs/secret_helpers.invariant_post_hs.spthy >> ../logs/secret_helpers.log 2>&1
 
 lemmata:
 	$(TAMARIN) -Dlemmas --prove=secret_session_keys tls13.spthy --output=../proofs/lemmas.secret_session_keys.spthy >> ../logs/lemmas.log 2>&1
+	$(TAMARIN) -Dlemmas --prove=secret_session_keys_pfs tls13.spthy --output=../proofs/lemmas.secret_session_keys.spthy >> ../logs/lemmas.log 2>&1
 	$(TAMARIN) -Dlemmas --prove=unique_session_keys tls13.spthy --output=../proofs/lemmas.unique_session_keys.spthy >> ../logs/lemmas.log 2>&1

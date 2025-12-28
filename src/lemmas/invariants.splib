@@ -1,54 +1,6 @@
-lemma one_C2d_per_tid [reuse]:
-    "All tid #i #j. C2d(tid)@i & C2d(tid)@j ==> #i = #j"
-
-lemma one_C2d_PSK_per_tid [reuse]:
-    "All tid #i #j. C2d_PSK(tid)@i & C2d_PSK(tid)@j ==> #i = #j"
-
-lemma one_S2d_per_tid [reuse]:
-    "All tid #i #j. S2d(tid)@i & S2d(tid)@j ==> #i = #j"
-
-lemma one_S2d_PSK_per_tid [reuse]:
-    "All tid #i #j. S2d_PSK(tid)@i & S2d_PSK(tid)@j ==> #i = #j"
-
-lemma one_C3_per_tid [reuse]:
-    "All tid #i #j. C3(tid)@i & C3(tid)@j ==> #i = #j"
-
-lemma one_C3_cert_per_tid [reuse]:
-    "All tid #i #j. C3_cert(tid)@i & C3_cert(tid)@j ==> #i = #j"
-
-lemma one_S3_per_tid [reuse]:
-    "All tid #i #j. S3(tid)@i & S3(tid)@j ==> #i = #j"
-
-lemma one_S3_cert_per_tid [reuse]:
-    "All tid #i #j. S3_cert(tid)@i & S3_cert(tid)@j ==> #i = #j"
-
-lemma S3_vs_S3_cert [reuse]:
-    "All tid #i #j. S3(tid)@i & S3_cert(tid)@j ==> F"
-
-lemma C3_vs_C3_cert [reuse]:
-    "All tid #i #j. C3(tid)@i & C3_cert(tid)@j ==> F"
-
-lemma S2d_vs_S2d_PSK [reuse]:
-    "All tid #i #j. S2d(tid)@i & S2d_PSK(tid)@j ==> F"
-
-lemma C2d_vs_C2d_PSK [reuse]:
-    "All tid #i #j. C2d(tid)@i & C2d_PSK(tid)@j ==> F"
-
 lemma tid_invariant [use_induction, reuse]:
   "All tid actor role #i. Instance(tid, actor, role)@i==>
       (Ex #j. Start(tid, actor, role)@j & (#j < #i))"
 
 lemma one_start_per_tid [reuse]:
   "All tid actor actor2 role role2 #i #j. Start(tid, actor, role)@i & Start(tid, actor2, role2)@j ==>#i=#j"
-
-lemma cert_req_origin [sources]:
-  "All certificate_request_context certificate_extensions keys #i.
-    KU(senc{<'13',<certificate_request_context,certificate_extensions>>}keys)@i ==> 
-      (Ex #j. KU(certificate_request_context)@j & #j < #i) |
-      (Ex #j tid actor role. RCertReqCtxt(tid, actor, role, <certificate_request_context>)@j & #j < #i)"
-
-lemma nst_source [sources]:
-  "All ticket ticket_age_add tkt_lt tkt_exts app_key #i.
-    KU(senc{<'4',<tkt_lt,ticket_age_add,ticket,tkt_exts>>}app_key)@i ==>
-      (Ex #j #k. KU(ticket)@j & KU(ticket_age_add)@k & #j < #i & #k < #i) |
-      (Ex tid S #j. RNST(tid, S, 'server', <ticket,ticket_age_add>)@j & #j < #i)"

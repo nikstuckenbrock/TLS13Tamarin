@@ -138,3 +138,6 @@ restriction one_S4_update_recv_per_tid:
 
 restriction one_S4_update_fin_per_tid:
     "All tid #i #j. S4_update_fin(tid)@i & S4_update_fin(tid)@j ==> #i = #j"
+
+restriction one_actor_per_role:
+    "All actor actor2 nc nc2 role #i #j. Instance(nc, actor, role)@i & Instance(nc2, actor2, role)@j ==> actor = actor2"

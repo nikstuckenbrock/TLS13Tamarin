@@ -1,6 +1,3 @@
-restriction one_actor_per_role:
-    "All actor actor2 nc nc2 role #i #j. Instance(nc, actor, role)@i & Instance(nc2, actor2, role)@j ==> actor = actor2"
-
 lemma exists_C0: exists-trace
     "Ex tid #i. C0(tid)@i"
 

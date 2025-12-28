@@ -48,26 +48,42 @@ rule message_in_to_in:
 #endif
 
 #ifdef invariants
+#include "lemmas/uniqueness.splib"
 #include "lemmas/invariants.splib"
 #endif
 
 #ifdef authHelpers
+#include "lemmas/uniqueness.splib"
+#include "lemmas/invariants.splib"
 #include "lemmas/authHelpers.splib"
 #endif
 
 #ifdef secretHelpers
+#include "lemmas/uniqueness.splib"
+#include "lemmas/invariants.splib"
+#include "lemmas/dhInj.splib"
+#include "lemmas/dhCal.splib"
 #include "lemmas/secretHelpers.splib"
 #endif
 
 #ifdef dhInj
+#include "lemmas/uniqueness.splib"
 #include "lemmas/dhInj.splib"
 #endif
 
 #ifdef dhCal
+#include "lemmas/uniqueness.splib"
+#include "lemmas/dhInj.splib"
 #include "lemmas/dhCal.splib"
 #endif
 
 #ifdef lemmas
+#include "lemmas/uniqueness.splib"
+#include "lemmas/invariants.splib"
+#include "lemmas/dhInj.splib"
+#include "lemmas/dhCal.splib"
+#include "lemmas/secretHelpers.splib"
+#include "lemmas/authHelpers.splib"
 #include "lemmas/lemmas.splib"
 #endif
 
