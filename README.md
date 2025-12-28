@@ -8,3 +8,5 @@ For a detailed comparison between the specification and our model, please see:
 https://samscott89.github.io/TLS13_Tamarin
 
 For more background information, including our previous publication, please visit our [project page](http://tls13tamarin.github.io/TLS13Tamarin/).
+
+Proofs of the reproved lemmas can be found [here](https://github.com/nikstuckenbrock/TLS13Tamarin-proofs/tree/main/base-draft-21).
