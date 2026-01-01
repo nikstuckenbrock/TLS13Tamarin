@@ -1,3 +1,5 @@
 proofs/
 logs/
 .venv/
+.mypy_cache
+.vscode
