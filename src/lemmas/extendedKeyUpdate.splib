@@ -1,0 +1,33 @@
+#ifdef reachability
+/**
+* This section contains reachability/executability lemmas to sanity check the protocol execution workflow.
+* This group of lemmas is related to an execution initiated by the client.
+*/
+
+lemma exists_extended_key_update_request_client [heuristic={reachability}]: exists-trace
+    "Ex tid #i. ExtendedKeyUpdateRequestClient(tid)@i"
+
+lemma exists_extended_key_update_request_client_receive [heuristic={reachability}]: exists-trace
+    "Ex tid #i. ExtendedKeyUpdateRequestClientReceive(tid)@i"
+
+lemma exists_extended_key_update_response_server [heuristic={reachability}]: exists-trace
+    "Ex tid #i. ExtendedKeyUpdateResponseServer(tid)@i"
+
+lemma exists_extended_key_update_response_server_receive [heuristic={reachability}]: exists-trace
+    "Ex tid #i. ExtendedKeyUpdateResponseServerReceive(tid)@i"
+
+lemma exists_extended_key_update_finish_client [heuristic={reachability}]: exists-trace
+    "Ex tid #i. ExtendedKeyUpdateFinishClient(tid)@i"
+
+lemma exists_extended_key_update_finish_client_receive [heuristic={reachability}]: exists-trace
+    "Ex tid #i. ExtendedKeyUpdateFinishClientReceive(tid)@i"
+
+/**
+* This section contains reachability/executability lemmas to sanity check the protocol execution workflow.
+* This group of lemmas is related to an execution initiated by the server.
+*/
+#endif
+
+/**
+* This section contains desired security properties of the extension.
+*/

@@ -39,6 +39,10 @@ rule message_in_to_in:
 #include "model/keyUpdate.splib"
 #include "model/record.splib"
 
+#ifdef extendedKeyUpdate
+#include "model/extendedKeyUpdate.splib"
+#endif
+
 #ifdef reachability
 #include "lemmas/reachability.splib"
 #endif
@@ -85,6 +89,10 @@ rule message_in_to_in:
 #include "lemmas/secretHelpers.splib"
 #include "lemmas/authHelpers.splib"
 #include "lemmas/lemmas.splib"
+#endif
+
+#ifdef extendedKeyUpdate
+#include "lemmas/extendedKeyUpdate.splib"
 #endif
 
 end
