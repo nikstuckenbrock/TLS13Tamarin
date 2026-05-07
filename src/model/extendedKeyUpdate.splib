@@ -420,7 +420,7 @@ rule extended_key_update_finish_client_receive:
     in
     [
         RecvStream(~tid, $S, $C, p_auth_status, p_app_keyc),
-        F_MessageIn(senc{finish}p_app_keyc)
+        F_MessageIn(senc{finish}p_app_keyc),
         S4_Extended_Key_Update(~tid, 'EKU1', $S, $C, gx, gy, <request, response>),
         ServerState(
             ~tid,
