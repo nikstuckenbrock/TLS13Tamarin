@@ -60,4 +60,9 @@ macros:
 
     NewSessionTicket(ticket_lifetime, ticket_age_add, ticket, ticket_extension) = Handshake(HandshakeMessageTypeNewSessionTicket(), <ticket_lifetime, ticket_age_add, ticket, ticket_extension>),
 
-    DataRecord(data) = <data, '23'>
+    DataRecord(data) = <data, '23'>,
+
+    // https://www.ietf.org/archive/id/draft-ietf-tls-extended-key-update-12.html#name-extended-key-update-message
+    ExtendedKeyUpdateRequest(key_share_entry) = <'0', key_share_entry>,
+    ExtendedKeyUpdateResponse(key_share_entry) = <'1', key_share_entry>,
+    ExtendedKeyUpdateFinish() = <'2'>
