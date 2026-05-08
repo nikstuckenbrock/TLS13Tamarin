@@ -172,12 +172,26 @@ rule extended_key_update_request_client_receive:
 rule extended_key_update_response_server:
     let
         gy = p_g^~y
+        gxy = gx^~y
         key_share_entry = KeyShareEntry(p_g, gy)
         response = Handshake(HandshakeMessageTypeExtendedKeyUpdate(), ExtendedKeyUpdateResponse(key_share_entry))
+        
+        transcript_hash_n_1 = h(<request, response>)
+        
+        derived_secret = Expand(p_ms, <'32', 'TLS13derived', '0'>, '32')
+        main_secret_n_1 = Extract(gxy, derived_secret)
+        client_application_traffic_secret_n_1 = Expand(main_secret_n_1, <'32', 'TLS13clientapplicationtrafficsecret', transcript_hash_n_1>, '32')
+        server_application_traffice_secret_n_1 = Expand(main_secret_n_1, <'32', 'TLS13serverapplicationtrafficsecret', transcript_hash_n_1>, '32')
+        exporter_secret_n_1 = Expand(main_secret_n_1, <'32', 'TLS13exportermastersecret', transcript_hash_n_1>, '32')
+        resumption_main_secret_n_1 = Expand(main_secret_n_1, <'32', 'TLS13resumptionmastersecret', transcript_hash_n_1>, '32')
+
+        client_application_traffic_key = Expand(client_application_traffic_secret_n_1, <'32', 'TLS13applicationdatakeyexpansion_key', '0'>, '32')
+        server_application_traffic_key = Expand(server_application_traffice_secret_n_1, <'32', 'TLS13applicationdatakeyexpansion_key', '0'>, '32')
     in
     [
         Fr(~y),
         SendStream(~tid, $S, $C, p_auth_status, p_app_keys),
+        RecvStream(~tid, $S, $C, p_auth_status, p_app_keyc),
         S4_Extended_Key_Update(~tid, 'EKU0', $S, $C, gx, '0', <request>),
         ServerState(
             ~tid,
@@ -220,7 +234,8 @@ rule extended_key_update_response_server:
     [
         S4_Extended_Key_Update(~tid, 'EKU1', $S, $C, gx, gy, <request, response>),
         MessageOut(senc{response}p_app_keys),
-        SendStream(~tid, $S, $C, p_auth_status, p_app_keys),
+        SendStream(~tid, $S, $C, p_auth_status, server_application_traffic_key),
+        RecvStream(~tid, $S, $C, p_auth_status, client_application_traffic_key),
         ServerState(
             ~tid,
             'S4',
@@ -241,16 +256,16 @@ rule extended_key_update_response_server:
             p_psk_ke_mode,
             p_psk_id,
             p_edi,
-            p_es,
+            exporter_secret_n_1,
             p_hs,
-            p_ms,
-            p_cats,
-            p_sats,
+            main_secret_n_1,
+            client_application_traffic_secret_n_1,
+            server_application_traffice_secret_n_1,
             p_hs_keyc,
             p_hs_keys,
             p_auth_status,
             p_ems,
-            p_rms,
+            resumption_main_secret_n_1,
             p_cert_req,
             ExtendedKeyUpdateRunning()
         )
@@ -304,7 +319,7 @@ rule extended_key_update_response_server_receive:
         Instance(~tid, $C, 'client')
     ]->
     [
-        C4_Extended_Key_Update(~tid, 'EKU1', $C, $S, ~x, gx, '0', <request, response>),
+        C4_Extended_Key_Update(~tid, 'EKU1', $C, $S, ~x, gy, '0', <request, response>),
         RecvStream(~tid, $C, $S, p_auth_status, p_app_keys),
         ClientState(
             ~tid,
@@ -344,10 +359,23 @@ rule extended_key_update_response_server_receive:
 rule extended_key_update_finish_client:
     let
         finish = Handshake(HandshakeMessageTypeExtendedKeyUpdate(), ExtendedKeyUpdateFinish())
+        gxy = gy^~x
+        transcript_hash_n_1 = h(<request, response>)
+        
+        derived_secret = Expand(p_ms, <'32', 'TLS13derived', '0'>, '32')
+        main_secret_n_1 = Extract(gxy, derived_secret)
+        client_application_traffic_secret_n_1 = Expand(main_secret_n_1, <'32', 'TLS13clientapplicationtrafficsecret', transcript_hash_n_1>, '32')
+        server_application_traffice_secret_n_1 = Expand(main_secret_n_1, <'32', 'TLS13serverapplicationtrafficsecret', transcript_hash_n_1>, '32')
+        exporter_secret_n_1 = Expand(main_secret_n_1, <'32', 'TLS13exportermastersecret', transcript_hash_n_1>, '32')
+        resumption_main_secret_n_1 = Expand(main_secret_n_1, <'32', 'TLS13resumptionmastersecret', transcript_hash_n_1>, '32')
+
+        client_application_traffic_key = Expand(client_application_traffic_secret_n_1, <'32', 'TLS13applicationdatakeyexpansion_key', '0'>, '32')
+        server_application_traffic_key = Expand(server_application_traffice_secret_n_1, <'32', 'TLS13applicationdatakeyexpansion_key', '0'>, '32')
     in
     [
-        C4_Extended_Key_Update(~tid, 'EKU1', $C, $S, ~x, gx, '0', <request, response>),
+        C4_Extended_Key_Update(~tid, 'EKU1', $C, $S, ~x, gy, '0', <request, response>),
         SendStream(~tid, $C, $S, p_auth_status, applicationTrafficKeyClient),
+        RecvStream(~tid, $C, $S, p_auth_status, p_app_keys),
         ClientState(
             ~tid,
             'C4',
@@ -386,8 +414,9 @@ rule extended_key_update_finish_client:
         ExtendedKeyUpdateFinishClient(~tid)
     ]->
     [
-        C4_Extended_Key_Update(~tid, 'EKU0', $C, $S, ~x, gx, '0', <request, response, finish>),
-        SendStream(~tid, $C, $S, p_auth_status, applicationTrafficKeyClient),
+        C4_Extended_Key_Update(~tid, 'EKU0', $C, $S, ~x, gy, '0', <request, response, finish>),
+        SendStream(~tid, $C, $S, p_auth_status, client_application_traffic_key),
+        RecvStream(~tid, $C, $S, p_auth_status, server_application_traffic_key),
         MessageOut(senc{finish}applicationTrafficKeyClient),
         ClientState(
             ~tid,
@@ -409,16 +438,16 @@ rule extended_key_update_finish_client:
             p_psk_ke_mode,
             p_psk_id,
             p_edi,
-            p_es,
+            exporter_secret_n_1,
             p_hs,
-            p_ms,
-            p_cats,
-            p_sats,
+            main_secret_n_1,
+            client_application_traffic_secret_n_1,
+            server_application_traffice_secret_n_1,
             p_hs_keyc,
             p_hs_keys,
             p_auth_status,
             p_ems,
-            p_rms,
+            resumption_main_secret_n_1,
             p_cert_req,
             ExtendedKeyUpdateNotRunning()
         )
