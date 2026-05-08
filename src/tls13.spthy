@@ -36,11 +36,12 @@ rule message_in_to_in:
 #include "model/server.splib"
 #include "model/serverPsk.splib"
 #include "model/postHandshake.splib"
-#include "model/keyUpdate.splib"
 #include "model/record.splib"
 
 #ifdef extendedKeyUpdate
 #include "model/extendedKeyUpdate.splib"
+#else
+#include "model/keyUpdate.splib"
 #endif
 
 #ifdef reachability
