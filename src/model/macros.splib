@@ -13,6 +13,9 @@ macros:
     HandshakeMessageTypeFinished() = '20',
     HandshakeMessageTypeKeyUpdate() = '24',
 
+    // https://www.ietf.org/archive/id/draft-ietf-tls-extended-key-update-12.html#name-extended-key-update-message
+    HandshakeMessageTypeExtendedKeyUpdate() = 'TBD',
+
     ProtocolVersion() = '0x0303',
     HelloRetryRequestRandom() = h('HelloRetryRequest'),
 
@@ -29,6 +32,7 @@ macros:
     ExtensionEarlyDataIndication() = Extension('42', <'0'>),
     ExtensionPskKeyExchangeModes(ke_mode) = Extension('45', ke_mode),
     ExtensionPreSharedKeyClientHello(identities, binders) = Extension('41', <identities, <binders>>),
+    ExtensionExtendedKeyUpdate() = Extension('TBD', '1'),
 
     // https://datatracker.ietf.org/doc/html/rfc8446#section-4.1.2
     LegacyVersion() = '0x0303',
@@ -65,4 +69,8 @@ macros:
     // https://www.ietf.org/archive/id/draft-ietf-tls-extended-key-update-12.html#name-extended-key-update-message
     ExtendedKeyUpdateRequest(key_share_entry) = <'0', key_share_entry>,
     ExtendedKeyUpdateResponse(key_share_entry) = <'1', key_share_entry>,
-    ExtendedKeyUpdateFinish() = <'2'>
+    ExtendedKeyUpdateFinish() = <'2'>,
+
+    // Extended key update state tracking
+    ExtendedKeyUpdateRunning() = <'1'>,
+    ExtendedKeyUpdateNotRunning() = <'0'>

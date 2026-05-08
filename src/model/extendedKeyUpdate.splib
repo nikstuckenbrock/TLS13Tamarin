@@ -2,7 +2,7 @@ rule extended_key_update_request_client:
     let
         gx = p_g^~x
         key_share_entry = KeyShareEntry(p_g, gx)
-        request = ExtendedKeyUpdateRequest(key_share_entry)
+        request = Handshake(HandshakeMessageTypeExtendedKeyUpdate(), ExtendedKeyUpdateRequest(key_share_entry))
     in
     [
         Fr(~x),
@@ -37,7 +37,8 @@ rule extended_key_update_request_client:
             p_auth_status,
             p_ems,
             p_rms,
-            p_cert_req
+            p_cert_req,
+            ExtendedKeyUpdateNotRunning()
         )
     ]
     --[
@@ -77,14 +78,15 @@ rule extended_key_update_request_client:
             p_auth_status,
             p_ems,
             p_rms,
-            p_cert_req
+            p_cert_req,
+            ExtendedKeyUpdateRunning()
         )
     ]
 
 rule extended_key_update_request_client_receive:
     let
         key_share_entry = KeyShareEntry(p_g, gx)
-        request = ExtendedKeyUpdateRequest(key_share_entry)
+        request = Handshake(HandshakeMessageTypeExtendedKeyUpdate(), ExtendedKeyUpdateRequest(key_share_entry))
     in
     [
         F_MessageIn(senc{request}p_app_keyc),
@@ -120,7 +122,8 @@ rule extended_key_update_request_client_receive:
             p_auth_status,
             p_ems,
             p_rms,
-            p_cert_req
+            p_cert_req,
+            ExtendedKeyUpdateNotRunning()
         )
     ]
     --[
@@ -159,7 +162,8 @@ rule extended_key_update_request_client_receive:
             p_auth_status,
             p_ems,
             p_rms,
-            p_cert_req
+            p_cert_req,
+            ExtendedKeyUpdateRunning()
         ),
         RecvStream(~tid, $S, $C, p_auth_status, p_app_keyc),
         SendStream(~tid, $S, $C, p_auth_status, p_app_keys),
@@ -169,7 +173,7 @@ rule extended_key_update_response_server:
     let
         gy = p_g^~y
         key_share_entry = KeyShareEntry(p_g, gy)
-        response = ExtendedKeyUpdateResponse(key_share_entry)
+        response = Handshake(HandshakeMessageTypeExtendedKeyUpdate(), ExtendedKeyUpdateResponse(key_share_entry))
     in
     [
         Fr(~y),
@@ -205,7 +209,8 @@ rule extended_key_update_response_server:
             p_auth_status,
             p_ems,
             p_rms,
-            p_cert_req
+            p_cert_req,
+            ExtendedKeyUpdateRunning()
         )
     ]
     --[
@@ -246,14 +251,15 @@ rule extended_key_update_response_server:
             p_auth_status,
             p_ems,
             p_rms,
-            p_cert_req
+            p_cert_req,
+            ExtendedKeyUpdateRunning()
         )
     ]
 
 rule extended_key_update_response_server_receive:
     let
         key_share_entry = KeyShareEntry(p_g, gy)
-        response = ExtendedKeyUpdateResponse(key_share_entry)
+        response = Handshake(HandshakeMessageTypeExtendedKeyUpdate(), ExtendedKeyUpdateResponse(key_share_entry))
     in
     [
         C4_Extended_Key_Update(~tid, 'EKU0', $C, $S, ~x, gx, '0', <request>),
@@ -289,7 +295,8 @@ rule extended_key_update_response_server_receive:
             p_auth_status,
             p_ems,
             p_rms,
-            p_cert_req
+            p_cert_req,
+            ExtendedKeyUpdateRunning()
         )
     ]
     --[
@@ -329,13 +336,14 @@ rule extended_key_update_response_server_receive:
             p_auth_status,
             p_ems,
             p_rms,
-            p_cert_req
+            p_cert_req,
+            ExtendedKeyUpdateRunning()
         )
     ]
 
 rule extended_key_update_finish_client:
     let
-        finish = ExtendedKeyUpdateFinish()
+        finish = Handshake(HandshakeMessageTypeExtendedKeyUpdate(), ExtendedKeyUpdateFinish())
     in
     [
         C4_Extended_Key_Update(~tid, 'EKU1', $C, $S, ~x, gx, '0', <request, response>),
@@ -370,7 +378,8 @@ rule extended_key_update_finish_client:
             p_auth_status,
             p_ems,
             p_rms,
-            p_cert_req
+            p_cert_req,
+            ExtendedKeyUpdateRunning()
         )
     ]
     --[
@@ -410,13 +419,14 @@ rule extended_key_update_finish_client:
             p_auth_status,
             p_ems,
             p_rms,
-            p_cert_req
+            p_cert_req,
+            ExtendedKeyUpdateNotRunning()
         )
     ]
 
 rule extended_key_update_finish_client_receive:
     let
-        finish = ExtendedKeyUpdateFinish()
+        finish = Handshake(HandshakeMessageTypeExtendedKeyUpdate(), ExtendedKeyUpdateFinish())
     in
     [
         RecvStream(~tid, $S, $C, p_auth_status, p_app_keyc),
@@ -452,7 +462,8 @@ rule extended_key_update_finish_client_receive:
             p_auth_status,
             p_ems,
             p_rms,
-            p_cert_req
+            p_cert_req,
+            ExtendedKeyUpdateRunning()
         )
     ]
     --[
@@ -491,7 +502,8 @@ rule extended_key_update_finish_client_receive:
             p_auth_status,
             p_ems,
             p_rms,
-            p_cert_req
+            p_cert_req,
+            ExtendedKeyUpdateNotRunning()
         )
     ]
 
