@@ -499,7 +499,7 @@ rule extended_key_update_finish_client_receive:
         ExtendedKeyUpdateFinishClientReceive(~tid)
     ]->
     [
-        S4_Extended_Key_Update(~tid, 'EKU0', $S, $C, y, gy, <request, response>),
+        S4_Extended_Key_Update(~tid, 'EKU0', $S, $C, y, gx, <request, response>),
         RecvStream(~tid, $S, $C, p_auth_status, p_app_keyc),
         ServerState(
             ~tid,
