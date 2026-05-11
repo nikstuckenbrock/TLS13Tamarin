@@ -131,7 +131,7 @@ rule extended_key_update_request_client_receive:
         Instance(~tid, $S, 'server')
     ]->
     [
-        S4_Extended_Key_Update(~tid, 'EKU0', $S, $C, gx, '0', <request>),
+        S4_Extended_Key_Update(~tid, 'EKU0', $S, $C, '0', gx, <request>),
         ServerState(
             ~tid,
             'S4',
@@ -192,7 +192,7 @@ rule extended_key_update_response_server:
         Fr(~y),
         SendStream(~tid, $S, $C, p_auth_status, p_app_keys),
         RecvStream(~tid, $S, $C, p_auth_status, p_app_keyc),
-        S4_Extended_Key_Update(~tid, 'EKU0', $S, $C, gx, '0', <request>),
+        S4_Extended_Key_Update(~tid, 'EKU0', $S, $C, '0', gx, <request>),
         ServerState(
             ~tid,
             'S4',
@@ -232,7 +232,7 @@ rule extended_key_update_response_server:
         Instance(~tid, $S, 'server')
     ]->
     [
-        S4_Extended_Key_Update(~tid, 'EKU1', $S, $C, gx, gy, <request, response>),
+        S4_Extended_Key_Update(~tid, 'EKU1', $S, $C, ~y, gx, <request, response>),
         MessageOut(senc{response}p_app_keys),
         SendStream(~tid, $S, $C, p_auth_status, server_application_traffic_key),
         RecvStream(~tid, $S, $C, p_auth_status, client_application_traffic_key),
@@ -460,7 +460,7 @@ rule extended_key_update_finish_client_receive:
     [
         RecvStream(~tid, $S, $C, p_auth_status, p_app_keyc),
         F_MessageIn(senc{finish}p_app_keyc),
-        S4_Extended_Key_Update(~tid, 'EKU1', $S, $C, gx, gy, <request, response>),
+        S4_Extended_Key_Update(~tid, 'EKU1', $S, $C, y, gx, <request, response>),
         ServerState(
             ~tid,
             'S4',
@@ -499,7 +499,7 @@ rule extended_key_update_finish_client_receive:
         ExtendedKeyUpdateFinishClientReceive(~tid)
     ]->
     [
-        S4_Extended_Key_Update(~tid, 'EKU0', $S, $C, gx, gy, <request, response, finish>),
+        S4_Extended_Key_Update(~tid, 'EKU0', $S, $C, y, gy, <request, response>),
         RecvStream(~tid, $S, $C, p_auth_status, p_app_keyc),
         ServerState(
             ~tid,
