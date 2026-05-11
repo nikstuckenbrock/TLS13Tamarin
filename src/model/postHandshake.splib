@@ -34,7 +34,7 @@ rule certificate_request_post:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running
+            ExtendedKeyUpdateNotRunning()
         ),
         SendStream(~tid, $S, $C, p_auth_status, app_keys),
         Fr(~cert_req_ctxt)
@@ -77,7 +77,7 @@ rule certificate_request_post:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running
+            ExtendedKeyUpdateNotRunning()
         ),
         SendStream(~tid, $S, $C, p_auth_status, app_keys),
         L_ServerCertReq(~tid, $S, $C, ~cert_req_ctxt),
@@ -120,7 +120,7 @@ rule recv_certificate_request_post:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running
+            ExtendedKeyUpdateNotRunning()
         ),
         RecvStream(~tid, $C, $S, p_auth_status, app_keys),
         F_MessageIn(senc{receivedMessage}app_keys)
@@ -163,7 +163,7 @@ rule recv_certificate_request_post:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running
+            ExtendedKeyUpdateNotRunning()
         ),
         RecvStream(~tid, $C, $S, p_auth_status, app_keys),
         L_ClientCertReq(~tid, $C, $S, certificate_request_context)
@@ -219,7 +219,7 @@ rule client_auth_post:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running
+            ExtendedKeyUpdateNotRunning()
         ),
         SendStream(~tid, $C, $S, p_auth_status, app_keyc),
         !Ltk($C, ~ltkC),
@@ -265,7 +265,7 @@ rule client_auth_post:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running
+            ExtendedKeyUpdateNotRunning()
         ),
         SendStream(~tid, $C, $S, auth_status, app_keyc),
         MessageOut(senc{messagesOut}app_keyc)
@@ -321,7 +321,7 @@ rule recv_client_auth_post:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running
+            ExtendedKeyUpdateNotRunning()
         ),
         RecvStream(~tid, $S, $C, p_auth_status, app_keyc),
         !Pk($C, pk(~ltkC)),
@@ -371,7 +371,7 @@ rule recv_client_auth_post:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running
+            ExtendedKeyUpdateNotRunning()
         ),
         RecvStream(~tid, $S, $C, auth_status, app_keyc)
     ]
