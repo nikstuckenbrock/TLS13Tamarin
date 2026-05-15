@@ -38,7 +38,8 @@ rule extended_key_update_request_client:
             p_ems,
             p_rms,
             p_cert_req,
-            ExtendedKeyUpdateNotRunning()
+            ExtendedKeyUpdateNotRunning(),
+            PostHandshakeAuthenticationNotRunning()
         )
     ]
     --[
@@ -79,7 +80,8 @@ rule extended_key_update_request_client:
             p_ems,
             p_rms,
             p_cert_req,
-            ExtendedKeyUpdateRunning()
+            ExtendedKeyUpdateRunning(),
+            PostHandshakeAuthenticationNotRunning()
         )
     ]
 
@@ -123,7 +125,8 @@ rule extended_key_update_request_client_receive:
             p_ems,
             p_rms,
             p_cert_req,
-            ExtendedKeyUpdateNotRunning()
+            ExtendedKeyUpdateNotRunning(),
+            PostHandshakeAuthenticationNotRunning()
         )
     ]
     --[
@@ -163,7 +166,8 @@ rule extended_key_update_request_client_receive:
             p_ems,
             p_rms,
             p_cert_req,
-            ExtendedKeyUpdateRunning()
+            ExtendedKeyUpdateRunning(),
+            PostHandshakeAuthenticationNotRunning()
         ),
         RecvStream(~tid, $S, $C, p_auth_status, p_app_keyc),
         SendStream(~tid, $S, $C, p_auth_status, p_app_keys),
@@ -224,7 +228,8 @@ rule extended_key_update_response_server:
             p_ems,
             p_rms,
             p_cert_req,
-            ExtendedKeyUpdateRunning()
+            ExtendedKeyUpdateRunning(),
+            PostHandshakeAuthenticationNotRunning()
         )
     ]
     --[
@@ -267,7 +272,8 @@ rule extended_key_update_response_server:
             p_ems,
             resumption_main_secret_n_1,
             p_cert_req,
-            ExtendedKeyUpdateRunning()
+            ExtendedKeyUpdateRunning(),
+            PostHandshakeAuthenticationNotRunning()
         )
     ]
 
@@ -311,7 +317,8 @@ rule extended_key_update_response_server_receive:
             p_ems,
             p_rms,
             p_cert_req,
-            ExtendedKeyUpdateRunning()
+            ExtendedKeyUpdateRunning(),
+            PostHandshakeAuthenticationNotRunning()
         )
     ]
     --[
@@ -352,7 +359,8 @@ rule extended_key_update_response_server_receive:
             p_ems,
             p_rms,
             p_cert_req,
-            ExtendedKeyUpdateRunning()
+            ExtendedKeyUpdateRunning(),
+            PostHandshakeAuthenticationNotRunning()
         )
     ]
 
@@ -407,7 +415,8 @@ rule extended_key_update_finish_client:
             p_ems,
             p_rms,
             p_cert_req,
-            ExtendedKeyUpdateRunning()
+            ExtendedKeyUpdateRunning(),
+            PostHandshakeAuthenticationNotRunning()
         )
     ]
     --[
@@ -449,7 +458,8 @@ rule extended_key_update_finish_client:
             p_ems,
             resumption_main_secret_n_1,
             p_cert_req,
-            ExtendedKeyUpdateNotRunning()
+            ExtendedKeyUpdateNotRunning(),
+            PostHandshakeAuthenticationNotRunning()
         )
     ]
 
@@ -492,7 +502,8 @@ rule extended_key_update_finish_client_receive:
             p_ems,
             p_rms,
             p_cert_req,
-            ExtendedKeyUpdateRunning()
+            ExtendedKeyUpdateRunning(),
+            PostHandshakeAuthenticationNotRunning()
         )
     ]
     --[
@@ -532,7 +543,8 @@ rule extended_key_update_finish_client_receive:
             p_ems,
             p_rms,
             p_cert_req,
-            ExtendedKeyUpdateNotRunning()
+            ExtendedKeyUpdateNotRunning(),
+            PostHandshakeAuthenticationNotRunning()
         )
     ]
 

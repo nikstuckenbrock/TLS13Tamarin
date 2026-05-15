@@ -38,7 +38,8 @@ rule start_server:
             '0',
             '0',
             '0',
-            ExtendedKeyUpdateNotRunning()
+            ExtendedKeyUpdateNotRunning(),
+            PostHandshakeAuthenticationRunning()
         )
     ]
 
@@ -91,7 +92,8 @@ rule recv_client_hello:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running
+            p_extended_key_update_running,
+            p_phs_auth_running
         )
     ]
     --[
@@ -130,7 +132,8 @@ rule recv_client_hello:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running
+            p_extended_key_update_running,
+            p_phs_auth_running
         )
     ]
 
@@ -183,7 +186,8 @@ rule hello_retry_request:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running
+            p_extended_key_update_running,
+            p_phs_auth_running
         )
     ]
     --[
@@ -224,7 +228,8 @@ rule hello_retry_request:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running
+            p_extended_key_update_running,
+            p_phs_auth_running
         )
     ]
 
@@ -275,7 +280,8 @@ rule server_hello:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running
+            p_extended_key_update_running,
+            p_phs_auth_running
         ),
         Fr(~y)
     ]
@@ -321,7 +327,8 @@ rule server_hello:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running
+            p_extended_key_update_running,
+            p_phs_auth_running
         ),
         DHExp(~y, ~tid, $S),
         !DHEx(~y, ~tid, $S),
@@ -367,7 +374,8 @@ rule server_gen_keys:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running
+            p_extended_key_update_running,
+            p_phs_auth_running
         ),
         DHExp(p_y, ~tid, $S)
     ]
@@ -411,7 +419,8 @@ rule server_gen_keys:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running
+            p_extended_key_update_running,
+            p_phs_auth_running
         )
     ]
 
@@ -452,7 +461,8 @@ rule encrypted_extensions:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running
+            p_extended_key_update_running,
+            p_phs_auth_running
         )
     ]
     --[
@@ -491,7 +501,8 @@ rule encrypted_extensions:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running
+            p_extended_key_update_running,
+            p_phs_auth_running
         ),
         MessageOut(senc{message}p_hs_keys)
     ]
@@ -532,7 +543,8 @@ rule skip_certificate_request:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running
+            p_extended_key_update_running,
+            p_phs_auth_running
         )
     ]
     --[
@@ -571,7 +583,8 @@ rule skip_certificate_request:
             p_ems,
             p_rms,
             cert_req,
-            p_extended_key_update_running
+            p_extended_key_update_running,
+            p_phs_auth_running
         )
     ]
 
@@ -615,7 +628,8 @@ rule certificate_request:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running
+            p_extended_key_update_running,
+            p_phs_auth_running
         )
     ]
     --[
@@ -654,7 +668,8 @@ rule certificate_request:
             p_ems,
             p_rms,
             cert_req,
-            p_extended_key_update_running
+            p_extended_key_update_running,
+            p_phs_auth_running
         ),
         MessageOut(senc{message}p_hs_keys)
     ]
@@ -714,7 +729,8 @@ rule server_auth:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running
+            p_extended_key_update_running,
+            p_phs_auth_running
         ),
         !Ltk($S, ~ltkS)
     ]
@@ -757,7 +773,8 @@ rule server_auth:
             earlyMasterSecret,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running
+            p_extended_key_update_running,
+            p_phs_auth_running
         ),
         SendStream(~tid, $S, $C, auth_status, serverApplicationTrafficKey),
         MessageOut(senc{<certificateMessage,certificateVerifyMessage,finishedMessage>}p_hs_keys)
@@ -805,7 +822,8 @@ rule recv_client_auth:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running
+            p_extended_key_update_running,
+            p_phs_auth_running
         ),
         F_MessageIn(senc{receivedFinished}p_hs_keyc)
     ]
@@ -854,7 +872,8 @@ rule recv_client_auth:
             p_ems,
             resumptionMasterSecret,
             p_cert_req,
-            p_extended_key_update_running
+            p_extended_key_update_running,
+            p_phs_auth_running
         ),
         RecvStream(~tid, $S, $C, p_auth_status, clientApplicationTrafficKey)
     ]
@@ -916,7 +935,8 @@ rule recv_client_auth_cert:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running
+            p_extended_key_update_running,
+            p_phs_auth_running
         ),
         !Pk($C, pk(~ltkC)),
         SendStream(~tid, $S, $C, p_auth_status, app_keys),
@@ -968,7 +988,8 @@ rule recv_client_auth_cert:
             p_ems,
             rms,
             cert_req,
-            p_extended_key_update_running
+            p_extended_key_update_running,
+            p_phs_auth_running
         ),
         SendStream(~tid, $S, $C, auth_status, app_keys),
         RecvStream(~tid, $S, $C, auth_status, app_keyc)
@@ -1014,7 +1035,8 @@ rule new_session_ticket:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running
+            p_extended_key_update_running,
+            p_phs_auth_running
         ),
         SendStream(~tid, $S, $C, p_auth_status, serverApplicationTrafficKey),
         Fr(~ticket),
@@ -1058,7 +1080,8 @@ rule new_session_ticket:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running
+            p_extended_key_update_running,
+            p_phs_auth_running
         ),
         SendStream(~tid, $S, $C, p_auth_status, serverApplicationTrafficKey),
         !ServerPSK($S, $C, p_rms, p_auth_status, message, 'res'),

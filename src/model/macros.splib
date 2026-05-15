@@ -73,4 +73,8 @@ macros:
 
     // Extended key update state tracking
     ExtendedKeyUpdateRunning() = <'1'>,
-    ExtendedKeyUpdateNotRunning() = <'0'>
+    ExtendedKeyUpdateNotRunning() = <'0'>,
+
+    // Post-Handshake Authentication state tracking
+    PostHandshakeAuthenticationRunning() = <'1'>,
+    PostHandshakeAuthenticationNotRunning() = <'0'>

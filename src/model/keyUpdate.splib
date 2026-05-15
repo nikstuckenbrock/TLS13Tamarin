@@ -37,7 +37,8 @@ rule update_req_client:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running
+            p_extended_key_update_running,
+            p_phs_auth_running
         )
     ]
     --[
@@ -79,7 +80,8 @@ rule update_req_client:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running
+            p_extended_key_update_running,
+            p_phs_auth_running
         )
     ]
 
@@ -126,7 +128,8 @@ rule update_recv_server:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running
+            p_extended_key_update_running,
+            p_phs_auth_running
         ),
         RecvStream(~tid, $S, $C, p_auth_status, p_app_keyc),
         SendStream(~tid, $S, $C, p_auth_status, p_app_keys),
@@ -172,7 +175,8 @@ rule update_recv_server:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running
+            p_extended_key_update_running,
+            p_phs_auth_running
         )
     ]
 
@@ -217,7 +221,8 @@ rule update_fin_client:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running
+            p_extended_key_update_running,
+            p_phs_auth_running
         )
     ]
     --[
@@ -258,7 +263,8 @@ rule update_fin_client:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running
+            p_extended_key_update_running,
+            p_phs_auth_running
         )
     ]
 
@@ -301,7 +307,8 @@ rule update_req_server:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running
+            p_extended_key_update_running,
+            p_phs_auth_running
         )
     ]
     --[
@@ -342,7 +349,8 @@ rule update_req_server:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running
+            p_extended_key_update_running,
+            p_phs_auth_running
         )
     ]
 
@@ -392,7 +400,8 @@ rule update_recv_client:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running
+            p_extended_key_update_running,
+            p_phs_auth_running
         )
     ]
     --[
@@ -435,7 +444,8 @@ rule update_recv_client:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running
+            p_extended_key_update_running,
+            p_phs_auth_running
         )
     ]
 
@@ -480,7 +490,8 @@ rule update_fin_server:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running
+            p_extended_key_update_running,
+            p_phs_auth_running
         )
     ]
     --[
@@ -521,6 +532,7 @@ rule update_fin_server:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running
+            p_extended_key_update_running,
+            p_phs_auth_running
         )
     ]
