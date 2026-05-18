@@ -31,3 +31,24 @@ lemma exists_extended_key_update_finish_client_receive [heuristic={reachability}
 /**
 * This section contains desired security properties of the extension.
 */
+
+/**
+* For each data send, the adversary doesn't know the data.
+*/
+lemma secrecy:
+    "All tid actor peer auth data #t.
+        ( SendData(tid, actor, peer, auth, data) @ #t)
+    ==> ( not Ex #x. K(data) @ #x )
+
+/**
+* For each individual extended key update both parties agree on the same keys,
+* if a post handshake authentication was successfull.
+*/
+
+/**
+* For reach new message after the schedule the adversary does not know the key,
+* if the key itself or its components where not revealed.
+* Refers to post compromise security.
+*/
+
+- vllt. gleich mal den anderen beweis herunterladen und versuchen den nachzubilden

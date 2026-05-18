@@ -1,4 +1,4 @@
-rule extended_key_update_request_client[color=#EA3788]:
+rule extended_key_update_request_client[color=#340068]:
     let
         gx = p_g^~x
         key_share_entry = KeyShareEntry(p_g, gx)
@@ -277,7 +277,7 @@ rule extended_key_update_response_server[color=#EA3788]:
         )
     ]
 
-rule extended_key_update_response_server_receive[color=#EA3788]:
+rule extended_key_update_response_server_receive[color=#340068]:
     let
         key_share_entry = KeyShareEntry(p_g, gy)
         response = Handshake(HandshakeMessageTypeExtendedKeyUpdate(), ExtendedKeyUpdateResponse(key_share_entry))
@@ -364,7 +364,7 @@ rule extended_key_update_response_server_receive[color=#EA3788]:
         )
     ]
 
-rule extended_key_update_finish_client[color=#EA3788]:
+rule extended_key_update_finish_client[color=#340068]:
     let
         finish = Handshake(HandshakeMessageTypeExtendedKeyUpdate(), ExtendedKeyUpdateFinish())
         gxy = gy^~x
