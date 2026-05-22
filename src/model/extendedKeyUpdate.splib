@@ -40,7 +40,7 @@ rule extended_key_update_request_client[color=#340068]:
             p_cert_req,
             ExtendedKeyUpdateNotRunning(),
             PostHandshakeAuthenticationNotRunning()
-        )[no_precomp]
+        )
     ]
     --[
         ExtendedKeyUpdateRequestClient(~tid),
@@ -84,7 +84,7 @@ rule extended_key_update_request_client[color=#340068]:
             p_cert_req,
             ExtendedKeyUpdateRunning(),
             PostHandshakeAuthenticationNotRunning()
-        )[no_precomp]
+        )
     ]
 
 rule extended_key_update_request_client_receive[color=#EA3788]:
@@ -129,7 +129,7 @@ rule extended_key_update_request_client_receive[color=#EA3788]:
             p_cert_req,
             ExtendedKeyUpdateNotRunning(),
             PostHandshakeAuthenticationNotRunning()
-        )[no_precomp]
+        )
     ]
     --[
         ExtendedKeyUpdateRequestClientReceive(~tid),
@@ -170,7 +170,7 @@ rule extended_key_update_request_client_receive[color=#EA3788]:
             p_cert_req,
             ExtendedKeyUpdateRunning(),
             PostHandshakeAuthenticationNotRunning()
-        )[no_precomp],
+        ),
         RecvStream(~tid, $S, $C, p_auth_status, p_app_keyc)[no_precomp],
         SendStream(~tid, $S, $C, p_auth_status, p_app_keys)[no_precomp]
     ]
@@ -232,7 +232,7 @@ rule extended_key_update_response_server[color=#EA3788]:
             p_cert_req,
             ExtendedKeyUpdateRunning(),
             PostHandshakeAuthenticationNotRunning()
-        )[no_precomp]
+        )
     ]
     --[
         ExtendedKeyUpdateResponseServer(~tid),
@@ -277,7 +277,7 @@ rule extended_key_update_response_server[color=#EA3788]:
             p_cert_req,
             ExtendedKeyUpdateRunning(),
             PostHandshakeAuthenticationNotRunning()
-        )[no_precomp]
+        )
     ]
 
 rule extended_key_update_response_server_receive[color=#340068]:
@@ -322,7 +322,7 @@ rule extended_key_update_response_server_receive[color=#340068]:
             p_cert_req,
             ExtendedKeyUpdateRunning(),
             PostHandshakeAuthenticationNotRunning()
-        )[no_precomp]
+        )
     ]
     --[
         ExtendedKeyUpdateResponseServerReceive(~tid),
@@ -364,7 +364,7 @@ rule extended_key_update_response_server_receive[color=#340068]:
             p_cert_req,
             ExtendedKeyUpdateRunning(),
             PostHandshakeAuthenticationNotRunning()
-        )[no_precomp]
+        )
     ]
 
 rule extended_key_update_finish_client[color=#340068]:
@@ -420,7 +420,7 @@ rule extended_key_update_finish_client[color=#340068]:
             p_cert_req,
             ExtendedKeyUpdateRunning(),
             PostHandshakeAuthenticationNotRunning()
-        )[no_precomp]
+        )
     ]
     --[
         ExtendedKeyUpdateFinishClient(~tid)
@@ -463,7 +463,7 @@ rule extended_key_update_finish_client[color=#340068]:
             p_cert_req,
             ExtendedKeyUpdateNotRunning(),
             PostHandshakeAuthenticationNotRunning()
-        )[no_precomp]
+        )
     ]
 
 rule extended_key_update_finish_client_receive[color=#EA3788]:
@@ -507,7 +507,7 @@ rule extended_key_update_finish_client_receive[color=#EA3788]:
             p_cert_req,
             ExtendedKeyUpdateRunning(),
             PostHandshakeAuthenticationNotRunning()
-        )[no_precomp]
+        )
     ]
     --[
         ExtendedKeyUpdateFinishClientReceive(~tid)
@@ -548,7 +548,7 @@ rule extended_key_update_finish_client_receive[color=#EA3788]:
             p_cert_req,
             ExtendedKeyUpdateNotRunning(),
             PostHandshakeAuthenticationNotRunning()
-        )[no_precomp]
+        )
     ]
 
 /**
