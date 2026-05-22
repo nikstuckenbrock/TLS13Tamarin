@@ -6,7 +6,7 @@ rule extended_key_update_request_client[color=#340068]:
     in
     [
         Fr(~x),
-        SendStream(~tid, $C, $S, p_auth_status, applicationTrafficKeyClient)[no_precomp],
+        SendStream(~tid, $C, $S, p_auth_status, applicationTrafficKeyClient),
         ClientState(
             ~tid,
             'C4',
@@ -40,7 +40,7 @@ rule extended_key_update_request_client[color=#340068]:
             p_cert_req,
             ExtendedKeyUpdateNotRunning(),
             PostHandshakeAuthenticationNotRunning()
-        )
+        )[no_precomp]
     ]
     --[
         ExtendedKeyUpdateRequestClient(~tid),
@@ -49,7 +49,7 @@ rule extended_key_update_request_client[color=#340068]:
     [
         C4_Extended_Key_Update(~tid, 'EKU0', $C, $S, ~x, gx, '0', <request>),
         MessageOut(senc{request}applicationTrafficKeyClient),
-        SendStream(~tid, $C, $S, p_auth_status, applicationTrafficKeyClient)[no_precomp],
+        SendStream(~tid, $C, $S, p_auth_status, applicationTrafficKeyClient),
         !ExtendedKeyUpdateDH(~tid, $C, ~x),
         ClientState(
             ~tid,
@@ -84,7 +84,7 @@ rule extended_key_update_request_client[color=#340068]:
             p_cert_req,
             ExtendedKeyUpdateRunning(),
             PostHandshakeAuthenticationNotRunning()
-        )
+        )[no_precomp]
     ]
 
 rule extended_key_update_request_client_receive[color=#EA3788]:
@@ -94,8 +94,8 @@ rule extended_key_update_request_client_receive[color=#EA3788]:
     in
     [
         F_MessageIn(senc{request}p_app_keyc),
-        RecvStream(~tid, $S, $C, p_auth_status, p_app_keyc)[no_precomp],
-        SendStream(~tid, $S, $C, p_auth_status, p_app_keys)[no_precomp],
+        RecvStream(~tid, $S, $C, p_auth_status, p_app_keyc),
+        SendStream(~tid, $S, $C, p_auth_status, p_app_keys),
         ServerState(
             ~tid,
             'S4',
@@ -129,7 +129,7 @@ rule extended_key_update_request_client_receive[color=#EA3788]:
             p_cert_req,
             ExtendedKeyUpdateNotRunning(),
             PostHandshakeAuthenticationNotRunning()
-        )
+        )[no_precomp]
     ]
     --[
         ExtendedKeyUpdateRequestClientReceive(~tid),
@@ -170,9 +170,9 @@ rule extended_key_update_request_client_receive[color=#EA3788]:
             p_cert_req,
             ExtendedKeyUpdateRunning(),
             PostHandshakeAuthenticationNotRunning()
-        ),
-        RecvStream(~tid, $S, $C, p_auth_status, p_app_keyc)[no_precomp],
-        SendStream(~tid, $S, $C, p_auth_status, p_app_keys)[no_precomp]
+        )[no_precomp],
+        RecvStream(~tid, $S, $C, p_auth_status, p_app_keyc),
+        SendStream(~tid, $S, $C, p_auth_status, p_app_keys)
     ]
 
 rule extended_key_update_response_server[color=#EA3788]:
@@ -196,8 +196,8 @@ rule extended_key_update_response_server[color=#EA3788]:
     in
     [
         Fr(~y),
-        SendStream(~tid, $S, $C, p_auth_status, p_app_keys)[no_precomp],
-        RecvStream(~tid, $S, $C, p_auth_status, p_app_keyc)[no_precomp],
+        SendStream(~tid, $S, $C, p_auth_status, p_app_keys),
+        RecvStream(~tid, $S, $C, p_auth_status, p_app_keyc),
         S4_Extended_Key_Update(~tid, 'EKU0', $S, $C, '0', gx, <request>),
         ServerState(
             ~tid,
@@ -232,7 +232,7 @@ rule extended_key_update_response_server[color=#EA3788]:
             p_cert_req,
             ExtendedKeyUpdateRunning(),
             PostHandshakeAuthenticationNotRunning()
-        )
+        )[no_precomp]
     ]
     --[
         ExtendedKeyUpdateResponseServer(~tid),
@@ -242,8 +242,8 @@ rule extended_key_update_response_server[color=#EA3788]:
         S4_Extended_Key_Update(~tid, 'EKU1', $S, $C, ~y, gx, <request, response>),
         MessageOut(senc{response}p_app_keys),
         !ExtendedKeyUpdateDH(~tid, $S, ~y),
-        SendStream(~tid, $S, $C, p_auth_status, server_application_traffic_key)[no_precomp],
-        RecvStream(~tid, $S, $C, p_auth_status, client_application_traffic_key)[no_precomp],
+        SendStream(~tid, $S, $C, p_auth_status, server_application_traffic_key),
+        RecvStream(~tid, $S, $C, p_auth_status, client_application_traffic_key),
         ServerState(
             ~tid,
             'S4',
@@ -277,7 +277,7 @@ rule extended_key_update_response_server[color=#EA3788]:
             p_cert_req,
             ExtendedKeyUpdateRunning(),
             PostHandshakeAuthenticationNotRunning()
-        )
+        )[no_precomp]
     ]
 
 rule extended_key_update_response_server_receive[color=#340068]:
@@ -288,7 +288,7 @@ rule extended_key_update_response_server_receive[color=#340068]:
     [
         C4_Extended_Key_Update(~tid, 'EKU0', $C, $S, ~x, gx, '0', <request>),
         F_MessageIn(senc{response}p_app_keys),
-        RecvStream(~tid, $C, $S, p_auth_status, p_app_keys)[no_precomp],
+        RecvStream(~tid, $C, $S, p_auth_status, p_app_keys),
         ClientState(
             ~tid,
             'C4',
@@ -322,7 +322,7 @@ rule extended_key_update_response_server_receive[color=#340068]:
             p_cert_req,
             ExtendedKeyUpdateRunning(),
             PostHandshakeAuthenticationNotRunning()
-        )
+        )[no_precomp]
     ]
     --[
         ExtendedKeyUpdateResponseServerReceive(~tid),
@@ -330,7 +330,7 @@ rule extended_key_update_response_server_receive[color=#340068]:
     ]->
     [
         C4_Extended_Key_Update(~tid, 'EKU1', $C, $S, ~x, gy, '0', <request, response>),
-        RecvStream(~tid, $C, $S, p_auth_status, p_app_keys)[no_precomp],
+        RecvStream(~tid, $C, $S, p_auth_status, p_app_keys),
         ClientState(
             ~tid,
             'C4',
@@ -364,7 +364,7 @@ rule extended_key_update_response_server_receive[color=#340068]:
             p_cert_req,
             ExtendedKeyUpdateRunning(),
             PostHandshakeAuthenticationNotRunning()
-        )
+        )[no_precomp]
     ]
 
 rule extended_key_update_finish_client[color=#340068]:
@@ -385,8 +385,8 @@ rule extended_key_update_finish_client[color=#340068]:
     in
     [
         C4_Extended_Key_Update(~tid, 'EKU1', $C, $S, ~x, gy, '0', <request, response>),
-        SendStream(~tid, $C, $S, p_auth_status, applicationTrafficKeyClient)[no_precomp],
-        RecvStream(~tid, $C, $S, p_auth_status, p_app_keys)[no_precomp],
+        SendStream(~tid, $C, $S, p_auth_status, applicationTrafficKeyClient),
+        RecvStream(~tid, $C, $S, p_auth_status, p_app_keys),
         ClientState(
             ~tid,
             'C4',
@@ -420,15 +420,15 @@ rule extended_key_update_finish_client[color=#340068]:
             p_cert_req,
             ExtendedKeyUpdateRunning(),
             PostHandshakeAuthenticationNotRunning()
-        )
+        )[no_precomp]
     ]
     --[
         ExtendedKeyUpdateFinishClient(~tid)
     ]->
     [
         C4_Extended_Key_Update(~tid, 'EKU0', $C, $S, ~x, gy, '0', <request, response, finish>),
-        SendStream(~tid, $C, $S, p_auth_status, client_application_traffic_key)[no_precomp],
-        RecvStream(~tid, $C, $S, p_auth_status, server_application_traffic_key)[no_precomp],
+        SendStream(~tid, $C, $S, p_auth_status, client_application_traffic_key),
+        RecvStream(~tid, $C, $S, p_auth_status, server_application_traffic_key),
         MessageOut(senc{finish}applicationTrafficKeyClient),
         ClientState(
             ~tid,
@@ -463,7 +463,7 @@ rule extended_key_update_finish_client[color=#340068]:
             p_cert_req,
             ExtendedKeyUpdateNotRunning(),
             PostHandshakeAuthenticationNotRunning()
-        )
+        )[no_precomp]
     ]
 
 rule extended_key_update_finish_client_receive[color=#EA3788]:
@@ -471,7 +471,7 @@ rule extended_key_update_finish_client_receive[color=#EA3788]:
         finish = Handshake(HandshakeMessageTypeExtendedKeyUpdate(), ExtendedKeyUpdateFinish())
     in
     [
-        RecvStream(~tid, $S, $C, p_auth_status, p_app_keyc)[no_precomp],
+        RecvStream(~tid, $S, $C, p_auth_status, p_app_keyc),
         F_MessageIn(senc{finish}p_app_keyc),
         S4_Extended_Key_Update(~tid, 'EKU1', $S, $C, y, gx, <request, response>),
         ServerState(
@@ -507,14 +507,14 @@ rule extended_key_update_finish_client_receive[color=#EA3788]:
             p_cert_req,
             ExtendedKeyUpdateRunning(),
             PostHandshakeAuthenticationNotRunning()
-        )
+        )[no_precomp]
     ]
     --[
         ExtendedKeyUpdateFinishClientReceive(~tid)
     ]->
     [
         S4_Extended_Key_Update(~tid, 'EKU0', $S, $C, y, gx, <request, response>),
-        RecvStream(~tid, $S, $C, p_auth_status, p_app_keyc)[no_precomp],
+        RecvStream(~tid, $S, $C, p_auth_status, p_app_keyc),
         ServerState(
             ~tid,
             'S4',
@@ -548,7 +548,7 @@ rule extended_key_update_finish_client_receive[color=#EA3788]:
             p_cert_req,
             ExtendedKeyUpdateNotRunning(),
             PostHandshakeAuthenticationNotRunning()
-        )
+        )[no_precomp]
     ]
 
 /**
