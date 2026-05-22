@@ -49,6 +49,8 @@ rule extended_key_update_request_client[color=#340068]:
     [
         C4_Extended_Key_Update(~tid, 'EKU0', $C, $S, ~x, gx, '0', <request>),
         MessageOut(senc{request}applicationTrafficKeyClient),
+        SendStream(~tid, $C, $S, p_auth_status, applicationTrafficKeyClient),
+        !ExtendedKeyUpdateDH(~tid, $C, ~x),
         ClientState(
             ~tid,
             'C4',
@@ -170,7 +172,7 @@ rule extended_key_update_request_client_receive[color=#EA3788]:
             PostHandshakeAuthenticationNotRunning()
         ),
         RecvStream(~tid, $S, $C, p_auth_status, p_app_keyc),
-        SendStream(~tid, $S, $C, p_auth_status, p_app_keys),
+        SendStream(~tid, $S, $C, p_auth_status, p_app_keys)
     ]
 
 rule extended_key_update_response_server[color=#EA3788]:
@@ -239,6 +241,7 @@ rule extended_key_update_response_server[color=#EA3788]:
     [
         S4_Extended_Key_Update(~tid, 'EKU1', $S, $C, ~y, gx, <request, response>),
         MessageOut(senc{response}p_app_keys),
+        !ExtendedKeyUpdateDH(~tid, $S, ~y),
         SendStream(~tid, $S, $C, p_auth_status, server_application_traffic_key),
         RecvStream(~tid, $S, $C, p_auth_status, client_application_traffic_key),
         ServerState(
@@ -546,6 +549,20 @@ rule extended_key_update_finish_client_receive[color=#EA3788]:
             ExtendedKeyUpdateNotRunning(),
             PostHandshakeAuthenticationNotRunning()
         )
+    ]
+
+/**
+* Models that the adversary may learn the DH parameter of the extended key update handshake.
+*/
+rule_extended_key_update_dh_reveal:
+    [
+        !ExtendedKeyUpdateDH(tid, actor, x)
+    ]
+    --[
+        RevealExtendedKeyUpdateDH(tid, actor, x)
+    ]->
+    [
+        !ExtendedKeyUpdateDH(tid, actor, x)
     ]
 
 // note: some mechanism to ensure there is only one key update at once,
