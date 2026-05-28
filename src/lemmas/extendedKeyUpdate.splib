@@ -38,7 +38,7 @@ lemma exists_extended_key_update_finish_client_receive [heuristic={reachability}
 lemma eku_secrecy:
     "All tid actor peer auth data #t.
         ( SendData(tid, actor, peer, auth, data) @ #t)
-    ==> ( not Ex #x. K(data) @ #x )
+    ==> ( not Ex #x. K(data) @ #x )"
 
 /**
 * For each individual extended key update both parties agree on the same keys,
@@ -51,4 +51,6 @@ lemma eku_secrecy:
 * Refers to post compromise security.
 */
 
-- vllt. gleich mal den anderen beweis herunterladen und versuchen den nachzubilden
+/**
+*- vllt. gleich mal den anderen beweis herunterladen und versuchen den nachzubilden
+*/
