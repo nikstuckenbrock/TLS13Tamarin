@@ -93,6 +93,12 @@ rule message_in_to_in:
 #endif
 
 #ifdef extendedKeyUpdate
+#include "lemmas/uniqueness.splib"
+#include "lemmas/invariants.splib"
+#include "lemmas/dhInj.splib"
+#include "lemmas/dhCal.splib"
+#include "lemmas/secretHelpers.splib"
+#include "lemmas/authHelpers.splib"
 #include "lemmas/extendedKeyUpdate.splib"
 #endif
 
