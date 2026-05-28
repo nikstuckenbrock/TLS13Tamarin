@@ -1,5 +1,6 @@
 rule extended_key_update_request_client[color=#340068]:
     let
+        p_g = $g
         gx = p_g^~x
         key_share_entry = KeyShareEntry(p_g, gx)
         request = Handshake(HandshakeMessageTypeExtendedKeyUpdate(), ExtendedKeyUpdateRequest(key_share_entry))
@@ -40,7 +41,7 @@ rule extended_key_update_request_client[color=#340068]:
             p_cert_req,
             ExtendedKeyUpdateNotRunning(),
             PostHandshakeAuthenticationNotRunning()
-        )[no_precomp]
+        )
     ]
     --[
         ExtendedKeyUpdateRequestClient(~tid),
@@ -84,11 +85,12 @@ rule extended_key_update_request_client[color=#340068]:
             p_cert_req,
             ExtendedKeyUpdateRunning(),
             PostHandshakeAuthenticationNotRunning()
-        )[no_precomp]
+        )
     ]
 
 rule extended_key_update_request_client_receive[color=#EA3788]:
     let
+        p_g = $g
         key_share_entry = KeyShareEntry(p_g, gx)
         request = Handshake(HandshakeMessageTypeExtendedKeyUpdate(), ExtendedKeyUpdateRequest(key_share_entry))
     in
@@ -129,7 +131,7 @@ rule extended_key_update_request_client_receive[color=#EA3788]:
             p_cert_req,
             ExtendedKeyUpdateNotRunning(),
             PostHandshakeAuthenticationNotRunning()
-        )[no_precomp]
+        )
     ]
     --[
         ExtendedKeyUpdateRequestClientReceive(~tid),
@@ -170,13 +172,14 @@ rule extended_key_update_request_client_receive[color=#EA3788]:
             p_cert_req,
             ExtendedKeyUpdateRunning(),
             PostHandshakeAuthenticationNotRunning()
-        )[no_precomp],
+        ),
         RecvStream(~tid, $S, $C, p_auth_status, p_app_keyc),
         SendStream(~tid, $S, $C, p_auth_status, p_app_keys)
     ]
 
 rule extended_key_update_response_server[color=#EA3788]:
     let
+        p_g = $g
         gy = p_g^~y
         gxy = gx^~y
         key_share_entry = KeyShareEntry(p_g, gy)
@@ -232,7 +235,7 @@ rule extended_key_update_response_server[color=#EA3788]:
             p_cert_req,
             ExtendedKeyUpdateRunning(),
             PostHandshakeAuthenticationNotRunning()
-        )[no_precomp]
+        )
     ]
     --[
         ExtendedKeyUpdateResponseServer(~tid),
@@ -277,11 +280,12 @@ rule extended_key_update_response_server[color=#EA3788]:
             p_cert_req,
             ExtendedKeyUpdateRunning(),
             PostHandshakeAuthenticationNotRunning()
-        )[no_precomp]
+        )
     ]
 
 rule extended_key_update_response_server_receive[color=#340068]:
     let
+        p_g = $g
         key_share_entry = KeyShareEntry(p_g, gy)
         response = Handshake(HandshakeMessageTypeExtendedKeyUpdate(), ExtendedKeyUpdateResponse(key_share_entry))
     in
@@ -322,7 +326,7 @@ rule extended_key_update_response_server_receive[color=#340068]:
             p_cert_req,
             ExtendedKeyUpdateRunning(),
             PostHandshakeAuthenticationNotRunning()
-        )[no_precomp]
+        )
     ]
     --[
         ExtendedKeyUpdateResponseServerReceive(~tid),
@@ -364,11 +368,12 @@ rule extended_key_update_response_server_receive[color=#340068]:
             p_cert_req,
             ExtendedKeyUpdateRunning(),
             PostHandshakeAuthenticationNotRunning()
-        )[no_precomp]
+        )
     ]
 
 rule extended_key_update_finish_client[color=#340068]:
     let
+        p_g = $g
         finish = Handshake(HandshakeMessageTypeExtendedKeyUpdate(), ExtendedKeyUpdateFinish())
         gxy = gy^~x
         transcript_hash_n_1 = h(<request, response>)
@@ -420,7 +425,7 @@ rule extended_key_update_finish_client[color=#340068]:
             p_cert_req,
             ExtendedKeyUpdateRunning(),
             PostHandshakeAuthenticationNotRunning()
-        )[no_precomp]
+        )
     ]
     --[
         ExtendedKeyUpdateFinishClient(~tid)
@@ -463,11 +468,12 @@ rule extended_key_update_finish_client[color=#340068]:
             p_cert_req,
             ExtendedKeyUpdateNotRunning(),
             PostHandshakeAuthenticationNotRunning()
-        )[no_precomp]
+        )
     ]
 
 rule extended_key_update_finish_client_receive[color=#EA3788]:
     let
+        p_g = $g
         finish = Handshake(HandshakeMessageTypeExtendedKeyUpdate(), ExtendedKeyUpdateFinish())
     in
     [
@@ -507,7 +513,7 @@ rule extended_key_update_finish_client_receive[color=#EA3788]:
             p_cert_req,
             ExtendedKeyUpdateRunning(),
             PostHandshakeAuthenticationNotRunning()
-        )[no_precomp]
+        )
     ]
     --[
         ExtendedKeyUpdateFinishClientReceive(~tid)
@@ -548,7 +554,7 @@ rule extended_key_update_finish_client_receive[color=#EA3788]:
             p_cert_req,
             ExtendedKeyUpdateNotRunning(),
             PostHandshakeAuthenticationNotRunning()
-        )[no_precomp]
+        )
     ]
 
 /**
