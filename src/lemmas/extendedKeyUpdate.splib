@@ -35,7 +35,7 @@ lemma exists_extended_key_update_finish_client_receive [heuristic={reachability}
 /**
 * For each data send, the adversary doesn't know the data.
 */
-lemma secrecy:
+lemma eku_secrecy:
     "All tid actor peer auth data #t.
         ( SendData(tid, actor, peer, auth, data) @ #t)
     ==> ( not Ex #x. K(data) @ #x )
