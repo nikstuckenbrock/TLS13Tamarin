@@ -35,10 +35,37 @@ lemma exists_extended_key_update_finish_client_receive [heuristic={reachability}
 /**
 * For each data send, the adversary doesn't know the data.
 */
+lemma secrecy_general:
+    "All tid actor peer auth data #t.
+        ( SendData(tid, actor, peer, auth, data) @ #t )
+    ==> ( not Ex #x. K(data) @ #x )"
+
+/**
+* Secrecy established after at least one extended key update.
+*/
 lemma eku_secrecy:
     "All tid actor peer auth data #t.
-        ( SendData(tid, actor, peer, auth, data) @ #t)
-    ==> ( not Ex #x. K(data) @ #x )"
+        // Data was send that is meant to stay secret
+        ( SendData(tid, actor, peer, auth, data) @ #t
+        // At least one extended key update has happened
+        & Ex #i. ExtendedKeyUpdateFinishClientReceive(tid) @ #i )
+
+        // The adversary can't now the message content, otherwise
+    ==> ( not ( Ex #x. K(data) @ #x )
+        // Handshake information has been leaked
+        | ( Ex #x. RevLtk(peer) @ #x )
+        | ( Ex z #x. RevDHExp(tid, peer, z) @ #x )
+        | ( Ex z #x. RevDHExp(tid, actor, z) @ #x )
+        | ( Ex rms #x. RevealPSK(actor, rms) @ #x )
+        | ( Ex rms #x. RevealPSK(peer, rms) @ #x ))"
+
+/**
+    not (Ex #r. RevLtk(peer)@r & #r < #i) &
+    not (Ex tid3 x #r. RevDHExp(tid3, peer, x)@r & #r < #i) &
+    not (Ex tid4 y #r. RevDHExp(tid4, actor, y)@r & #r < #i) &
+    not (Ex rms #r. RevealPSK(actor, rms)@r & #r < #i) &
+    not (Ex rms #r. RevealPSK(peer, rms)@r & #r < #i) &
+*/
 
 /**
 * For each individual extended key update both parties agree on the same keys,
