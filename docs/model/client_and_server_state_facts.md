@@ -26,4 +26,4 @@
 |           	|          	|                 	|
 |           	|          	|                 	|
 |           	|          	|                 	|
-|           	|          	|                 	|
+|           	| Extended key update In Progress         	| Tracks if an extended key update is currently in progress or not |

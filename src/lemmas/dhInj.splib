@@ -1,8 +1,15 @@
-lemma dh_exp_invariant  [use_induction, reuse]:
+tactic: dhInjectivity
+presort: i
+prio:
+    regex "last" | regex "Instance" | regex "ClientState" | regex "ServerState"
+deprio:
+    regex "splitEqs"
+
+lemma dh_exp_invariant [use_induction,reuse,heuristic={dhInjectivity}]:
   "All tid actor x #i. RevDHExp(tid, actor, x)@i ==>
     Ex #j. DH(tid, actor, x)@j & #j < i"
 
-lemma one_dh_per_x  [reuse]:
+lemma one_dh_per_x [reuse,heuristic={dhInjectivity}]:
   "All tid tid2 x actor actor2 #i #j. 
     DH(tid, actor, x)@i & DH(tid2, actor2, x)@j ==> #i = #j"
 
@@ -12,7 +19,7 @@ restriction rev_dh_ordering:
       ((Ex #i. DH(tid, actor, x) @ i & i < j) & 
        (All #r. RevDHExp(tid, actor, x) @ r  ==>  r < j))"
 
-lemma rev_dh_before_hs  [reuse]:
+lemma rev_dh_before_hs [reuse,heuristic={dhInjectivity}]:
   "All tid actor role hs x #i #j.
     RHS(tid, actor, role, <hs>)@j &
     RevDHExp(tid, actor, x)@i ==>

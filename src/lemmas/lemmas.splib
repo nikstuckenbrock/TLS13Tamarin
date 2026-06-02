@@ -27,7 +27,7 @@ lemma unique_session_keys:
       ==>
         #i = #j"
 
-lemma session_key_agreement [hide_lemma=sig_origin]:
+lemma session_key_agreement [hide_lemma=sig_origin,hide_lemma=posths_rms_weak,hide_lemma=auth_psk,hide_lemma=matching_sessions]:
   "All tid tid2 actor peer actor2 peer2 nonces kr kr2 kw kw2 cas as2 #i #j #k #l.
      SessionKey(tid, actor, peer, <cas, 'auth'>, <kr, kw>)@i & 
      RNonces (tid, actor, 'client', nonces)@j &

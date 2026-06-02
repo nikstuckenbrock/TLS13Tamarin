@@ -562,13 +562,13 @@ rule extended_key_update_finish_client_receive[color=#EA3788]:
 */
 rule_extended_key_update_dh_reveal:
     [
-        !ExtendedKeyUpdateDH(tid, actor, x)
+        ExtendedKeyUpdateDH(tid, actor, x)
     ]
     --[
         RevealExtendedKeyUpdateDH(tid, actor, x)
     ]->
     [
-        !ExtendedKeyUpdateDH(tid, actor, x)
+        MessageOut(~x)
     ]
 
 // note: some mechanism to ensure there is only one key update at once,
