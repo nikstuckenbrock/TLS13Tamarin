@@ -35,29 +35,6 @@ lemma exists_extended_key_update_finish_client_receive [heuristic={reachability}
 /**
 * For each data send, the adversary doesn't know the data.
 */
-lemma secrecy_general:
-    "All tid actor peer auth data #t.
-        ( SendData(tid, actor, peer, auth, data) @ #t )
-    ==> ( not Ex #x. K(data) @ #x )"
-
-/**
-* Secrecy established after at least one extended key update.
-*/
-lemma eku_secrecy:
-    "All tid actor peer auth data #t.
-        // Data was send that is meant to stay secret
-        ( SendData(tid, actor, peer, auth, data) @ #t
-
-        // At least one extended key update has happened (healing)
-        & Ex #i. ExtendedKeyUpdateFinishClientReceive(tid) @ #i 
-        
-        // The data must have been sent using the updated key
-        & #i < #t )
-
-        // The adversary can't now the message content, otherwise
-    ==> ( not ( Ex #x. K(data) @ #x )
-        | Ex actor2 y #x. RevealExtendedKeyUpdateDH(tid, actor2, y) @ #x & #i < #x
-        | Ex #x. RevealExtendedKeyUpdateSessionKey() @ #x & #i < #x )"
 
 /**
     not (Ex #r. RevLtk(peer)@r & #r < #i) &

@@ -3,8 +3,7 @@ rule Register_pk:
         Fr(~ltkA)
     ]
     --[
-        GenLtk($A, ~ltkA),
-        HonestUse(~ltkA)
+        GenLtk($A, ~ltkA)
     ]->
     [
         !Ltk($A, ~ltkA),

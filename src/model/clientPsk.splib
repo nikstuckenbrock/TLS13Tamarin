@@ -3,7 +3,7 @@ rule client_hello_psk:
         messages = '0'
         binder = '0'
         supported_groups = <$g1, $g2>
-        gx = $g1^~x
+        opaue = kem_pk(~x)
         psk_ke_mode = <PskKeyExchangeModePskKe(), PskKeyExchangeModePskDheKe()>
         obfuscated_ticket_age = mask(ticket_age_add, $ticket_age)
         identities = <<ticket, obfuscated_ticket_age>>
@@ -12,7 +12,7 @@ rule client_hello_psk:
         binder_extensions = <
             ExtensionSupportedVersions(),
             ExtensionNamedGroupdList(supported_groups),
-            ExtensionKeyShare(KeyShareEntry($g1, gx)),
+            ExtensionKeyShare(KeyShareEntry($g1, opaue)),
             ExtensionPskKeyExchangeModes(psk_ke_mode),
             edi,
             ExtensionPreSharedKeyClientHello(identities, binder)
@@ -23,7 +23,7 @@ rule client_hello_psk:
         extensions = <
             ExtensionSupportedVersions(),
             ExtensionNamedGroupdList(supported_groups),
-            ExtensionKeyShare(KeyShareEntry($g1, gx)),
+            ExtensionKeyShare(KeyShareEntry($g1, opaue)),
             ExtensionPskKeyExchangeModes(psk_ke_mode),
             edi,
             ExtensionPreSharedKeyClientHello(identities, binder)
@@ -60,7 +60,7 @@ rule client_hello_psk:
             '0',
             ~x,
             '0',
-            gx,
+            opaue,
             '0',
             '0',
             psk_ke_mode,
@@ -324,11 +324,9 @@ rule recv_server_hello_psk_dhe:
         p_g = $g
         p_psk_ke_mode = <'0', '1'>
         psk_ke_mode = '1'
-        gy = p_g^new_y
-        gxy = gy^p_g
         receivedExtensions = <
             ExtensionSignatureSchemeList($sig_algs),
-            ExtensionKeyShare(KeyShareEntry(p_g, gy)),
+            ExtensionKeyShare(KeyShareEntry(p_g, ct)),
             <'41', '0'>,
             p_edi
         >
@@ -370,15 +368,17 @@ rule recv_server_hello_psk_dhe:
             p_extended_key_update_running,
             p_phs_auth_running
         ),
+        !KeyValues(~k),
         F_MessageIn(receivedMessage)
     ]
     --[
         C1_PSK_DHE(~tid),
-        Neq(gy, $g),
+        Neq(ct, $g),
         Instance(~tid, $C, 'client'),
-        DHChal($g, ~x, new_y, p_gx, gy, gxy),
+        DHChal($g, ~x, p_y, p_gx, ct, p_gxy),
         RNonces(~tid, $C, 'client', <p_nc, new_ns>),
-        Neq(new_ns, HelloRetryRequestRandom())
+        Neq(new_ns, HelloRetryRequestRandom()),
+        Decaps(~k, ct, kem_pk(~x), ~x)
     ]->
     [
         ClientState(
@@ -396,8 +396,8 @@ rule recv_server_hello_psk_dhe:
             ~x,
             p_y,
             p_gx,
-            gy,
-            gxy,
+            ct,
+            ~k,
             psk_ke_mode,
             ~ticket,
             p_edi,

@@ -2,12 +2,13 @@ rule client_hello:
     let
         messages = '0'
         supported_groups = <$g1, $g2>
-        gx = $g1^~x
+        named_group = $g1
+        opaque = kem_pk(~x)
         extensions = <
             ExtensionSupportedVersions(),
             ExtensionNamedGroupdList(supported_groups),
             ExtensionSignatureSchemeList($sig_algs),
-            ExtensionKeyShare(KeyShareEntry($g1, gx))
+            ExtensionKeyShare(KeyShareEntry(named_group, opaque))
         >
         message = ClientHello(~nc, '0', $cipher_suites, '0', extensions)
         messages = <messages, message>
@@ -22,9 +23,7 @@ rule client_hello:
         Start(~nc, $C, 'client'),
         RIdentity(~nc, $C, 'client', <$C>),
         Neq($g1, $g2),
-        DH(~nc, $C, ~x),
-        HonestUse(~x),
-        HonestUse(gx)
+        DH(~nc, $C, ~x)
     ]->
     [
         ClientState(
@@ -41,7 +40,7 @@ rule client_hello:
             '0',
             ~x,
             '0',
-            gx,
+            opaque,
             '0',
             '0',
             'na',
@@ -74,7 +73,7 @@ rule recv_hello_retry_request:
         supported_groups = <$g1, $g2>
         psk_ke_mode = 'na'
         auth_status = <'0', '0'>
-        gx = $g2^~new_x
+        opaque = kem_pk(~new_x)
         receivedExtensions = <
             ExtensionSupportedVersions(),
             ExtensionKeyShare($g2)
@@ -85,7 +84,7 @@ rule recv_hello_retry_request:
             ExtensionSupportedVersions(),
             ExtensionNamedGroupdList(supported_groups),
             ExtensionSignatureSchemeList($supported_signature_algorithms),
-            ExtensionKeyShare(KeyShareEntry($g2, gx))
+            ExtensionKeyShare(KeyShareEntry($g2, opaque))
         >
         message = ClientHello(p_nc, '0', $cipher_suites, '0', extensions)
         messages = <messages, message>
@@ -155,7 +154,7 @@ rule recv_hello_retry_request:
             hrr,
             ~new_x,
             p_y,
-            gx,
+            opaque,
             p_gy,
             p_gxy,
             psk_ke_mode,
@@ -182,11 +181,11 @@ rule recv_server_hello:
         p_x = ~x // TODO: Check if really needed.
         serverRandom = new_ns // TODO: check if really needed.
         gy = new_gy
-        gy = $g^new_y
-        gxy = gy^p_x
+        gy = ct
+        gxy = ~k
         extensions = <
             ExtensionSignatureSchemeList($sig_algs),
-            ExtensionKeyShare(KeyShareEntry($g, gy))
+            ExtensionKeyShare(KeyShareEntry($g, ct))
         >
         receivedMessage = ServerHello(serverRandom, '0', $cipher_suite, '0', extensions)
         psk_ke_mode = 'na'
@@ -228,7 +227,8 @@ rule recv_server_hello:
             p_extended_key_update_running,
             p_phs_auth_running
         ),
-        F_MessageIn(receivedMessage)
+        F_MessageIn(receivedMessage),
+        !KeyValues(~k)
     ]
     --[
         C1(~tid),
@@ -236,8 +236,9 @@ rule recv_server_hello:
         Neq(gy, $g),
         Neq(gxy, $g),
         Neq(serverRandom, HelloRetryRequestRandom()),
-        DHChal($g, p_x, new_y, p_gx, gy, gxy),
-        RNonces(~tid, $C, 'client', <p_nc, serverRandom>)
+        DHChal($g, p_x, gy, p_gx, gy, gxy),
+        RNonces(~tid, $C, 'client', <p_nc, serverRandom>),
+        Decaps(~k, gy, kem_pk(p_x), p_x)
     ]->
     [
         ClientState(

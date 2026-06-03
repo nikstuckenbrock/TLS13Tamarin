@@ -1,8 +1,8 @@
 rule extended_key_update_request_client[color=#340068]:
     let
-        p_g = $g
-        gx = p_g^~x
-        key_share_entry = KeyShareEntry(p_g, gx)
+        p_g = $negotiated_group
+        opaque = kem_pk(~x)
+        key_share_entry = KeyShareEntry(p_g, opaque)
         request = Handshake(HandshakeMessageTypeExtendedKeyUpdate(), ExtendedKeyUpdateRequest(key_share_entry))
     in
     [
@@ -48,10 +48,9 @@ rule extended_key_update_request_client[color=#340068]:
         Instance(~tid, $C, 'client')
     ]->
     [
-        C4_Extended_Key_Update(~tid, 'EKU0', $C, $S, ~x, gx, '0', <request>),
+        C4_Extended_Key_Update(~tid, 'EKU0', $C, $S, ~x, opaque, '0', <request>),
         MessageOut(senc{request}applicationTrafficKeyClient),
         SendStream(~tid, $C, $S, p_auth_status, applicationTrafficKeyClient),
-        !ExtendedKeyUpdateDH(~tid, $C, ~x),
         ClientState(
             ~tid,
             'C4',
@@ -90,8 +89,8 @@ rule extended_key_update_request_client[color=#340068]:
 
 rule extended_key_update_request_client_receive[color=#EA3788]:
     let
-        p_g = $g
-        key_share_entry = KeyShareEntry(p_g, gx)
+        p_g = $negotiated_group
+        key_share_entry = KeyShareEntry(p_g, opaque)
         request = Handshake(HandshakeMessageTypeExtendedKeyUpdate(), ExtendedKeyUpdateRequest(key_share_entry))
     in
     [
@@ -138,7 +137,7 @@ rule extended_key_update_request_client_receive[color=#EA3788]:
         Instance(~tid, $S, 'server')
     ]->
     [
-        S4_Extended_Key_Update(~tid, 'EKU0', $S, $C, '0', gx, <request>),
+        S4_Extended_Key_Update(~tid, 'EKU0', $S, $C, '0', opaque, <request>),
         ServerState(
             ~tid,
             'S4',
@@ -179,16 +178,14 @@ rule extended_key_update_request_client_receive[color=#EA3788]:
 
 rule extended_key_update_response_server[color=#EA3788]:
     let
-        p_g = $g
-        gy = p_g^~y
-        gxy = gx^~y
-        key_share_entry = KeyShareEntry(p_g, gy)
+        p_g = $negotiated_group
+        key_share_entry = KeyShareEntry(p_g, ~ct)
         response = Handshake(HandshakeMessageTypeExtendedKeyUpdate(), ExtendedKeyUpdateResponse(key_share_entry))
         
         transcript_hash_n_1 = h(<request, response>)
         
         derived_secret = Expand(p_ms, <'32', 'TLS13derived', '0'>, '32')
-        main_secret_n_1 = Extract(gxy, derived_secret)
+        main_secret_n_1 = Extract(~k, derived_secret)
         client_application_traffic_secret_n_1 = Expand(main_secret_n_1, <'32', 'TLS13clientapplicationtrafficsecret', transcript_hash_n_1>, '32')
         server_application_traffice_secret_n_1 = Expand(main_secret_n_1, <'32', 'TLS13serverapplicationtrafficsecret', transcript_hash_n_1>, '32')
         exporter_secret_n_1 = Expand(main_secret_n_1, <'32', 'TLS13exportermastersecret', transcript_hash_n_1>, '32')
@@ -199,9 +196,11 @@ rule extended_key_update_response_server[color=#EA3788]:
     in
     [
         Fr(~y),
+        !KeyValues(~k),
+        !CTValues(~ct),
         SendStream(~tid, $S, $C, p_auth_status, p_app_keys),
         RecvStream(~tid, $S, $C, p_auth_status, p_app_keyc),
-        S4_Extended_Key_Update(~tid, 'EKU0', $S, $C, '0', gx, <request>),
+        S4_Extended_Key_Update(~tid, 'EKU0', $S, $C, '0', opaque, <request>),
         ServerState(
             ~tid,
             'S4',
@@ -239,10 +238,11 @@ rule extended_key_update_response_server[color=#EA3788]:
     ]
     --[
         ExtendedKeyUpdateResponseServer(~tid),
-        Instance(~tid, $S, 'server')
+        Instance(~tid, $S, 'server'),
+        Encaps(~k, ~ct, opaque)
     ]->
     [
-        S4_Extended_Key_Update(~tid, 'EKU1', $S, $C, ~y, gx, <request, response>),
+        S4_Extended_Key_Update(~tid, 'EKU1', $S, $C, ~y, opaque, <request, response>),
         MessageOut(senc{response}p_app_keys),
         !ExtendedKeyUpdateDH(~tid, $S, ~y),
         SendStream(~tid, $S, $C, p_auth_status, server_application_traffic_key),
@@ -555,20 +555,6 @@ rule extended_key_update_finish_client_receive[color=#EA3788]:
             ExtendedKeyUpdateNotRunning(),
             PostHandshakeAuthenticationNotRunning()
         )[no_precomp]
-    ]
-
-/**
-* Models that the adversary may learn the DH parameter of the extended key update handshake.
-*/
-rule_extended_key_update_dh_reveal:
-    [
-        ExtendedKeyUpdateDH(tid, actor, x)
-    ]
-    --[
-        RevealExtendedKeyUpdateDH(tid, actor, x)
-    ]->
-    [
-        MessageOut(~x)
     ]
 
 // note: some mechanism to ensure there is only one key update at once,

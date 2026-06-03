@@ -47,16 +47,15 @@ rule recv_client_hello:
     let
         psk_ke_mode = 'na'
         supported_groups = <$g1, $g2>
-        gx = $new_g^new_x
+        named_group = $common_group
         extensions = <
             ExtensionSupportedVersions(),
             ExtensionNamedGroupdList(supported_groups),
             ExtensionSignatureSchemeList($sig_algs),
-            ExtensionKeyShare(KeyShareEntry($new_g, gx))
+            ExtensionKeyShare(KeyShareEntry(named_group, opaque))
         >
         receivedMessage = ClientHello(new_nc, '0', $cipher_suites, '0', extensions)
         messages = <p_messages, receivedMessage>
-        group = $new_g
     in
     [
         F_MessageIn(receivedMessage),
@@ -110,12 +109,12 @@ rule recv_client_hello:
             messages,
             new_nc,
             ~new_ns,
-            group,
+            named_group,
             p_sg,
             p_hrr,
             p_x,
             p_y,
-            gx,
+            opaque,
             p_gy,
             p_gxy,
             psk_ke_mode,
@@ -141,7 +140,7 @@ rule hello_retry_request:
     let
         p_hrr = '0'
 
-        p_sg = $p_sg // TODO: unsure
+        p_sg = $common_supported_group
 
         hrr = 'hrr'
         new_g = p_sg
@@ -235,10 +234,9 @@ rule hello_retry_request:
 
 rule server_hello:
     let
-        p_gx = $p_g^some_x
         auth_status = <'0', '0'>
-        gy = $p_g^~y
-        gxy = p_gx^~y
+        gy = ~ct
+        gxy = ~k
         psk_ke_mode = 'na'
         extensions = <
             ExtensionSignatureSchemeList($sig_algs),
@@ -283,7 +281,9 @@ rule server_hello:
             p_extended_key_update_running,
             p_phs_auth_running
         ),
-        Fr(~y)
+        Fr(~y),
+        !KeyValues(~k),
+        !CTValues(~ct)
     ]
     --[
         S1(~tid),
@@ -292,8 +292,9 @@ rule server_hello:
         Neq(gxy, $p_g),
         Instance(~tid, $S, 'server'),
         RNonces(~tid, $S, 'server', <p_nc, p_ns>),
-        DHChal($p_g, some_x, ~y, p_gx, gy, gxy),
-        DH(~tid, $S, ~y)
+        DHChal($p_g, p_gx, ~y, p_gx, gy, gxy),
+        DH(~tid, $S, ~y),
+        Encaps(~k, ~ct, p_gx)
     ]->
     [
         ServerState(

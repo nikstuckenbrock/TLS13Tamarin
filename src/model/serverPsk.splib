@@ -2,7 +2,6 @@ rule recv_client_hello_psk:
     let
         binder = '0'
         supported_groups = <$g1, $g2>
-        gx = $new_g^x
         clientRandom = new_nc
         psk_ke_mode = <PskKeyExchangeModePskKe(), PskKeyExchangeModePskDheKe()>
         ticket = ~ticket
@@ -13,7 +12,7 @@ rule recv_client_hello_psk:
         binder_extensions = <
             ExtensionSupportedVersions(),
             ExtensionNamedGroupdList(supported_groups),
-            ExtensionKeyShare(KeyShareEntry($new_g, gx)),
+            ExtensionKeyShare(KeyShareEntry($new_g, opaque)),
             ExtensionPskKeyExchangeModes(psk_ke_mode),
             new_edi,
             ExtensionPreSharedKeyClientHello(identities, binder)
@@ -26,7 +25,7 @@ rule recv_client_hello_psk:
         extensions = <
             ExtensionSupportedVersions(),
             ExtensionNamedGroupdList(supported_groups),
-            ExtensionKeyShare(KeyShareEntry($new_g, gx)),
+            ExtensionKeyShare(KeyShareEntry($new_g, opaque)),
             ExtensionPskKeyExchangeModes(psk_ke_mode),
             new_edi,
             ExtensionPreSharedKeyClientHello(identities, binder_in)
@@ -98,7 +97,7 @@ rule recv_client_hello_psk:
             p_hrr,
             p_x,
             p_y,
-            gx,
+            opaque,
             p_gy,
             p_gxy,
             psk_ke_mode,
@@ -220,15 +219,12 @@ rule server_hello_psk:
 rule server_hello_psk_dhe:
     let
         p_g = $g
-        p_gx = p_g^some_x
         p_psk_ke_mode = <'0', '1'>
-        gy = p_g^~y
-        gxy = p_gx^~y
         psk_ke_mode = '1'
         es = Extract(p_res_psk, '0')
         extensions = <
             ExtensionSignatureSchemeList($sig_algs),
-            ExtensionKeyShare(KeyShareEntry(p_g, gy)),
+            ExtensionKeyShare(KeyShareEntry(p_g, ~ct)),
             <'41', '0'>,
             p_edi
         >
@@ -236,6 +232,8 @@ rule server_hello_psk_dhe:
         messages = <p_messages, message>
     in
     [
+        !KeyValues(~k),
+        !CTValues(~ct),
         ServerState(
             ~tid,
             'S1',
@@ -277,9 +275,10 @@ rule server_hello_psk_dhe:
         Neq(p_gx, p_g),
         Neq(p_x, inv(~y)),
         Instance(~tid, $S, 'server'),
-        DHChal(p_g, some_x, ~y, p_gx, gy, gxy),
+        DHChal(p_g, p_gx, ~y, p_gx, ~ct, ~k),
         RNonces(~tid, $S, 'server', <p_nc, ~ns>),
-        DH(~tid, $S, ~y)
+        DH(~tid, $S, ~y),
+        Encaps(~k, ~ct, p_gx)
     ]->
     [
         ServerState(
@@ -297,8 +296,8 @@ rule server_hello_psk_dhe:
             p_x,
             ~y,
             p_gx,
-            gy,
-            gxy,
+            ~ct,
+            ~k,
             psk_ke_mode,
             ~ticket,
             p_edi,
