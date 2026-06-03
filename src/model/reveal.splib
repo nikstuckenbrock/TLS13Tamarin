@@ -9,8 +9,5 @@ rule Reveal_Ltk:
     MessageOut(~ltkA)
   ]
 
-rule reveal_dh_exp:
-  [ !DHEx(~x, ~tid, $A) ] --[ RevDHExp(~tid, $A,~x) ]-> [ MessageOut(~x) ]
-
 rule reveal_psk:
     [ F_SecretPSK($A,res_psk)]--[ RevealPSK($A, res_psk) ]->[MessageOut(res_psk)]

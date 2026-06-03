@@ -3,7 +3,7 @@ rule client_hello:
         messages = '0'
         supported_groups = <$g1, $g2>
         named_group = $g1
-        opaque = kem_pk(~x)
+        opaque = kem_pk(~secretKey)
         extensions = <
             ExtensionSupportedVersions(),
             ExtensionNamedGroupdList(supported_groups),
@@ -16,14 +16,13 @@ rule client_hello:
     in
     [
         Fr(~nc),
-        Fr(~x)
+        Fr(~secretKey)
     ]
     --[
         C0(~nc),
         Start(~nc, $C, 'client'),
         RIdentity(~nc, $C, 'client', <$C>),
-        Neq($g1, $g2),
-        DH(~nc, $C, ~x)
+        Neq($g1, $g2)
     ]->
     [
         ClientState(
@@ -38,7 +37,7 @@ rule client_hello:
             $g1,
             supported_groups,
             '0',
-            ~x,
+            ~secretKey,
             '0',
             opaque,
             '0',
@@ -60,8 +59,6 @@ rule client_hello:
             ExtendedKeyUpdateNotRunning(),
             PostHandshakeAuthenticationNotRunning()
         ),
-        DHExp(~x, ~nc, $C),
-        !DHEx(~x, ~nc, $C),
         MessageOut(message)
     ]
 
@@ -73,7 +70,7 @@ rule recv_hello_retry_request:
         supported_groups = <$g1, $g2>
         psk_ke_mode = 'na'
         auth_status = <'0', '0'>
-        opaque = kem_pk(~new_x)
+        opaque = kem_pk(~newSecretKey)
         receivedExtensions = <
             ExtensionSupportedVersions(),
             ExtensionKeyShare($g2)
@@ -125,21 +122,16 @@ rule recv_hello_retry_request:
             p_extended_key_update_running,
             p_phs_auth_running
         ),
-        Fr(~new_x),
-        F_MessageIn(receivedMessage),
-        DHExp(p_x, ~tid, $C)
+        Fr(~newSecretKey),
+        F_MessageIn(receivedMessage)
     ]
     --[
         C1_retry(~tid),
         Neq($g1, $g2),
-        Instance(~tid, $C, 'client'),
-        DeleteDH(~tid, $C, p_x),
-        DH(~tid, $C, ~new_x)
+        Instance(~tid, $C, 'client')
     ]->
     [
         MessageOut(message),
-        DHExp(~new_x, ~tid, $C),
-        !DHEx(~new_x, ~tid, $C),
         ClientState(
             ~tid,
             'C1',
@@ -152,7 +144,7 @@ rule recv_hello_retry_request:
             $g2,
             p_sg,
             hrr,
-            ~new_x,
+            ~newSecretKey,
             p_y,
             opaque,
             p_gy,
@@ -236,7 +228,6 @@ rule recv_server_hello:
         Neq(gy, $g),
         Neq(gxy, $g),
         Neq(serverRandom, HelloRetryRequestRandom()),
-        DHChal($g, p_x, gy, p_gx, gy, gxy),
         RNonces(~tid, $C, 'client', <p_nc, serverRandom>),
         Decaps(~k, gy, kem_pk(p_x), p_x)
     ]->
@@ -318,15 +309,13 @@ rule client_gen_keys:
             p_cert_req,
             p_extended_key_update_running,
             p_phs_auth_running
-        ),
-        DHExp(p_x, ~tid, $C)
+        )
     ]
     --[
         C2a(~tid),
         Instance(~tid, $C, 'client'),
         RMS(~tid, $C, 'client', <masterSecret>),
-        RHS(~tid, $C, 'client', <handshakeSecret>),
-        DeleteDH(~tid, $C, p_x)
+        RHS(~tid, $C, 'client', <handshakeSecret>)
     ]->
     [
         ClientState(

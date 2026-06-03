@@ -39,7 +39,7 @@ rule start_server:
             '0',
             '0',
             ExtendedKeyUpdateNotRunning(),
-            PostHandshakeAuthenticationRunning()
+            PostHandshakeAuthenticationNotRunning()
         )
     ]
 
@@ -235,12 +235,10 @@ rule hello_retry_request:
 rule server_hello:
     let
         auth_status = <'0', '0'>
-        gy = ~ct
-        gxy = ~k
         psk_ke_mode = 'na'
         extensions = <
             ExtensionSignatureSchemeList($sig_algs),
-            ExtensionKeyShare(KeyShareEntry($p_g, gy))
+            ExtensionKeyShare(KeyShareEntry($p_g, ~ciphertext))
         >
         message = ServerHello(p_ns, '0', $cipher_suite, '0', extensions)
         es = Extract(p_res_psk, '0')
@@ -283,18 +281,14 @@ rule server_hello:
         ),
         Fr(~y),
         !KeyValues(~k),
-        !CTValues(~ct)
+        !CTValues(~ciphertext)
     ]
     --[
         S1(~tid),
         Eq($p_g, p_sg),
-        Neq(p_gx, $p_g),
-        Neq(gxy, $p_g),
         Instance(~tid, $S, 'server'),
         RNonces(~tid, $S, 'server', <p_nc, p_ns>),
-        DHChal($p_g, p_gx, ~y, p_gx, gy, gxy),
-        DH(~tid, $S, ~y),
-        Encaps(~k, ~ct, p_gx)
+        Encaps(~k, ~ciphertext, p_gx)
     ]->
     [
         ServerState(
@@ -312,8 +306,8 @@ rule server_hello:
             p_x,
             ~y,
             p_gx,
-            gy,
-            gxy,
+            ~ciphertext,
+            ~k,
             psk_ke_mode,
             p_psk_id,
             p_edi,

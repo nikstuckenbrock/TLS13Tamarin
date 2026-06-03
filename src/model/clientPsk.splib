@@ -111,8 +111,8 @@ rule recv_hello_retry_request_psk:
         obfuscated_ticket_age = mask(ticket_age_add, '1')
         identities = <<ticket, obfuscated_ticket_age>>
 
-        gx = $g2^~new_x
-
+        gx = kem_pk(~new_x)
+        
         es = Extract(res_psk, '0')
         binder = '0'
         binder_extensions = <

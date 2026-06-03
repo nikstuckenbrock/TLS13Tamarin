@@ -375,7 +375,7 @@ rule extended_key_update_finish_client[color=#340068]:
     let
         p_g = $g
         finish = Handshake(HandshakeMessageTypeExtendedKeyUpdate(), ExtendedKeyUpdateFinish())
-        gxy = gy^~x
+        gxy = ~k
         transcript_hash_n_1 = h(<request, response>)
         
         derived_secret = Expand(p_ms, <'32', 'TLS13derived', '0'>, '32')
@@ -389,6 +389,7 @@ rule extended_key_update_finish_client[color=#340068]:
         server_application_traffic_key = Expand(server_application_traffice_secret_n_1, <'32', 'TLS13applicationdatakeyexpansion_key', '0'>, '32')
     in
     [
+        !KeyValues(~k),
         C4_Extended_Key_Update(~tid, 'EKU1', $C, $S, ~x, gy, '0', <request, response>),
         SendStream(~tid, $C, $S, p_auth_status, applicationTrafficKeyClient),
         RecvStream(~tid, $C, $S, p_auth_status, p_app_keys),
@@ -428,7 +429,8 @@ rule extended_key_update_finish_client[color=#340068]:
         )[no_precomp]
     ]
     --[
-        ExtendedKeyUpdateFinishClient(~tid)
+        ExtendedKeyUpdateFinishClient(~tid),
+        Decaps(~k, gy, kem_pk(~x), ~x)
     ]->
     [
         C4_Extended_Key_Update(~tid, 'EKU0', $C, $S, ~x, gy, '0', <request, response, finish>),

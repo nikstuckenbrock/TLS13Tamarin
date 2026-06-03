@@ -1,8 +1,0 @@
-lemma dh_chal_dual [reuse]:
-  "All tid tid2 actor actor2 g x y gx gy gxy #i #j #r.
-      DHChal(g, x, y, gx, gy, gxy)@i & Instance(tid, actor, 'client')@i &
-      DHChal(g, x, y, gx, gy, gxy)@j & Instance(tid2, actor2, 'server')@j &
-      KU(gxy)@r 
-      ==> 
-      (Ex #p. (RevDHExp(tid, actor,  x)@p & #p < #r)) | 
-      (Ex #q. (RevDHExp(tid2, actor2, y)@q & #q < #r))"
