@@ -239,7 +239,8 @@ rule extended_key_update_response_server[color=#EA3788]:
     --[
         ExtendedKeyUpdateResponseServer(~tid),
         Instance(~tid, $S, 'server'),
-        Encaps(~k, ~ct, opaque)
+        Encaps(~k, ~ct, opaque),
+        SessionKey(~tid, $S, $S, <'0', '0'>, <client_application_traffic_key, server_application_traffic_key>)
     ]->
     [
         S4_Extended_Key_Update(~tid, 'EKU1', $S, $C, ~y, opaque, <request, response>),
@@ -429,7 +430,8 @@ rule extended_key_update_finish_client[color=#340068]:
     ]
     --[
         ExtendedKeyUpdateFinishClient(~tid),
-        Decaps(~k, gy, kem_pk(~x), ~x)
+        Decaps(~k, gy, kem_pk(~x), ~x),
+        SessionKey(~tid, $C, $S, <'0', '0'>, <client_application_traffic_key, server_application_traffic_key>)
     ]->
     [
         C4_Extended_Key_Update(~tid, 'EKU0', $C, $S, ~x, gy, '0', <request, response, finish>),
