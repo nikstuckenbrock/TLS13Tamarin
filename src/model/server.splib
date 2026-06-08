@@ -325,8 +325,6 @@ rule server_hello:
             p_extended_key_update_running,
             p_phs_auth_running
         ),
-        DHExp(~y, ~tid, $S),
-        !DHEx(~y, ~tid, $S),
         MessageOut(message)
     ]
 
@@ -371,8 +369,7 @@ rule server_gen_keys:
             p_cert_req,
             p_extended_key_update_running,
             p_phs_auth_running
-        ),
-        DHExp(p_y, ~tid, $S)
+       )
     ]
     --[
         S2a(~tid),
@@ -380,7 +377,6 @@ rule server_gen_keys:
         Instance(~tid, $S, 'server'),
         RHS(~tid, $S, 'server', <handshakeSecret>),
         RMS(~tid, $S, 'server', <masterSecret>),
-        DeleteDH(~tid, $S, p_y)
     ]->
     [
         ServerState(

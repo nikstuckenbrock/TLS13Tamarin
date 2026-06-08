@@ -173,8 +173,7 @@ rule server_hello_psk:
     --[
         S1_PSK(~tid),
         Instance(~tid, $S, 'server'),
-        RNonces(~tid, $S, 'server', <p_nc, ~ns>),
-        DH(~tid, $S, ~y_ignored)
+        RNonces(~tid, $S, 'server', <p_nc, ~ns>)
     ]->
     [
         ServerState(
@@ -211,8 +210,6 @@ rule server_hello_psk:
             p_extended_key_update_running,
             p_phs_auth_running
         ),
-        DHExp(~y_ignored, ~tid, $S),
-        !DHEx(~y_ignored, ~tid, $S),
         MessageOut(message)
     ]
 
@@ -275,9 +272,7 @@ rule server_hello_psk_dhe:
         Neq(p_gx, p_g),
         Neq(p_x, inv(~y)),
         Instance(~tid, $S, 'server'),
-        DHChal(p_g, p_gx, ~y, p_gx, ~ct, ~k),
         RNonces(~tid, $S, 'server', <p_nc, ~ns>),
-        DH(~tid, $S, ~y),
         Encaps(~k, ~ct, p_gx)
     ]->
     [
@@ -315,8 +310,6 @@ rule server_hello_psk_dhe:
             p_extended_key_update_running,
             p_phs_auth_running
         ),
-        DHExp(~y, ~tid, $S),
-        !DHEx(~y, ~tid, $S),
         MessageOut(message)
     ]
 

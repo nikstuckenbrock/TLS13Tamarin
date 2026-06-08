@@ -42,8 +42,7 @@ rule client_hello_psk:
         C0_PSK(~nc),
         Start(~nc, $C, 'client'),
         RPSK(~nc, $C, 'client', <$S, res_psk, auth_status>),
-        Neq(res_psk, '0'),
-        DH(~nc, $C, ~x)
+        Neq(res_psk, '0')
     ]->
     [
         ClientState(
@@ -82,8 +81,6 @@ rule client_hello_psk:
         ),
         F_CachePSK(~nc, $S, res_psk, auth_status, <'4', $ticket_lifetime, ticket_age_add, ticket, <<'46',$max_early_data_size>> >,psk_type),
         EarlySendStream(~nc, $C, $S, auth_status, ead_keyc, edi),
-        DHExp(~x, ~nc, $C),
-        !DHEx(~x, ~nc, $C),
         MessageOut(message)
     ]
 
@@ -176,21 +173,16 @@ rule recv_hello_retry_request_psk:
         F_CachePSK(~tid, $S, p_res_psk, p_auth_status, <'4', $ticket_lifetime, ticket_age_add, ticket,<<'46',$max_early_data_size>> >,psk_type),
         Fr(~new_nc),
         Fr(~new_x),
-        DHExp(p_x, ~tid, $C),
         F_MessageIn(receivedMessage)
     ]
     --[
         C1_retry_PSK(~tid),
         Neq($g1, $g2),
         Instance(~tid, $C, 'client'),
-        RPSK(~tid, $C, 'client', <$S, p_res_psk, p_auth_status>),
-        DeleteDH(~tid, $C, p_x),
-        DH(~tid, $C, ~new_x)
+        RPSK(~tid, $C, 'client', <$S, p_res_psk, p_auth_status>)
     ]->
     [
         MessageOut(message),
-        DHExp(~new_x, ~tid, $C),
-        !DHEx(~new_x, ~tid, $C),
         ClientState(
             ~tid,
             'C1',
@@ -375,7 +367,6 @@ rule recv_server_hello_psk_dhe:
         C1_PSK_DHE(~tid),
         Neq(ct, $g),
         Instance(~tid, $C, 'client'),
-        DHChal($g, ~x, p_y, p_gx, ct, p_gxy),
         RNonces(~tid, $C, 'client', <p_nc, new_ns>),
         Neq(new_ns, HelloRetryRequestRandom()),
         Decaps(~k, ct, kem_pk(~x), ~x)

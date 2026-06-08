@@ -193,10 +193,6 @@ elif argv[1] == "dh_chal_dual":
         "!KU( $g^(~y*",
         "!KU( ~ticket"
     ], lines)
-elif argv[1] == "rev_dh_before_hs":
-    match = match_against_list([
-        "ServerState( ~tid, 'S1'",
-    ], lines)
 elif argv[1] == "invariant_post_hs":
     match = match_against_list([
         "RRMS",

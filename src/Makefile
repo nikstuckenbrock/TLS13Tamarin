@@ -52,15 +52,6 @@ authHelpers:
 	$(TAMARIN) -DauthHelpers --prove=consistent_nonces tls13.spthy --output=../proofs/auth_helpers.consistent.spthy >> ../logs/auth_helpers.log 2>&1
 	$(TAMARIN) -DauthHelpers --prove=invariant_nonces tls13.spthy --output=../proofs/auth_helpers.invariant_nonces.spthy >> ../logs/auth_helpers.log 2>&1
 
-dhInj:
-	$(TAMARIN) -DdhInj --prove=dh_exp_invariant tls13.spthy --output=../proofs/dh_inj.dh_exp_invariant.spthy >> ../logs/dh_inj.log 2>&1
-	$(TAMARIN) -DdhInj --prove=one_dh_per_x tls13.spthy --output=../proofs/dh_inj.one_dh_per_x.spthy >> ../logs/dh_inj.log 2>&1
-	#now_restriction$(TAMARIN) -DdhInj --prove=rev_dh_ordering tls13.spthy --output=../proofs/dh_inj.rev_dh_ordering.spthy >> ../logs/dh_inj.log 2>&1
-	$(TAMARIN) -DdhInj --prove=rev_dh_before_hs tls13.spthy --output=../proofs/dh_inj.rev_dh_before_hs.spthy >> ../logs/dh_inj.log 2>&1
-
-dhCal:
-	$(TAMARIN) -DdhCal --prove=dh_chal_dual tls13.spthy --output=../proofs/dh_chal.spthy >> ../logs/dh_cal.log 2>&1
-
 secretHelpers:
 	$(TAMARIN) -DsecretHelpers --prove=ku_extract tls13.spthy --output=../proofs/secret_helpers.ku_extract.spthy >> ../logs/secret_helpers.log 2>&1
 	$(TAMARIN) -DsecretHelpers --prove=ku_expand tls13.spthy --output=../proofs/secret_helpers.ku_expand.spthy >> ../logs/secret_helpers.log 2>&1
