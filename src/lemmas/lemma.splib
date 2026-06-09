@@ -181,8 +181,6 @@ lemma post_master_secret [reuse, hide_lemma=posths_rms]:
     CIdentityPost(tid, actor, role, <peer,<aas,'auth'>>)@i &
     KU(rms)@k ==>
       (Ex #r. RevLtk(peer)@r & #r < #i) |
-      (Ex tid3 x #r. RevDHExp(tid3, peer, x)@r & #r < #i) |
-      (Ex tid4 y #r. RevDHExp(tid4, actor, y)@r & #r < #i) |
       (Ex rms2 #r. RevealPSK(actor, rms2)@r & #r < #k) |
       (Ex rms2 #r. RevealPSK(peer, rms2)@r & #r < #k)"
 
@@ -198,8 +196,6 @@ lemma handshake_secret [reuse, use_induction, hide_lemma=posths_rms_weak]:
     CIdentity(tid, actor, role, <peer,<aas,'auth'>>)@i &
     KU(hs)@k ==>
         (Ex #r. RevLtk(peer)@r & #r < #i) |
-        (Ex tid3 x #r. RevDHExp(tid3, peer, x)@r & #r < #i) |
-        (Ex tid4 y #r. RevDHExp(tid4, actor, y)@r & #r < #i) |
         (Ex rms #r. RevealPSK(actor, rms)@r & #r < #k) |
         (Ex rms #r. RevealPSK(peer, rms)@r & #r < #k)"
 
@@ -207,8 +203,6 @@ lemma secret_session_keys [hide_lemma=sig_origin,hide_lemma=posths_rms]:
   "All tid actor peer kw kr pas #i.
       SessionKey(tid, actor, peer, <pas, 'auth'>, <kw, kr>)@i & 
       not (Ex #r. RevLtk(peer)@r & #r < #i) &
-      not (Ex tid3 x #r. RevDHExp(tid3, peer, x)@r & #r < #i) &
-      not (Ex tid4 y #r. RevDHExp(tid4, actor, y)@r & #r < #i) &
       not (Ex rms #r. RevealPSK(actor, rms)@r) &
       not (Ex rms #r. RevealPSK(peer, rms)@r)
     ==> not Ex #j. K(kr)@
