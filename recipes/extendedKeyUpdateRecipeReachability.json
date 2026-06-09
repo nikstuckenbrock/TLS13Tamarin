@@ -1,0 +1,136 @@
+{
+    "config": {
+        "global_max_cores": "max",
+        "global_max_memory": "max",
+        "default_timeout": 48000,
+        "output_directory": "./results"
+    },
+    "tamarin_versions": {
+        "development": {
+            "path": "/home/ms/n/ns363449/.local/bin/tamarin-prover"
+        }
+    },
+    "tasks": {
+        "reachability": {
+            "theory_file": "src/tls13.spthy",
+            "resources": {
+                "max_cores": 24,
+                "max_memory": 200,
+                "timeout": 7200
+            },
+            "output_file_prefix": "reachability",
+            "preprocess_flags": [
+                "extendedKeyUpdate",
+                "reachability"
+            ],
+            "tamarin_options": [
+                "-D=extendedKeyUpdate",
+                "-D=reachability"
+            ],
+            "tamarin_versions": [
+                "development"
+            ],
+            "lemmas": [
+                {
+                    "name": "exists_C0"
+                },
+                {
+                    "name": "exists_S0"
+                },
+                {
+                    "name": "exists_C1"
+                },
+                {
+                    "name": "exists_S1"
+                },
+                {
+                    "name": "exists_S1_retry"
+                },
+                {
+                    "name": "exists_C2a"
+                },
+                {
+                    "name": "exists_C2b"
+                },
+                {
+                    "name": "exists_C2c"
+                },
+                {
+                    "name": "exists_C2d"
+                },
+                {
+                    "name": "exists_S2a"
+                },
+                {
+                    "name": "exists_S2b"
+                },
+                {
+                    "name": "exists_S2c"
+                },
+                {
+                    "name": "exists_S2d"
+                },
+                {
+                    "name": "exists_C3",
+                    "resources": {
+                        "max_cores": 24,
+                        "max_memory": 300,
+                        "timeout": 48000
+                    }
+                },
+                {
+                    "name": "exists_S3",
+                    "resources": {
+                        "max_cores": 24,
+                        "max_memory": 300,
+                        "timeout": 48000
+                    }
+                },
+                {
+                    "name": "exists_C1_PSK"
+                },
+                {
+                    "name": "exists_C0_PSK"
+                },
+                {
+                    "name": "exists_S0_PSK"
+                },
+                {
+                    "name": "exists_S1_PSK_DHE"
+                },
+                {
+                    "name": "exists_S1_PSK"
+                },
+                {
+                    "name": "exists_C2d_PSK"
+                },
+                {
+                    "name": "exists_S4_NST",
+                    "resources": {
+                        "max_cores": 24,
+                        "max_memory": 300,
+                        "timeout": 48000
+                    }
+                },
+                {
+                    "name": "exists_extended_key_update_request_client"
+                },
+                {
+                    "name": "exists_extended_key_update_request_client_receive"
+                },
+                {
+                    "name": "exists_extended_key_update_response_server"
+                },
+                {
+                    "name": "exists_extended_key_update_response_server_receive"
+                },
+                {
+                    "name": "exists_extended_key_update_finish_client"
+                },
+                {
+                    "name": "exists_extended_key_update_finish_client_receive"
+                }
+            ]
+        }
+    }
+}
