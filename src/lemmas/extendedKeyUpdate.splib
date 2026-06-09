@@ -36,6 +36,13 @@ lemma exists_extended_key_update_finish_client_receive [heuristic={reachability}
 * For each data send, the adversary doesn't know the data.
 */
 
+lemma secrecy:
+    "All tid actor peer auth_status message writeKey receiveKey #t #u.
+            SendData(tid, actor, peer, auth_status, message)@t &
+            SessionKey(tid, actor, peer, auth_status, <writeKey, receiveKey>)@u
+        ==>
+            not (Ex #x. K(message)@x)"
+
 /**
     not (Ex #r. RevLtk(peer)@r & #r < #i) &
     not (Ex tid3 x #r. RevDHExp(tid3, peer, x)@r & #r < #i) &
