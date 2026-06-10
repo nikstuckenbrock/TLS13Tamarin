@@ -175,14 +175,14 @@ rule recv_hello_retry_request_psk:
         F_CachePSK(~tid, $S, p_res_psk, p_auth_status, <'4', $ticket_lifetime, ticket_age_add, ticket,<<'46',$max_early_data_size>> >,psk_type),
         Fr(~new_nc),
         Fr(~new_x),
-        F_MessageIn(receivedMessage),
-        GoodKey(gx)
+        F_MessageIn(receivedMessage)
     ]
     --[
         C1_retry_PSK(~tid),
         Neq($g1, $g2),
         Instance(~tid, $C, 'client'),
-        RPSK(~tid, $C, 'client', <$S, p_res_psk, p_auth_status>)
+        RPSK(~tid, $C, 'client', <$S, p_res_psk, p_auth_status>),
+        GoodKey(gx)
     ]->
     [
         MessageOut(message),

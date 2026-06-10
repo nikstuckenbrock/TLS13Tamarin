@@ -50,6 +50,7 @@ rule extended_key_update_request_client[color=#340068]:
     ]->
     [
         C4_Extended_Key_Update(~tid, 'EKU0', $C, $S, ~x, opaque, '0', <request>),
+        !KEMEphermeralKey(~tid, $C, ~x),
         MessageOut(senc{request}applicationTrafficKeyClient),
         SendStream(~tid, $C, $S, p_auth_status, applicationTrafficKeyClient),
         ClientState(
