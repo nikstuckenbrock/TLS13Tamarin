@@ -83,6 +83,7 @@ rule message_in_to_in:
 #include "lemmas/invariants.splib"
 #include "lemmas/secretHelpers.splib"
 #include "lemmas/authHelpers.splib"
+#include "lemmas/lemmas.splib"
 #include "lemmas/extendedKeyUpdate.splib"
 #endif
 
