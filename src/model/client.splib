@@ -22,7 +22,8 @@ rule client_hello:
         C0(~nc),
         Start(~nc, $C, 'client'),
         RIdentity(~nc, $C, 'client', <$C>),
-        Neq($g1, $g2)
+        Neq($g1, $g2),
+        GoodKey(opaque)
     ]->
     [
         ClientState(

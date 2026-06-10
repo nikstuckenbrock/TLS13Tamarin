@@ -22,6 +22,12 @@ lemma exists_extended_key_update_finish_client [heuristic={reachability}]: exist
 lemma exists_extended_key_update_finish_client_receive [heuristic={reachability}]: exists-trace
     "Ex tid #i. ExtendedKeyUpdateFinishClientReceive(tid)@i"
 
+lemma exists_eku_with_post_handshake_auth [heuristic={reachability}]: exists-trace
+    "Ex tid #i #j.
+        ExtendedKeyUpdateFinishClientReceive(tid)@i &
+        S4_cert(tid)@j  &
+        #i < #j"
+
 /**
 * This section contains reachability/executability lemmas to sanity check the protocol execution workflow.
 * This group of lemmas is related to an execution initiated by the server.

@@ -1,0 +1,52 @@
+{
+    "config": {
+        "global_max_cores": "max",
+        "global_max_memory": "max",
+        "default_timeout": 48000,
+        "output_directory": "./results"
+    },
+    "tamarin_versions": {
+        "development": {
+            "path": "/home/ms/n/ns363449/.local/bin/tamarin-prover"
+        }
+    },
+    "tasks": {
+        "lemmas_weak": {
+            "theory_file": "src/tls13.spthy",
+            "resources": {
+                "max_cores": 24,
+                "max_memory": 400,
+                "timeout": 14000
+            },
+            "output_file_prefix": "lemmas",
+            "preprocess_flags": [
+                "extendedKeyUpdate",
+                "bindkcttopk"
+            ],
+            "tamarin_versions": [
+                "development"
+            ],
+            "tamarin_options": [
+                "-D=extendedKeyUpdate",
+                "-D=bindkcttopk"
+            ],
+            "lemmas": [
+                {
+                    "name": "secret_session_keys"
+                },
+                {
+                    "name": "secret_session_keys_pfs"
+                },
+                {
+                    "name": "unique_session_keys"
+                },
+                {
+                    "name": "entity_authentication"
+                },
+                {
+                    "name": "injective_mutual_entity_authentication"
+                }
+            ]
+        }
+    }
+}

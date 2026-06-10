@@ -42,7 +42,8 @@ rule client_hello_psk:
         C0_PSK(~nc),
         Start(~nc, $C, 'client'),
         RPSK(~nc, $C, 'client', <$S, res_psk, auth_status>),
-        Neq(res_psk, '0')
+        Neq(res_psk, '0'),
+        GoodKey(opaue)
     ]->
     [
         ClientState(
@@ -174,7 +175,8 @@ rule recv_hello_retry_request_psk:
         F_CachePSK(~tid, $S, p_res_psk, p_auth_status, <'4', $ticket_lifetime, ticket_age_add, ticket,<<'46',$max_early_data_size>> >,psk_type),
         Fr(~new_nc),
         Fr(~new_x),
-        F_MessageIn(receivedMessage)
+        F_MessageIn(receivedMessage),
+        GoodKey(gx)
     ]
     --[
         C1_retry_PSK(~tid),
