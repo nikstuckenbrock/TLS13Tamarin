@@ -1,78 +1,56 @@
 restriction At_most_2_of_RPostHS:
-"not (Ex #i1 #i2 #i3  
-      a1v1 a1v2 a1v3 a1v4 
-      a2v1 a2v2 a2v3 a2v4 
-      a3v1 a3v2 a3v3 a3v4 
-      .
-      RPostHS(a1v1,a1v2,a1v3,a1v4)@#i1 & 
-      RPostHS(a2v1,a2v2,a2v3,a2v4)@#i2 & 
-      RPostHS(a3v1,a3v2,a3v3,a3v4)@#i3 & 
-      #i1 < #i2 & #i2 < #i3
-     )"
+    "not (Ex #i1 #i2 #i3  
+        a1v1 a1v2 a1v3 a1v4 
+        a2v1 a2v2 a2v3 a2v4 
+        a3v1 a3v2 a3v3 a3v4.
+            RPostHS(a1v1,a1v2,a1v3,a1v4)@#i1 & 
+            RPostHS(a2v1,a2v2,a2v3,a2v4)@#i2 & 
+            RPostHS(a3v1,a3v2,a3v3,a3v4)@#i3 & 
+            #i1 < #i2 &
+            #i2 < #i3
+    )"
 
 restriction At_most_1_of_C0:
-"All #i1 #i2 a1v1 
-      a2v1 
-      .
-	C0(a1v1)@#i1 
-       & 
-	C0(a2v1)@#i2 
-      
-	 ==> #i1 = #i2"
+    "All #i1 #i2 a1v1 a2v1.
+	    C0(a1v1)@#i1 & 
+	    C0(a2v1)@#i2
+	==> #i1 = #i2"
 
 restriction At_most_1_of_C1_retry:
-"All #i1 #i2 a1v1 
-      a2v1 
-      .
-	C1_retry(a1v1)@#i1 
-       & 
-	C1_retry(a2v1)@#i2 
-      
-	 ==> #i1 = #i2"
+    "All #i1 #i2 a1v1 a2v1.
+	    C1_retry(a1v1)@#i1 & 
+	    C1_retry(a2v1)@#i2
+	==> #i1 = #i2"
 
 restriction At_most_1_of_S1:
-"All #i1 #i2 a1v1 
-      a2v1 
-      .
-	S1(a1v1)@#i1 
-       & 
-	S1(a2v1)@#i2 
-      
-	 ==> #i1 = #i2"
+    "All #i1 #i2 a1v1 a2v1.
+	    S1(a1v1)@#i1 & 
+	    S1(a2v1)@#i2
+	==> #i1 = #i2"
 
 restriction At_most_1_of_C1:
-"All #i1 #i2 a1v1 
-      a2v1 
-      .
-	C1(a1v1)@#i1 
-       & 
-	C1(a2v1)@#i2 
-      
-	 ==> #i1 = #i2"
+    "All #i1 #i2 a1v1 a2v1.
+	    C1(a1v1)@#i1 & 
+	    C1(a2v1)@#i2 
+    ==> #i1 = #i2"
 
 restriction At_most_2_of_S2a:
-"not (Ex #i1 #i2 #i3  
-      a1v1 
-      a2v1 
-      a3v1 
-      .
-      S2a(a1v1)@#i1 & 
-      S2a(a2v1)@#i2 & 
-      S2a(a3v1)@#i3 & 
-      #i1 < #i2 & #i2 < #i3
-     )"
+    "not (Ex #i1 #i2 #i3 a1v1 a2v1 a3v1.
+        S2a(a1v1)@#i1 & 
+        S2a(a2v1)@#i2 & 
+        S2a(a3v1)@#i3 & 
+        #i1 < #i2 &
+        #i2 < #i3
+    )"
 
 restriction At_most_2_of_S2b:
-"not (Ex #i1 #i2 #i3  
-      a1v1 
-      a2v1 
-      a3v1 
-      .
-      S2b(a1v1)@#i1 & 
-      S2b(a2v1)@#i2 & 
-      S2b(a3v1)@#i3 & 
-      #i1 < #i2 & #i2 < #i3
-     )"
+    "not (Ex #i1 #i2 #i3 a1v1 a2v1 a3v1.
+        S2b(a1v1)@#i1 & 
+        S2b(a2v1)@#i2 & 
+        S2b(a3v1)@#i3 & 
+        #i1 < #i2 &
+        #i2 < #i3
+    )"
 
 restriction At_most_1_of_S2c:
 "All #i1 #i2 a1v1 
