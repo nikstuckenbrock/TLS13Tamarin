@@ -1,0 +1,152 @@
+{
+    "config": {
+        "global_max_cores": "max",
+        "global_max_memory": "max",
+        "default_timeout": 48000,
+        "output_directory": "./results"
+    },
+    "tamarin_versions": {
+        "development": {
+            "path": "/home/ms/n/ns363449/.local/bin/tamarin-prover"
+        }
+    },
+    "tasks": {
+        "uniqueness": {
+            "theory_file": "src/tls13.spthy",
+            "resources": {
+                "max_cores": 24,
+                "max_memory": 500,
+                "timeout": 14000
+            },
+            "preprocess_flags": [
+                "extendedKeyUpdate"
+            ],
+            "output_file_prefix": "uniqueness",
+            "tamarin_options": [
+                "-D=extendedKeyUpdate"
+            ],
+            "tamarin_versions": [
+                "development"
+            ],
+            "lemmas": [
+                {
+                    "name": "one_C0_per_tid"
+                },
+                {
+                    "name": "one_C1_per_tid"
+                },
+                {
+                    "name": "one_C1_retry_per_tid"
+                },
+                {
+                    "name": "one_S1_per_tid"
+                },
+                {
+                    "name": "one_S1_PSK_per_tid"
+                },
+                {
+                    "name": "one_S1_PSK_DHE_per_tid"
+                },
+                {
+                    "name": "one_C1_PSK_per_tid"
+                },
+                {
+                    "name": "one_C1_PSK_DHE_per_tid"
+                },
+                {
+                    "name": "one_S2a_per_tid",
+                    "resources": {
+                        "max_cores": 24,
+                        "max_memory": 500,
+                        "timeout": 48000
+                    }
+                },
+                {
+                    "name": "one_S2b_per_tid"
+                },
+                {
+                    "name": "one_S2c_per_tid"
+                },
+                {
+                    "name": "one_S2c_req_per_tid"
+                },
+                {
+                    "name": "one_S2d_per_tid"
+                },
+                {
+                    "name": "one_S2d_PSK_per_tid"
+                },
+                {
+                    "name": "one_C2a_per_tid"
+                },
+                {
+                    "name": "one_C2b_per_tid"
+                },
+                {
+                    "name": "one_C2c_per_tid"
+                },
+                {
+                    "name": "one_C2c_req_per_tid"
+                },
+                {
+                    "name": "one_C2d_per_tid"
+                },
+                {
+                    "name": "one_C2d_PSK_per_tid"
+                },
+                {
+                    "name": "one_C3_per_tid"
+                },
+                {
+                    "name": "one_C3_cert_per_tid"
+                },
+                {
+                    "name": "one_S3_per_tid",
+                    "resources": {
+                        "max_cores": 24,
+                        "max_memory": 500,
+                        "timeout": 48000
+                    }
+                },
+                {
+                    "name": "one_S3_cert_per_tid"
+                },
+                {
+                    "name": "S1_vs_S1_PSK_DHE"
+                },
+                {
+                    "name": "S1_PSK_vs_S1_PSK_DHE"
+                },
+                {
+                    "name": "S1_PSK_vs_S1"
+                },
+                {
+                    "name": "C1_vs_C1_PSK_DHE"
+                },
+                {
+                    "name": "C1_PSK_vs_C1_PSK_DHE"
+                },
+                {
+                    "name": "C1_PSK_vs_C1"
+                },
+                {
+                    "name": "S3_vs_S3_cert"
+                },
+                {
+                    "name": "C3_vs_C3_cert"
+                },
+                {
+                    "name": "S2d_vs_S2d_PSK"
+                },
+                {
+                    "name": "C2d_vs_C2d_PSK",
+                    "resources": {
+                        "max_cores": 24,
+                        "max_memory": 500,
+                        "timeout": 48000
+                    }
+                }
+            ]
+        }
+    }
+}
