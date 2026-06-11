@@ -1,0 +1,47 @@
+{
+    "config": {
+        "global_max_cores": "max",
+        "global_max_memory": "max",
+        "default_timeout": 48000,
+        "output_directory": "./results"
+    },
+    "tamarin_versions": {
+        "development": {
+            "path": "/home/ms/n/ns363449/.local/bin/tamarin-prover"
+        }
+    },
+    "tasks": {
+        "authHelpers": {
+            "theory_file": "src/tls13.spthy",
+            "resources": {
+                "max_cores": 24,
+                "max_memory": 200,
+                "timeout": 7200
+            },
+            "output_file_prefix": "authHelpers",
+            "preprocess_flags": [
+                "extendedKeyUpdate"
+            ],
+            "tamarin_options": [
+                "-D=extendedKeyUpdate"
+            ],
+            "tamarin_versions": [
+                "development"
+            ],
+            "lemmas": [
+                {
+                    "name": "matching_nonces"
+                },
+                {
+                    "name": "matching_rms_nonces"
+                },
+                {
+                    "name": "consistent_nonces"
+                },
+                {
+                    "name": "invariant_nonces"
+                }
+            ]
+        }
+    }
+}
