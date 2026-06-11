@@ -1,24 +1,23 @@
 lemma matching_nonces [reuse]:
   "All tid tid2 actor actor2 role  nonces #i #j. 
     RNonces(tid, actor, role, <nonces>)@i & 
-    RNonces(tid2, actor2, role, <nonces>)@j ==>
-    tid = tid2 & actor = actor2"
+    RNonces(tid2, actor2, role, <nonces>)@j
+  ==> tid = tid2 & actor = actor2"
 
 lemma consistent_nonces [reuse]:
   "All tid actor role nonces #i. 
-    CNonces(tid, actor, role, <nonces>)@i ==>
-      Ex #j. RNonces(tid, actor, role, <nonces>)@j"
+    CNonces(tid, actor, role, <nonces>)@i
+  ==> Ex #j. RNonces(tid, actor, role, <nonces>)@j"
 
 lemma invariant_nonces [reuse]:
   "All tid actor actor2 role role2 nonces nonces2 #i #j.
     RNonces(tid, actor, role, <nonces>)@i & 
-    RNonces(tid, actor2, role2, <nonces2>)@j ==> #i = #j"
+    RNonces(tid, actor2, role2, <nonces2>)@j
+  ==> #i = #j"
 
 lemma matching_rms_nonces [reuse]:
   "All nonces tid tid2 actor actor2 peer peer2 rms messages #i #j. 
     RRMS(tid, actor, 'client', <peer,rms,messages>)@i &
     RRMS(tid2, actor2, 'server', <peer2,rms,messages>)@j &
-    CNonces(tid2, actor2, 'server', <nonces>)@j ==>
-      Ex #a.
-        CNonces(tid, actor, 'client', <nonces>)@a & 
-        #a < #i"
+    CNonces(tid2, actor2, 'server', <nonces>)@j
+  ==> Ex #a. CNonces(tid, actor, 'client', <nonces>)@a & #a < #i"
