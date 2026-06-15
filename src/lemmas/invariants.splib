@@ -1,6 +1,8 @@
 tactic: invariants
 presort: i
 prio:
+    regex "AttEncaps"
+prio:
     regex "last"
 prio:
     regex "Instance"
