@@ -1,14 +1,22 @@
 tactic: uniquenessClient
 presort: i
 prio:
-    regex "(#i < #j)  ∥ (#j < #i)" | regex "ClientState" | regex "ServerState"
+    regex "(#i < #j)  ∥ (#j < #i)"
+prio:
+    regex "ClientState"
+prio:
+    regex "ServerState"
 deprio:
     regex "splitEqs"
 
 tactic: uniquenessServer
 presort: i
 prio:
-    regex "(#i < #j)  ∥ (#j < #i)" | regex "ServerState" | regex "ClientState"
+    regex "(#i < #j)  ∥ (#j < #i)"
+prio:
+    regex "ServerState"
+prio:
+    regex "ClientState"
 deprio:
     regex "splitEqs"
 
