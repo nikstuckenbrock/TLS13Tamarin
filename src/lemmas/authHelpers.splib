@@ -1,23 +1,73 @@
-lemma matching_nonces [reuse]:
-  "All tid tid2 actor actor2 role  nonces #i #j. 
-    RNonces(tid, actor, role, <nonces>)@i & 
-    RNonces(tid2, actor2, role, <nonces>)@j
-  ==> tid = tid2 & actor = actor2"
+tactic: matchingNonces
+presort: i
+prio:
+    regex "RNonces"
+prio:
+    regex "ClientState"
+prio:
+    regex "ServerState"
 
-lemma consistent_nonces [reuse]:
-  "All tid actor role nonces #i. 
-    CNonces(tid, actor, role, <nonces>)@i
-  ==> Ex #j. RNonces(tid, actor, role, <nonces>)@j"
+tactic: consistentNonces
+presort: i
+prio:
+    regex "CNonces"
+prio:
+    regex "RNonces"
+prio:
+    regex "ClientState"
+prio:
+    regex "ServerState"
 
-lemma invariant_nonces [reuse]:
-  "All tid actor actor2 role role2 nonces nonces2 #i #j.
-    RNonces(tid, actor, role, <nonces>)@i & 
-    RNonces(tid, actor2, role2, <nonces2>)@j
-  ==> #i = #j"
+tactic: invariantNonces
+presort: i
+prio:
+    regex "\(#i < #j\)"
+prio:
+    regex "ClientState\( ~tid, 'C1'"
+prio:
+    regex "RNonces"
+prio:
+    regex "ServerState\( ~tid, 'S1'"
 
-lemma matching_rms_nonces [reuse]:
-  "All nonces tid tid2 actor actor2 peer peer2 rms messages #i #j. 
-    RRMS(tid, actor, 'client', <peer,rms,messages>)@i &
-    RRMS(tid2, actor2, 'server', <peer2,rms,messages>)@j &
-    CNonces(tid2, actor2, 'server', <nonces>)@j
-  ==> Ex #a. CNonces(tid, actor, 'client', <nonces>)@a & #a < #i"
+tactic: matchingRmsNonces
+presort: i
+prio:
+    regex "ClientState\( ~tid, 'C3'"
+prio:
+    regex "!Ltk"
+prio:
+    regex "!Pk"
+prio:
+    regex "RRMS"
+prio:
+    regex "ServerState\( ~tid.1, 'S3'"
+prio:
+    regex "ServerState\( ~tid, 'S1'"
+prio:
+    regex "CNonces"
+prio:
+    regex "ClientState"
+
+lemma matching_nonces [reuse,heuristic={matchingNonces}]:
+    "All tid tid2 actor actor2 role  nonces #i #j. 
+        RNonces(tid, actor, role, <nonces>)@i & 
+        RNonces(tid2, actor2, role, <nonces>)@j
+    ==> tid = tid2 & actor = actor2"
+
+lemma consistent_nonces [reuse,heuristic={consistentNonces}]:
+    "All tid actor role nonces #i. 
+        CNonces(tid, actor, role, <nonces>)@i
+    ==> Ex #j. RNonces(tid, actor, role, <nonces>)@j"
+
+lemma invariant_nonces [reuse,heuristic={invariantNonces}]:
+    "All tid actor actor2 role role2 nonces nonces2 #i #j.
+        RNonces(tid, actor, role, <nonces>)@i & 
+        RNonces(tid, actor2, role2, <nonces2>)@j
+    ==> #i = #j"
+
+lemma matching_rms_nonces [reuse,heuristic={matchingRmsNonces}]:
+    "All nonces tid tid2 actor actor2 peer peer2 rms messages #i #j. 
+        RRMS(tid, actor, 'client', <peer,rms,messages>)@i &
+        RRMS(tid2, actor2, 'server', <peer2,rms,messages>)@j &
+        CNonces(tid2, actor2, 'server', <nonces>)@j
+    ==> Ex #a. CNonces(tid, actor, 'client', <nonces>)@a & #a < #i"
