@@ -39,14 +39,14 @@ rule message_in_to_in:
 #include "model/postHandshake.splib"
 #include "model/record.splib"
 
+#ifdef reachability
+#include "lemmas/reachability.splib"
+#endif
+
 #ifdef extendedKeyUpdate
 #include "model/extendedKeyUpdate.splib"
 #else
 #include "model/keyUpdate.splib"
-#endif
-
-#ifdef reachability
-#include "lemmas/reachability.splib"
 #endif
 
 #ifdef uniqueness
