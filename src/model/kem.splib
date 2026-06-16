@@ -1,13 +1,13 @@
 functions: kem_pk/1
 
-#ifdef not noConsistency
+#ifdef not noConsistency & not reachability
 restriction Consistency:
 "
 All k1 k2 ct seck pub #i #j. Decaps(k1, ct, pub, seck)@#i  & Decaps(k2, ct, pub, seck)@#j ==> k1 = k2
 "
 #endif
 
-#ifdef not noCorrectness
+#ifdef not noCorrectness & not reachability
 restriction Correctness1:
 "
 All k1 k2 ct seck #i #j #k. Decaps(k1, ct, kem_pk(seck), seck) @#i & Encaps(k2, ct, kem_pk(seck))@#j & GoodKey(kem_pk(seck))@#k ==> k1 = k2
@@ -19,7 +19,7 @@ All k1 k2 ct seck #i #j #k. Decaps(k1, ct, kem_pk(seck), seck) @#i & AttEncaps(k
 "
 #endif
 
-#ifdef not NoCCA
+#ifdef not NoCCA & not reachability
 restriction IND_CCA:
 "
 All k k2 ct ct2 pub pub2 #i #j #k. Encaps(k, ct, pub) @#i & Encaps(k2, ct2, pub2)@#j & not(#i=#j) & GoodKey(pub)@#k ==> not(k = k2)
@@ -36,7 +36,7 @@ All k ct seck #i. Decaps(k, ct, kem_pk(seck), seck) @#i ==> ((Ex #k. Encaps(k, c
 "
 #endif
 
-#ifdef GoodKeysOnly
+#ifdef GoodKeysOnly & not reachability
 restriction DecapsKeyOrigin:
 "
 All k ct pub seck #i. Decaps(k, ct, pub, seck) @#i ==> (Ex #k. GoodKey(pub)@#k)
@@ -63,6 +63,7 @@ rule CTValues[color=4d587a]:
     -->
     [!CTValues(~ct)]
 
+#ifdef not reachability
 rule attKeyGen[color=82a5ac]:
     [ Fr(~sk) ]
     --[ GoodKey(kem_pk(~sk)) ]->
@@ -82,8 +83,9 @@ rule attComputingDecaps[color=93b2b1]:
     [In(ct), In(seck), !KeyValues(k)]
     --[Decaps(k, ct, kem_pk(seck), seck), AttDecaps(k, ct, kem_pk(seck), seck)]->
     [Out(k)]
+#endif
 
-#ifdef bindktoct & not MAL
+#ifdef bindktoct & not MAL & not reachability
 restriction k_bind_ct:
 "
 All k k2 ct ct2 pub pub2 seck seck2 #i #j #k #l. Decaps(k, ct, pub, seck)@#i & Decaps(k2, ct2, pub2, seck2)@#j & k=k2 & GoodKey(pub)@#k & GoodKey(pub2)@#l ==> ct=ct2
@@ -93,7 +95,7 @@ All k k2 ct ct2 pub pub2 seck seck2 #i #j #k #l. Decaps(k, ct, pub, seck)@#i & D
 
 
 
-#ifdef bindktoct & MAL
+#ifdef bindktoct & MAL & not reachability
 restriction k_bind_ct_decaps:
 "
 All k k2 ct ct2 pub pub2 seck seck2 #i #j. Decaps(k, ct, pub, seck)@#i & Decaps(k2, ct2, pub2, seck2)@#j & k=k2 ==> ct=ct2
@@ -126,7 +128,7 @@ All k k2 ct ct2 pub pub2 seck #i #j. AttEncaps(k, ct, pub)@#i & Decaps(k2, ct2, 
 #endif
 
 
-#ifdef bindktopk & not MAL
+#ifdef bindktopk & not MAL & not reachability
 restriction k_bind_pk:
 "
 All k k2 ct ct2 pub pub2 seck seck2 #i #j #k #l. Decaps(k, ct, pub, seck)@#i & Decaps(k2, ct2, pub2, seck2)@#j & k=k2 & GoodKey(pub)@#k & GoodKey(pub2)@#l ==> pub=pub2
@@ -136,7 +138,7 @@ All k k2 ct ct2 pub pub2 seck seck2 #i #j #k #l. Decaps(k, ct, pub, seck)@#i & D
 
 
 
-#ifdef bindktopk & MAL
+#ifdef bindktopk & MAL & not reachability
 restriction k_bind_pk_decaps:
 "
 All k k2 ct ct2 pub pub2 seck seck2 #i #j. Decaps(k, ct, pub, seck)@#i & Decaps(k2, ct2, pub2, seck2)@#j & k=k2 ==> pub=pub2
@@ -171,7 +173,7 @@ All k k2 ct ct2 pub pub2 #i #j. AttEncaps(k, ct, pub)@#i & Encaps(k2, ct2, pub2)
 
 
 
-#ifdef bindcttok & not MAL
+#ifdef bindcttok & not MAL & not reachability
 restriction ct_bind_k:
 "
 All k k2 ct ct2 pub pub2 seck seck2 #i #j #k #l. Decaps(k, ct, pub, seck)@#i & Decaps(k2, ct2, pub2, seck2)@#j & ct=ct2 & GoodKey(pub)@#k & GoodKey(pub2)@#l ==> k=k2
@@ -181,7 +183,7 @@ All k k2 ct ct2 pub pub2 seck seck2 #i #j #k #l. Decaps(k, ct, pub, seck)@#i & D
 
 
 
-#ifdef bindcttok & MAL
+#ifdef bindcttok & MAL & not reachability
 restriction ct_bind_k_decaps:
 "
 All k k2 ct ct2 pub pub2 seck seck2 #i #j. Decaps(k, ct, pub, seck)@#i & Decaps(k2, ct2, pub2, seck2)@#j & ct=ct2 ==> k=k2
@@ -216,7 +218,7 @@ All k k2 ct ct2 pub pub2 seck #i #j. AttEncaps(k, ct, pub)@#i & Decaps(k2, ct2, 
 
 
 
-#ifdef bindcttopk & not MAL
+#ifdef bindcttopk & not MAL & not reachability
 restriction ct_bind_pk:
 "
 All k k2 ct ct2 pub pub2 seck seck2 #i #j #k #l. Decaps(k, ct, pub, seck)@#i & Decaps(k2, ct2, pub2, seck2)@#j & ct=ct2 & GoodKey(pub)@#k & GoodKey(pub2)@#l ==> pub=pub2
@@ -255,14 +257,14 @@ All k k2 ct ct2 pub pub2 seck #i #j. Decaps(k, ct, pub, seck)@#i & AttEncaps(k2,
 "
 #endif
 
-#ifdef bindkcttopk & not MAL
+#ifdef bindkcttopk & not MAL & not reachability
 restriction k_ct_bind_pk:
 "
 All k k2 ct ct2 pub pub2 seck seck2 #i #j #k #l. Decaps(k, ct, pub, seck)@#i & Decaps(k2, ct2, pub2, seck2)@#j & ct=ct2 & k=k2 & GoodKey(pub)@#k & GoodKey(pub2)@#l ==> pub=pub2
 "
 #endif
 
-#ifdef bindkcttopk & MAL
+#ifdef bindkcttopk & MAL & not reachability
 restriction k_ct_bind_pk_decaps:
 "
 All k k2 ct ct2 pub pub2 seck seck2 #i #j. Decaps(k, ct, pub, seck)@#i & Decaps(k2, ct2, pub2, seck2)@#j & ct=ct2 & k=k2 ==> pub=pub2
@@ -294,14 +296,14 @@ All k k2 ct ct2 pub pub2 seck #i #j. AttEncaps(k, ct, pub)@#i & Decaps(k2, ct2, 
 "
 #endif
 
-#ifdef bindpkktoct & not MAL
+#ifdef bindpkktoct & not MAL & not reachability
 restriction pk_k_bind_ct:
 "
 All k k2 ct ct2 pub pub2 seck seck2 #i #j #k #l. Decaps(k, ct, pub, seck)@#i & Decaps(k2, ct2, pub2, seck2)@#j & pub=pub2 & k=k2 & GoodKey(pub)@#k & GoodKey(pub2)@#l ==> ct=ct2
 "
 #endif
 
-#ifdef bindpkktoct & MAL
+#ifdef bindpkktoct & MAL & not reachability
 restriction pk_k_bind_ct_decaps:
 "
 All k k2 ct ct2 pub pub2 seck seck2 #i #j. Decaps(k, ct, pub, seck)@#i & Decaps(k2, ct2, pub2, seck2)@#j & pub=pub2 & k=k2  ==> ct=ct2
@@ -332,4 +334,3 @@ restriction pk_k_bind_ct_att_encaps_decaps:
 All k k2 ct ct2 pub pub2 seck #i #j. AttEncaps(k, ct, pub)@#i & Decaps(k2, ct2, pub2, seck)@#j & pub=pub2 & k=k2  ==> ct=ct2
 "
 #endif
-    
