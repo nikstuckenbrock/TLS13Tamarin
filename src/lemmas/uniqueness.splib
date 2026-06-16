@@ -1,7 +1,7 @@
 tactic: uniquenessClient
 presort: i
 prio:
-    regex "(#i < #j)  ∥ (#j < #i)"
+    regex "\(#i < #j\)"
 prio:
     regex "ClientState"
 prio:
@@ -12,7 +12,7 @@ deprio:
 tactic: uniquenessServer
 presort: i
 prio:
-    regex "(#i < #j)  ∥ (#j < #i)"
+    regex "\(#i < #j\)"
 prio:
     regex "ServerState"
 prio:
