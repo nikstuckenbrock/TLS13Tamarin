@@ -25,7 +25,8 @@
             ],
             "tamarin_options": [
                 "-D=extendedKeyUpdate",
-                "-D=reachability"
+                "-D=reachability",
+                "--stop-on-trace=SEQDFS"
             ],
             "tamarin_versions": [
                 "development"
