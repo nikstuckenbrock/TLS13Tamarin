@@ -1,4 +1,16 @@
-lemma secret_session_keys [hide_lemma=sig_origin,hide_lemma=posths_rms]:
+tactic: secretSessionKeys
+prio:
+    regex "SessionKey"
+prio:
+    regex "Reveal"
+prio:
+    regex "F_SecretPSK"
+prio:
+    regex "ClientState"
+prio:
+    regex "ServerState"
+
+lemma secret_session_keys [hide_lemma=sig_origin,hide_lemma=posths_rms,heuristic={secretSessionKeys}]:
     "All tid actor peer kw kr pas #i.
         SessionKey(tid, actor, peer, <pas, 'auth'>, <kw, kr>)@i & 
         not (Ex #r. RevLtk(peer)@r & #r < #i) &
@@ -6,7 +18,25 @@ lemma secret_session_keys [hide_lemma=sig_origin,hide_lemma=posths_rms]:
         not (Ex rms #r. RevealPSK(peer, rms)@r)
     ==> not Ex #j. K(kr)@j"
 
-lemma secret_session_keys_pfs [hide_lemma=sig_origin,hide_lemma=posths_rms]:
+tactic: secretSessionKeysPfs
+prio:
+    regex "∃ #r."
+prio:
+    regex "∃ #j."
+prio:
+    regex "ClientState\( ~tid, 'C3'"
+prio:
+    regex "ServerState\( ~tid, 'S3'"
+prio:
+    regex "SessionKey\("
+prio:
+    regex "RMode\("
+prio:
+    regex "F_SecretPSK\( $A"
+prio:
+    regex "!Pk\( $C, pk(~ltkC)"
+
+lemma secret_session_keys_pfs [hide_lemma=sig_origin,hide_lemma=posths_rms,heuristic={secretSessionKeysPfs}]:
     "All tid actor peer role kw kr pas psk_ke_mode #i.
         SessionKey(tid, actor, peer, <pas, 'auth'>, <kw, kr>)@i & 
         RMode(tid, actor, role, <psk_ke_mode>)@i &
