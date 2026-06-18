@@ -14,6 +14,8 @@ presort: i
 prio:
     regex "\(#i < #j\)"
 prio:
+    regex "ServerState\(~tid, 'S0'"
+prio:
     regex "ServerState"
 prio:
     regex "ClientState"
