@@ -42,6 +42,15 @@
                     "name": "entity_authentication"
                 },
                 {
+                    "name": "transcript_agreement"
+                },
+                {
+                    "name": "mutual_entity_authentication"
+                },
+                {
+                    "name": "mutual_transcript_agreement"
+                },
+                {
                     "name": "injective_mutual_entity_authentication"
                 }
             ]

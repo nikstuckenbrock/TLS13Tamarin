@@ -34,20 +34,20 @@ lemma session_key_agreement [hide_lemma=sig_origin,hide_lemma=posths_rms_weak,hi
     ==> <kr, kw> = <kw2, kr2>"
 
 lemma entity_authentication [reuse, use_induction]:
-  "All tid actor peer nonces cas #i. 
-      CNonces(tid, actor, 'client', <nonces>)@i & CIdentity(tid, actor, 'client', <peer,<cas,'auth'>>)@i &
-      not (Ex #r. RevLtk(peer)@r & #r < #i) &
-      not (Ex rms #r. RevealPSK(actor, rms)@r) &
-      not (Ex rms #r. RevealPSK(peer, rms)@r)
-          ==> (Ex tid2 #j. RNonces(tid2, peer, 'server', <nonces>)@j & #j < #i)"
+    "All tid actor peer nonces cas #i. 
+        CNonces(tid, actor, 'client', <nonces>)@i & CIdentity(tid, actor, 'client', <peer,<cas,'auth'>>)@i &
+        not (Ex #r. RevLtk(peer)@r & #r < #i) &
+        not (Ex rms #r. RevealPSK(actor, rms)@r) &
+        not (Ex rms #r. RevealPSK(peer, rms)@r)
+    ==> (Ex tid2 #j. RNonces(tid2, peer, 'server', <nonces>)@j & #j < #i)"
 
 lemma transcript_agreement [reuse]:
-  "All tid actor peer transcript cas #i.
-      CTranscript(tid, actor, 'client', <transcript>)@i & CIdentity(tid, actor, 'client', <peer,<cas,'auth'>>)@i &
-      not (Ex #r. RevLtk(peer)@r & #r < #i) &
-      not (Ex rms #r. RevealPSK(actor, rms)@r) &
-      not (Ex rms #r. RevealPSK(peer, rms)@r)
-          ==> (Ex tid2 #j. RTranscript(tid2, peer, 'server', <transcript>)@j & #j < #i)"
+    "All tid actor peer transcript cas #i.
+        CTranscript(tid, actor, 'client', <transcript>)@i & CIdentity(tid, actor, 'client', <peer,<cas,'auth'>>)@i &
+        not (Ex #r. RevLtk(peer)@r & #r < #i) &
+        not (Ex rms #r. RevealPSK(actor, rms)@r) &
+        not (Ex rms #r. RevealPSK(peer, rms)@r)
+    ==> (Ex tid2 #j. RTranscript(tid2, peer, 'server', <transcript>)@j & #j < #i)"
 
 lemma mutual_entity_authentication [reuse, use_induction]:
     "All tid actor peer nonces sas #i.
