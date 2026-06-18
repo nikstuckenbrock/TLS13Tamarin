@@ -95,7 +95,17 @@ lemma mutual_transcript_agreement [reuse]:
         not (Ex rms #r. RevealPSK(peer, rms)@r)
     ==> (Ex tid2 #j. RTranscript(tid2, peer, 'client', <transcript>)@j & #j < #i)"
 
-lemma injective_mutual_entity_authentication [reuse, hide_lemma=posths_rms]:
+tactic: injectiveMutualEntityAuthentication
+prio:
+    regex "CNonces"
+prio:
+    regex "CIdentity"
+prio:
+    regex "(?s).*RevLtk.*RevDHExp.*RevDHExp.*RevealPSK.*RevealPSK.*.RNonces.*"
+prio:
+    regex "(?s).*RevLtk.*RevDHExp.*RevDHExp.*RevealPSK.*RevealPSK.*.RTranscript.*"
+
+lemma injective_mutual_entity_authentication [reuse,hide_lemma=posths_rms,heuristic={injectiveMutualEntityAuthentication}]:
     "All tid actor peer role nonces aas #i.
         CNonces(tid, actor, role, <nonces>)@i & CIdentity(tid, actor, role, <peer,<aas,'auth'>>)@i &
         not (Ex #r. RevLtk(peer)@r & #r < #i) &
