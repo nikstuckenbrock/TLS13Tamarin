@@ -76,12 +76,16 @@ rule message_in_to_in:
 #include "lemmas/lemmas.splib"
 #endif
 
-#ifdef extendedKeyUpdate
+#ifdef extendedKeyUpdate & not reachability
 #include "lemmas/uniqueness.splib"
 #include "lemmas/invariants.splib"
 #include "lemmas/secretHelpers.splib"
 #include "lemmas/authHelpers.splib"
 #include "lemmas/lemmas.splib"
+#include "lemmas/extendedKeyUpdate.splib"
+#endif
+
+#ifdef extendedKeyUpdate & reachability
 #include "lemmas/extendedKeyUpdate.splib"
 #endif
 
