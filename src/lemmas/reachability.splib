@@ -2,6 +2,8 @@ tactic: reachability
 presort: i
 deprio:
     regex "splitEqs"
+deprio:
+    regex "ServerState\( ~tid, 'S4'.*'1'.*'0'\)"
 
 lemma exists_C0 [heuristic={reachability}]: exists-trace
     "Ex tid #i. C0(tid)@i"
