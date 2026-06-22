@@ -14,9 +14,9 @@
         "reachability": {
             "theory_file": "src/tls13.spthy",
             "resources": {
-                "max_cores": 24,
-                "max_memory": 500,
-                "timeout": 48000
+                "max_cores": 4,
+                "max_memory": 100,
+                "timeout": 14000
             },
             "output_file_prefix": "reachability",
             "preprocess_flags": [
