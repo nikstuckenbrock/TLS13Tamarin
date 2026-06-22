@@ -16,7 +16,7 @@
             "resources": {
                 "max_cores": 24,
                 "max_memory": 500,
-                "timeout": 14000
+                "timeout": 48000
             },
             "preprocess_flags": [
                 "extendedKeyUpdate"
