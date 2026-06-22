@@ -43,7 +43,8 @@ rule client_hello_psk:
         Start(~nc, $C, 'client'),
         RPSK(~nc, $C, 'client', <$S, res_psk, auth_status>),
         Neq(res_psk, '0'),
-        GoodKey(opaue)
+        GoodKey(opaue),
+        GenKemEphemeral(~nc, $C, ~x)
     ]->
     [
         ClientState(

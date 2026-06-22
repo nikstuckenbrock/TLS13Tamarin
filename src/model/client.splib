@@ -23,7 +23,8 @@ rule client_hello:
         Start(~nc, $C, 'client'),
         RIdentity(~nc, $C, 'client', <$C>),
         Neq($g1, $g2),
-        GoodKey(opaque)
+        GoodKey(opaque),
+        GenKemEphemeral(~nc, $C, ~secretKey)
     ]->
     [
         ClientState(

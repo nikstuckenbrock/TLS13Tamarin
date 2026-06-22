@@ -46,7 +46,8 @@ rule extended_key_update_request_client[color=#340068]:
     --[
         ExtendedKeyUpdateRequestClient(~tid),
         Instance(~tid, $C, 'client'),
-        GoodKey(~x)
+        GoodKey(opaque),
+        GenKemEphemeral(~tid, $C, ~x)
     ]->
     [
         C4_Extended_Key_Update(~tid, 'EKU0', $C, $S, ~x, opaque, '0', <request>),
