@@ -28,10 +28,6 @@ lemma exists_eku_with_post_handshake_auth [heuristic={reachability}]: exists-tra
         S4_cert(tid)@j  &
         #i < #j"
 
-/**
-* This section contains reachability/executability lemmas to sanity check the protocol execution workflow.
-* This group of lemmas is related to an execution initiated by the server.
-*/
 #endif
 
 /**
@@ -44,10 +40,10 @@ lemma exists_eku_with_post_handshake_auth [heuristic={reachability}]: exists-tra
 
 lemma secrecy:
     "All tid actor peer auth_status message writeKey receiveKey #t #u.
-            SendData(tid, actor, peer, auth_status, message)@t &
-            SessionKey(tid, actor, peer, auth_status, <writeKey, receiveKey>)@u
-        ==>
-            not (Ex #x. K(message)@x)"
+        SendData(tid, actor, peer, auth_status, message, writeKey)@t &
+        SessionKey(tid, actor, peer, auth_status, <writeKey, receiveKey>)@u
+    ==>
+        not (Ex #x. K(message)@x)"
 
 /**
     not (Ex #r. RevLtk(peer)@r & #r < #i) &
