@@ -14,7 +14,7 @@
         "invariants": {
             "theory_file": "src/tls13.spthy",
             "resources": {
-                "max_cores": 24,
+                "max_cores": 4,
                 "max_memory": 200,
                 "timeout": 7200
             },
@@ -34,6 +34,12 @@
                 },
                 {
                     "name": "tid_invariant"
+                },
+                {
+                    "name": "cert_req_origin"
+                },
+                {
+                    "name": "nst_source"
                 }
             ]
         }
