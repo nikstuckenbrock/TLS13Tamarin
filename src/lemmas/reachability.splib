@@ -5,6 +5,15 @@ deprio:
 deprio:
     regex "ServerState\( ~tid, 'S4'.*'1'.*'0'\)"
 
+tactic: reachabilityPsk
+presort: i
+prio:
+    regex "splitEqs"
+prio:
+    regex "F_MessageIn\( <'1', '0x0303'.*Expand\(Expand"
+prio:
+    regex "!ServerPSK"
+
 lemma exists_C0 [heuristic={reachability}]: exists-trace
     "Ex tid #i. C0(tid)@i"
 
@@ -68,7 +77,7 @@ lemma exists_S3 [heuristic={reachability}]: exists-trace
 lemma exists_S3_cert [heuristic={reachability}]: exists-trace
     "Ex tid #i. S3_cert(tid)@i"
 
-lemma exists_S0_PSK [heuristic={reachability}]: exists-trace
+lemma exists_S0_PSK [heuristic={reachabilityPsk}]: exists-trace
     "Ex tid #i. S0_PSK(tid)@i"
 
 lemma exists_S1_PSK [heuristic={reachability}]: exists-trace
@@ -89,6 +98,7 @@ lemma exists_S2d_PSK [heuristic={reachability}]: exists-trace
 lemma exists_C2d_PSK [heuristic={reachability}]: exists-trace
     "Ex tid #i. C2d_PSK(tid)@i"
 
+// TODO: This ones problematic because it does use the loop, maybe there is another way to automate
 lemma exists_S4_NST [heuristic={reachability}]: exists-trace
     "Ex tid #i. S4_NST(tid)@i"
 
