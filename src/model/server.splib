@@ -325,7 +325,8 @@ rule server_hello:
             p_extended_key_update_running,
             p_phs_auth_running
         ),
-        MessageOut(message)
+        MessageOut(message),
+        !KEMEphermeralKey(~tid, $S, ~k)
     ]
 
 rule server_gen_keys:
