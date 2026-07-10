@@ -5,27 +5,33 @@
 */
 
 lemma exists_extended_key_update_request_client [heuristic={reachability}]: exists-trace
-    "Ex tid #i. ExtendedKeyUpdateRequestClient(tid)@i"
+    "Ex tid identity #i.
+        ExtendedKeyUpdateRequestClient(tid, identity)@i"
 
 lemma exists_extended_key_update_request_client_receive [heuristic={reachability}]: exists-trace
-    "Ex tid #i. ExtendedKeyUpdateRequestClientReceive(tid)@i"
+    "Ex tid identity #i.
+        ExtendedKeyUpdateRequestClientReceive(tid, identity)@i"
 
 lemma exists_extended_key_update_response_server [heuristic={reachability}]: exists-trace
-    "Ex tid #i. ExtendedKeyUpdateResponseServer(tid)@i"
+    "Ex tid #i.
+        ExtendedKeyUpdateResponseServer(tid, identity)@i"
 
 lemma exists_extended_key_update_response_server_receive [heuristic={reachability}]: exists-trace
-    "Ex tid #i. ExtendedKeyUpdateResponseServerReceive(tid)@i"
+    "Ex tid identity #i.
+        ExtendedKeyUpdateResponseServerReceive(tid, identity)@i"
 
 lemma exists_extended_key_update_finish_client [heuristic={reachability}]: exists-trace
-    "Ex tid #i. ExtendedKeyUpdateFinishClient(tid)@i"
+    "Ex tid identity #i.
+        ExtendedKeyUpdateFinishClient(tid, identity)@i"
 
 lemma exists_extended_key_update_finish_client_receive [heuristic={reachability}]: exists-trace
-    "Ex tid #i. ExtendedKeyUpdateFinishClientReceive(tid)@i"
+    "Ex tid identity #i.
+        ExtendedKeyUpdateFinishClientReceive(tid, identity)@i"
 
 lemma exists_eku_with_post_handshake_auth [heuristic={reachability}]: exists-trace
-    "Ex tid #i #j.
-        ExtendedKeyUpdateFinishClientReceive(tid)@i &
-        S4_cert(tid)@j  &
+    "Ex tid identity #i #j.
+        ExtendedKeyUpdateFinishClientReceive(tid, identity)@i &
+        S4_cert(tid)@j &
         #i < #j"
 
 #endif
@@ -38,32 +44,150 @@ lemma exists_eku_with_post_handshake_auth [heuristic={reachability}]: exists-tra
 * For each data send, the adversary doesn't know the data.
 */
 
-lemma secrecy:
-    "All tid actor peer auth_status message writeKey receiveKey #t #u.
+/** 
+ * To avoid looping, this auxilary lemma should help Tamarin.
+ * Every updates requires a session start beforehand.
+ */
+lemma start_before_eku_request_client [reuse]:
+    "All tid identity #t.
+        ExtendedKeyUpdateRequestClient(tid, identity)@t
+    ==> Ex #x. Start(tid, identity, 'client')@x & #x < #t"
+
+lemma start_before_eku_request_client_receive [reuse]:
+    "All tid identity #t.
+        ExtendedKeyUpdateRequestClientReceive(tid, identity)@t
+    ==> Ex #x. Start(tid, identity, 'server')@x & #x < #t"
+
+lemma start_before_eku_response_server [reuse]:
+    "All tid identity #t.
+        ExtendedKeyUpdateResponseServer(tid, identity)@t
+    ==> Ex #x. Start(tid, identity, 'server')@x & #x < #t"
+
+lemma start_before_eku_response_server_receive [reuse]:
+    "All tid identity #t.
+        ExtendedKeyUpdateResponseServerReceive(tid, identity)@t
+    ==> Ex #x. Start(tid, identity, 'client')@x & #x < #t"
+
+lemma start_before_eku_finish_client [reuse]:
+    "All tid identity #t.
+        ExtendedKeyUpdateFinishClient(tid, identity)@t
+    ==> Ex #x. Start(tid, identity, 'client')@x & #x < #t"
+
+lemma start_before_eku_finish_client_receive [reuse]:
+    "All tid identity #t.
+        ExtendedKeyUpdateFinishClientReceive(tid, identity)@t
+    ==> Ex #x. Start(tid, identity, 'server')@x & #x < #t"
+
+lemma start_before_post_request [reuse]:
+    "All tid identity context #t.
+        RCertReqCtxt(tid, identity, 'server', context)@t
+    ==> Ex #x. Start(tid, identity, 'server')@x & #x < #t"
+
+lemma start_before_post_request_recv [reuse]:
+    "All tid identity #t.
+        C4_req(tid)@t &
+        Instance(tid, identity, 'client')@t
+    ==> Ex #x. Start(tid, identity, 'client')@x & #x < #t"
+
+lemma start_before_post_client_auth [reuse]:
+    "All tid identity context #t.
+        RTranscriptPost(tid, identity, 'client', context)@t
+    ==> Ex #x. Start(tid, identity, 'client')@x & #x < #t"
+
+lemma start_before_post_client_auth_recv [reuse]:
+    "All tid identity context #t.
+        CTranscriptPost(tid, identity, 'server', context)@t
+    ==> Ex #x. Start(tid, identity, 'server')@x & #x < #t"
+
+lemma start_before_eku_main_secret [reuse,use_induction,hide_lemma=sig_origin,hide_lemma=posths_rms_weak,hide_lemma=auth_psk,hide_lemma=matching_sessions]:
+    "All tid identity kemPublicKey main_secret_n main_secret_n_1 #t.
+        EKUMainSecret(tid, identity, kemPublicKey, main_secret_n, main_secret_n_1)@t
+    ==> Ex #x. Start(tid, identity, 'server')@x & #x < #t"
+
+/**
+ * If the starting key is the same, then they must agree on the new updated key.
+ * Related key material is not leaked.
+ */
+tactic: keyAgreement
+presort: i
+prio:
+    regex "Start"
+prio:
+    regex "EKUMainSecret"
+prio:
+    regex "C4_Extended_Key_Update"
+prio:
+    regex "S4_Extended_Key_Update"
+prio:
+    regex "ClientPSK"
+
+lemma eku_key_agreement [reuse,hide_lemma=sig_origin,hide_lemma=posths_rms_weak,hide_lemma=auth_psk,hide_lemma=matching_sessions]:
+    "All tid tid2 initiator responder kemPublicKey main_secret_n master_secret_n_1_initiator master_secret_n_1_responder #s #t.
+        EKUMainSecret(tid, initiator, kemPublicKey, main_secret_n, master_secret_n_1_initiator)@t &
+        EKUMainSecret(tid2, responder, kemPublicKey, main_secret_n, master_secret_n_1_responder)@s
+    ==> master_secret_n_1_initiator = master_secret_n_1_responder"
+// muss nich vorher schon eine sichere session bestehen?!
+    // |
+//        (Ex key #x. RevealKemEphermeral(tid, initiator, kemPublicKey)@x)
+
+// cases in implication
+// post handshake auth
+
+// notes
+// encaps depiro
+// start prio
+// EKUMainSecret prio
+
+/**
+ * If the adversary knows a key established using an EKU, the adversary must now the old key and the private KEM part.
+ */
+lemma eku_main_secret_secrecy [reuse]:
+    "All tid actor kemPublicKey main_secret_n main_secret_n_1 #t.
+        EKUMainSecret(tid, actor, kemPublicKey, main_secret_n, main_secret_n_1)@t
+    ==> (
+            ( not Ex #x. KU(main_secret_n_1)@x )
+            | (Ex #x. RevealKemEphermeral(tid, actor, kemPublicKey)@x & KU(main_secret_n)@x)
+        )"
+
+/**
+ * Should be trivial, because all keys depend on the main secret.
+ */
+lemma eku_derived_secrets_and_keys_secrecy [reuse]:
+    "All tid main_secret cats sats es rms catk satk #t.
+        EKUDerivate(tid, main_secret, cats, sats, es, rms, catk, satk)@t
+    ==> (
+            (
+                not Ex #x. KU(cats)@x &
+                not Ex #x. KU(sats)@x &
+                not Ex #x. KU(es)@x &
+                not Ex #x. KU(rms)@x &
+                not Ex #x. KU(catk)@x &
+                not Ex #x. KU(satk)@x
+            )
+            | Ex #x. KU(main_secret)@x
+        )
+    "
+
+/**
+lemma message_secrecy:
+    "All tid actor peer auth_status pas message master_secret writeKey receiveKey #t #u.
         SendData(tid, actor, peer, auth_status, message, writeKey)@t &
         SessionKey(tid, actor, peer, auth_status, <writeKey, receiveKey>)@u
     ==>
-        not (Ex #x. K(message)@x)"
-
-/**
-    not (Ex #r. RevLtk(peer)@r & #r < #i) &
-    not (Ex tid3 x #r. RevDHExp(tid3, peer, x)@r & #r < #i) &
-    not (Ex tid4 y #r. RevDHExp(tid4, actor, y)@r & #r < #i) &
-    not (Ex rms #r. RevealPSK(actor, rms)@r & #r < #i) &
-    not (Ex rms #r. RevealPSK(peer, rms)@r & #r < #i) &
-*/
-
-/**
-* For each individual extended key update both parties agree on the same keys,
-* if a post handshake authentication was successfull.
-*/
-
-/**
-* For reach new message after the schedule the adversary does not know the key,
-* if the key itself or its components where not revealed.
-* Refers to post compromise security.
-*/
-
-/**
-*- vllt. gleich mal den anderen beweis herunterladen und versuchen den nachzubilden
+        not (Ex #x. K(message)@x) |
+        // case no key update
+        (
+            not (Ex #x. ExtendedKeyUpdateFinishClient(tid)@x & #t < #x) &
+            (
+                // TODO!
+                (Ex #r. RevLtk(peer)@r & #r < #u & auth_status = <pas, 'auth'>) | 
+                (Ex rms #x. RevealPSK(actor, rms)@x) |
+                (Ex rms #x. RevealPSK(peer, rms)@x) |
+                (Ex #x. RevealKemEphermeral(tid, actor, ephermeral_component)@x) // TODO: bind/map ephermeral key to first session
+        ) |
+        // case key updated
+        (
+            Ex #x. ExtendedKeyUpdateFinishClient(tid)@x & #t < #x) &
+            Ex #x. RevealKemEphermeral(tid, actor, ephermeral_component)@x // TODO: bind/map ephermeral key to sendata
+        )"
 */

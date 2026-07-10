@@ -84,7 +84,7 @@ rule client_hello_psk:
         F_CachePSK(~nc, $S, res_psk, auth_status, <'4', $ticket_lifetime, ticket_age_add, ticket, <<'46',$max_early_data_size>> >,psk_type),
         EarlySendStream(~nc, $C, $S, auth_status, ead_keyc, edi),
         MessageOut(message),
-        !KEMEphermeralKey(~nc, $C, ~x)
+        !KEMEphermeralKey(~nc, $C, opaue, ~x)
     ]
 
 rule recv_hello_retry_request_psk:

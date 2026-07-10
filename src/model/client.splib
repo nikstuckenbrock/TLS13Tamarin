@@ -61,7 +61,7 @@ rule client_hello:
             ExtendedKeyUpdateNotRunning(),
             PostHandshakeAuthenticationNotRunning()
         ),
-        !KEMEphermeralKey(~nc, $C, ~secretKey),
+        !KEMEphermeralKey(~nc, $C, opaque, ~secretKey),
         MessageOut(message)
     ]
 

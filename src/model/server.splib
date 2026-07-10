@@ -326,7 +326,7 @@ rule server_hello:
             p_phs_auth_running
         ),
         MessageOut(message),
-        !KEMEphermeralKey(~tid, $S, ~k)
+        !KEMEphermeralKey(~tid, $S, p_gx, ~k)
     ]
 
 rule server_gen_keys:
@@ -377,7 +377,7 @@ rule server_gen_keys:
         Extract('0', handshakeSecret),
         Instance(~tid, $S, 'server'),
         RHS(~tid, $S, 'server', <handshakeSecret>),
-        RMS(~tid, $S, 'server', <masterSecret>),
+        RMS(~tid, $S, 'server', <masterSecret>)
     ]->
     [
         ServerState(
