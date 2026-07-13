@@ -100,9 +100,58 @@ lemma start_before_post_client_auth_recv [reuse]:
     ==> Ex #x. Start(tid, identity, 'server')@x & #x < #t"
 
 lemma start_before_eku_main_secret [reuse,use_induction,hide_lemma=sig_origin,hide_lemma=posths_rms_weak,hide_lemma=auth_psk,hide_lemma=matching_sessions]:
-    "All tid identity kemPublicKey main_secret_n main_secret_n_1 #t.
+    "All tid identity role kemPublicKey main_secret_n main_secret_n_1 #t.
+        Instance(tid, identity, role)@t &
         EKUMainSecret(tid, identity, kemPublicKey, main_secret_n, main_secret_n_1)@t
-    ==> Ex #x. Start(tid, identity, 'server')@x & #x < #t"
+    ==> Ex #x. Start(tid, identity, role)@x & #x < #t"
+
+/**
+ * Characterizes where the main secret currently held in a client's 'C4' state can come from:
+ * either it is the original handshake master secret (RHSMS, set once at the C3->C4 transition),
+ * or it is the output of an earlier EKUMainSecret derivation. All other 'C4' rules leave p_ms
+ * untouched, so the induction step just carries the invariant through unchanged.
+ * This avoids forcing Tamarin to case-split ClientState's raw sources (which range over every
+ * post-handshake sub-protocol rule, not just the EKU ones) when resolving eku_key_agreement.
+ */
+tactic: ekuMsOrigin
+presort: i
+prio:
+    regex "RHSMS"
+prio:
+    regex "EKUMainSecret"
+deprio:
+    regex "L_ClientCertReq|L_ServerCertReq|RCertReqCtxt"
+
+lemma eku_ms_state_origin_client [reuse, use_induction, heuristic={ekuMsOrigin}]:
+    "All tid actor peer res_psk messages nc ns g sg hrr x y gx gy gxy
+        psk_ke_mode psk_id edi es hs ms cats sats hs_keyc hs_keys
+        auth_status ems rms cert_req eku_running phs_running #t.
+        ClientState(tid, 'C4', actor, peer, res_psk, messages, nc, ns, g, sg,
+            hrr, x, y, gx, gy, gxy, psk_ke_mode, psk_id, edi, es, hs, ms,
+            cats, sats, hs_keyc, hs_keys, auth_status, ems, rms, cert_req,
+            eku_running, phs_running)@t
+    ==>
+        (Ex #x. RHSMS(tid, actor, 'client', <hs, ms>)@x & (#x < #t | #x = #t))
+        |
+        (Ex kemPublicKey ms_prev #x.
+            EKUMainSecret(tid, actor, kemPublicKey, ms_prev, ms)@x & (#x < #t | #x = #t))"
+
+/**
+ * Server-side counterpart of eku_ms_state_origin_client.
+ */
+lemma eku_ms_state_origin_server [reuse, use_induction, heuristic={ekuMsOrigin}]:
+    "All tid actor peer res_psk messages nc ns g sg hrr x y gx gy gxy
+        psk_ke_mode psk_id edi es hs ms cats sats hs_keyc hs_keys
+        auth_status ems rms cert_req eku_running phs_running #t.
+        ServerState(tid, 'S4', actor, peer, res_psk, messages, nc, ns, g, sg,
+            hrr, x, y, gx, gy, gxy, psk_ke_mode, psk_id, edi, es, hs, ms,
+            cats, sats, hs_keyc, hs_keys, auth_status, ems, rms, cert_req,
+            eku_running, phs_running)@t
+    ==>
+        (Ex #x. RHSMS(tid, actor, 'server', <hs, ms>)@x & (#x < #t | #x = #t))
+        |
+        (Ex kemPublicKey ms_prev #x.
+            EKUMainSecret(tid, actor, kemPublicKey, ms_prev, ms)@x & (#x < #t | #x = #t))"
 
 /**
  * If the starting key is the same, then they must agree on the new updated key.
@@ -113,6 +162,8 @@ presort: i
 prio:
     regex "Start"
 prio:
+    regex "RHSMS"
+prio:
     regex "EKUMainSecret"
 prio:
     regex "C4_Extended_Key_Update"
@@ -120,8 +171,12 @@ prio:
     regex "S4_Extended_Key_Update"
 prio:
     regex "ClientPSK"
+deprio:
+    regex "ClientState|ServerState"
+deprio:
+    regex "client_auth_case|client_auth_cert_case|L_ClientCertReq|L_ServerCertReq|RCertReqCtxt"
 
-lemma eku_key_agreement [reuse,hide_lemma=sig_origin,hide_lemma=posths_rms_weak,hide_lemma=auth_psk,hide_lemma=matching_sessions]:
+lemma eku_key_agreement [reuse,use_induction,heuristic={keyAgreement},hide_lemma=sig_origin,hide_lemma=posths_rms_weak,hide_lemma=auth_psk,hide_lemma=matching_sessions,hide_lemma=posths_rms]:
     "All tid tid2 initiator responder kemPublicKey main_secret_n master_secret_n_1_initiator master_secret_n_1_responder #s #t.
         EKUMainSecret(tid, initiator, kemPublicKey, main_secret_n, master_secret_n_1_initiator)@t &
         EKUMainSecret(tid2, responder, kemPublicKey, main_secret_n, master_secret_n_1_responder)@s

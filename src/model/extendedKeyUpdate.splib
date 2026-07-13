@@ -437,11 +437,11 @@ rule extended_key_update_finish_client[color=#340068]:
     --[
         ExtendedKeyUpdateFinishClient(~tid, $C),
         Decaps(~k, gy, kem_pk(~x), ~x),
+        Instance(~tid, $C, 'client'),
         SessionKey(~tid, $C, $S, <'0', '0'>, <client_application_traffic_key, server_application_traffic_key>),
         EKUMainSecret(~tid, $C, kem_pk(~x), p_ms, main_secret_n_1)
     ]->
     [
-        C4_Extended_Key_Update(~tid, 'EKU0', $C, $S, ~x, gy, '0', <request, response, finish>),
         SendStream(~tid, $C, $S, p_auth_status, client_application_traffic_key),
         RecvStream(~tid, $C, $S, p_auth_status, server_application_traffic_key),
         MessageOut(senc{finish}applicationTrafficKeyClient),
@@ -529,7 +529,6 @@ rule extended_key_update_finish_client_receive[color=#EA3788]:
         ExtendedKeyUpdateFinishClientReceive(~tid, $S)
     ]->
     [
-        S4_Extended_Key_Update(~tid, 'EKU0', $S, $C, y, gx, <request, response>),
         RecvStream(~tid, $S, $C, p_auth_status, p_app_keyc),
         ServerState(
             ~tid,
