@@ -1,14 +1,16 @@
 rule send:
-    [ SendStream(~tid, $actor, $peer, auth_status, app_key_out)
-    , Fr(~data) ]
+    [ SendStream(~tid, ~sendStreamId, $actor, $peer, auth_status, app_key_out)
+    , Fr(~data)
+    , Fr(~newSendStreamId) ]
     --[ Send(~tid)
       , SendData(~tid, $actor, $peer, auth_status, ~data, app_key_out) ]->
-    [ SendStream(~tid, $actor, $peer, auth_status, app_key_out)
+    [ SendStream(~tid, ~newSendStreamId, $actor, $peer, auth_status, app_key_out)
     , MessageOut(senc{DataRecord(~data)}app_key_out) ]
 
 rule recv:
-    [ RecvStream(~tid, $actor, $peer, auth_status, app_key_in)
-    , F_MessageIn(senc{DataRecord(data)}app_key_in) ]
+    [ RecvStream(~tid, ~recvStreamId, $actor, $peer, auth_status, app_key_in)
+    , F_MessageIn(senc{DataRecord(data)}app_key_in)
+    , Fr(~newRecvStreamId) ]
     --[ Recv(~tid)
       , RecvData(~tid, $actor, $peer, auth_status, data) ]->
-    [ RecvStream(~tid, $actor, $peer, auth_status, app_key_in) ]
+    [ RecvStream(~tid, ~newRecvStreamId, $actor, $peer, auth_status, app_key_in) ]

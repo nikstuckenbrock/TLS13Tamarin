@@ -13,7 +13,7 @@ lemma exists_extended_key_update_request_client_receive [heuristic={reachability
         ExtendedKeyUpdateRequestClientReceive(tid, identity)@i"
 
 lemma exists_extended_key_update_response_server [heuristic={reachability}]: exists-trace
-    "Ex tid #i.
+    "Ex tid identity #i.
         ExtendedKeyUpdateResponseServer(tid, identity)@i"
 
 lemma exists_extended_key_update_response_server_receive [heuristic={reachability}]: exists-trace
@@ -28,11 +28,43 @@ lemma exists_extended_key_update_finish_client_receive [heuristic={reachability}
     "Ex tid identity #i.
         ExtendedKeyUpdateFinishClientReceive(tid, identity)@i"
 
+lemma exists_extended_key_update_request_server [heuristic={reachability}]: exists-trace
+    "Ex tid identity #i.
+        ExtendedKeyUpdateRequestServer(tid, identity)@i"
+
+lemma exists_extended_key_update_request_server_receive [heuristic={reachability}]: exists-trace
+    "Ex tid identity #i.
+        ExtendedKeyUpdateRequestServerReceive(tid, identity)@i"
+
+lemma exists_extended_key_update_response_client [heuristic={reachability}]: exists-trace
+    "Ex tid identity #i.
+        ExtendedKeyUpdateResponseClient(tid, identity)@i"
+
+lemma exists_extended_key_update_response_client_receive [heuristic={reachability}]: exists-trace
+    "Ex tid identity #i.
+        ExtendedKeyUpdateResponseClientReceive(tid, identity)@i"
+
+lemma exists_extended_key_update_finish_server [heuristic={reachability}]: exists-trace
+    "Ex tid identity #i.
+        ExtendedKeyUpdateFinishServer(tid, identity)@i"
+
+lemma exists_extended_key_update_finish_server_receive [heuristic={reachability}]: exists-trace
+    "Ex tid identity #i.
+        ExtendedKeyUpdateFinishServerReceive(tid, identity)@i"
+
 lemma exists_eku_with_post_handshake_auth [heuristic={reachability}]: exists-trace
     "Ex tid identity #i #j.
         ExtendedKeyUpdateFinishClientReceive(tid, identity)@i &
         S4_cert(tid)@j &
         #i < #j"
+
+lemma exists_eku_race_condition_server_wins [heuristic={reachability}]: exists-trace
+    "Ex #j.
+        ExtendedKeyUpdateRaceConditionServerWins()@j"
+
+lemma exists_eku_race_condition_client_wins [heuristic={reachability}]: exists-trace
+    "Ex #j.
+        ExtendedKeyUpdateRaceConditionClientWins()@j"
 
 #endif
 
@@ -106,54 +138,6 @@ lemma start_before_eku_main_secret [reuse,use_induction,hide_lemma=sig_origin,hi
     ==> Ex #x. Start(tid, identity, role)@x & #x < #t"
 
 /**
- * Characterizes where the main secret currently held in a client's 'C4' state can come from:
- * either it is the original handshake master secret (RHSMS, set once at the C3->C4 transition),
- * or it is the output of an earlier EKUMainSecret derivation. All other 'C4' rules leave p_ms
- * untouched, so the induction step just carries the invariant through unchanged.
- * This avoids forcing Tamarin to case-split ClientState's raw sources (which range over every
- * post-handshake sub-protocol rule, not just the EKU ones) when resolving eku_key_agreement.
- */
-tactic: ekuMsOrigin
-presort: i
-prio:
-    regex "RHSMS"
-prio:
-    regex "EKUMainSecret"
-deprio:
-    regex "L_ClientCertReq|L_ServerCertReq|RCertReqCtxt"
-
-lemma eku_ms_state_origin_client [reuse, use_induction, heuristic={ekuMsOrigin}]:
-    "All tid actor peer res_psk messages nc ns g sg hrr x y gx gy gxy
-        psk_ke_mode psk_id edi es hs ms cats sats hs_keyc hs_keys
-        auth_status ems rms cert_req eku_running phs_running #t.
-        ClientState(tid, 'C4', actor, peer, res_psk, messages, nc, ns, g, sg,
-            hrr, x, y, gx, gy, gxy, psk_ke_mode, psk_id, edi, es, hs, ms,
-            cats, sats, hs_keyc, hs_keys, auth_status, ems, rms, cert_req,
-            eku_running, phs_running)@t
-    ==>
-        (Ex #x. RHSMS(tid, actor, 'client', <hs, ms>)@x & (#x < #t | #x = #t))
-        |
-        (Ex kemPublicKey ms_prev #x.
-            EKUMainSecret(tid, actor, kemPublicKey, ms_prev, ms)@x & (#x < #t | #x = #t))"
-
-/**
- * Server-side counterpart of eku_ms_state_origin_client.
- */
-lemma eku_ms_state_origin_server [reuse, use_induction, heuristic={ekuMsOrigin}]:
-    "All tid actor peer res_psk messages nc ns g sg hrr x y gx gy gxy
-        psk_ke_mode psk_id edi es hs ms cats sats hs_keyc hs_keys
-        auth_status ems rms cert_req eku_running phs_running #t.
-        ServerState(tid, 'S4', actor, peer, res_psk, messages, nc, ns, g, sg,
-            hrr, x, y, gx, gy, gxy, psk_ke_mode, psk_id, edi, es, hs, ms,
-            cats, sats, hs_keyc, hs_keys, auth_status, ems, rms, cert_req,
-            eku_running, phs_running)@t
-    ==>
-        (Ex #x. RHSMS(tid, actor, 'server', <hs, ms>)@x & (#x < #t | #x = #t))
-        |
-        (Ex kemPublicKey ms_prev #x.
-            EKUMainSecret(tid, actor, kemPublicKey, ms_prev, ms)@x & (#x < #t | #x = #t))"
-
-/**
  * If the starting key is the same, then they must agree on the new updated key.
  * Related key material is not leaked.
  */
@@ -177,21 +161,11 @@ deprio:
     regex "client_auth_case|client_auth_cert_case|L_ClientCertReq|L_ServerCertReq|RCertReqCtxt"
 
 lemma eku_key_agreement [reuse,use_induction,heuristic={keyAgreement},hide_lemma=sig_origin,hide_lemma=posths_rms_weak,hide_lemma=auth_psk,hide_lemma=matching_sessions,hide_lemma=posths_rms]:
-    "All tid tid2 initiator responder kemPublicKey main_secret_n master_secret_n_1_initiator master_secret_n_1_responder #s #t.
-        EKUMainSecret(tid, initiator, kemPublicKey, main_secret_n, master_secret_n_1_initiator)@t &
-        EKUMainSecret(tid2, responder, kemPublicKey, main_secret_n, master_secret_n_1_responder)@s
-    ==> master_secret_n_1_initiator = master_secret_n_1_responder"
-// muss nich vorher schon eine sichere session bestehen?!
-    // |
-//        (Ex key #x. RevealKemEphermeral(tid, initiator, kemPublicKey)@x)
-
-// cases in implication
-// post handshake auth
-
-// notes
-// encaps depiro
-// start prio
-// EKUMainSecret prio
+    "All tid tid2 initiator responder kem_public_key_initiator kem_public_key_received main_secret_n_initiator main_secret_n_responder main_secret_n_1 #s #t.
+        EKUMainSecret(tid, initiator, kem_public_key_initiator, main_secret_n_initiator, main_secret_n_1)@t &
+        EKUMainSecret(tid2, responder, kem_public_key_received, main_secret_n_responder, main_secret_n_1)@s
+    ==> main_secret_n_initiator = main_secret_n_responder &
+        kem_public_key_initiator = kem_public_key_received"
 
 /**
  * If the adversary knows a key established using an EKU, the adversary must now the old key and the private KEM part.
@@ -246,3 +220,95 @@ lemma message_secrecy:
             Ex #x. RevealKemEphermeral(tid, actor, ephermeral_component)@x // TODO: bind/map ephermeral key to sendata
         )"
 */
+
+
+// maybe something like
+// the adverasray can only know the previous master secret, if he has one or more of the floowing things
+//
+
+/**
+* Passive attacker implies both parties agreed on the same keys, requiring a correct protocol model.
+* After both parties agreed on a key, the adversary can only know a message sent by the updated key, if he knows all three components:
+* - Handshake private part (KEM)
+* - Certificate private server
+* - EKU private part (KEM)
+*/
+lemma passive_secrecy [hide_lemma=eku_derived_secrets_and_keys_secrecy,hide_lemma=eku_main_secret_secrecy,hide_lemma=eku_key_agreement,hide_lemma=sig_origin,hide_lemma=posths_rms_weak,hide_lemma=auth_psk,hide_lemma=matching_sessions,hide_lemma=posths_rms,hide_lemma=mutual_entity_authentication,hide_lemma=mutual_transcript_agreement,hide_lemma=injective_mutual_entity_authentication]:
+    "All tid tid2 actor peer auth message publicKemKey writeKey role1 role2 sharedKemKey #s #t #u #v.
+        SendData(tid, actor, peer, auth, message, writeKey)@s &
+        EKUWriteKeyDerivation(tid, actor, peer, writeKey, publicKemKey, sharedKemKey)@t &
+        EKUReadKeyDerivation(tid2, peer, actor, writeKey, publicKemKey, sharedKemKey)@u &
+        GoodKey(publicKemKey)@v &
+        Instance(tid, actor, role1)@t &
+        Instance(tid2, peer, role2)@u &
+        not (role1 = role2)
+    ==> not (Ex #x. K(message)@x) |
+        ( Ex #x. RevealKemEphermeral(tid, actor, publicKemKey)@x ) |
+        ( Ex #x. RevealKemEphermeral(tid2, peer, publicKemKey)@x )"
+
+/**
+lemma injective_mutual_entity_authentication [hide_lemma=eku_derived_secrets_and_keys_secrecy,hide_lemma=eku_main_secret_secrecy,hide_lemma=eku_key_agreement,hide_lemma=sig_origin,hide_lemma=posths_rms_weak,hide_lemma=auth_psk,hide_lemma=matching_sessions,hide_lemma=posths_rms,hide_lemma=mutual_entity_authentication,hide_lemma=mutual_transcript_agreement,hide_lemma=injective_mutual_entity_authentication]:
+    "All tid actor peer role hs rms aas messages #i.
+        RPostHS(tid, actor, role, <hs, rms, peer, <aas, 'auth'>, messages>)@i
+    ==> Ex role2 tid2 #j. RPostHS(tid2, peer, role2, <hs, rms, peer, <'auth', aas>, messages>)@j & #j < #i & not role = role2 &
+        (All tid3 peer2 #k. RPostHS(tid3, peer2, role2, <hs, rms, peer, <'auth', aas>, messages>)@k ==> #k = #j)"
+*/
+lemma injective_mutual_entity_authentication_breaks [hide_lemma=eku_derived_secrets_and_keys_secrecy,hide_lemma=eku_main_secret_secrecy,hide_lemma=eku_key_agreement,hide_lemma=sig_origin,hide_lemma=posths_rms_weak,hide_lemma=auth_psk,hide_lemma=matching_sessions,hide_lemma=posths_rms,hide_lemma=mutual_entity_authentication,hide_lemma=mutual_transcript_agreement,hide_lemma=injective_mutual_entity_authentication]:
+    "All tid tid2 actor peer role role2 key hs rms aas messages #i #j.
+        RPostHS(tid, actor, role, <hs, rms, peer, <'auth', aas>, messages>)@i &
+        RPostHS(tid2, peer, role2, <hs, rms, peer, <aas, 'auth'>, messages>)@j &
+        RPostHSKeyDeleteMe(tid2, peer, key)@j &
+        #j < #i &
+        not role = role2
+    ==> not (Ex #x. K(key)@x) |
+        ( Ex #x. RevLtk(actor)@x )"
+
+lemma secrecy:
+    "All tid actor peer auth message role publicKemKey writeKey sharedKemKey #s #t #u.
+        SendData(tid, actor, peer, auth, message, writeKey)@s &
+        WriteKeyDerivation(tid, actor, peer, writeKey, publicKemKey, sharedKemKey)@t &
+        Instance(tid, actor, role)@t &
+        GoodKey(publicKemKey)@u
+    ==> not (Ex #x. K(message)@x)
+        /**
+         * The peers private certificate must stay secret, otherwise attacker can intercept handshake authentication.
+         */
+        | (Ex #x. RevLtk(peer)@x & #x < #s)
+        /**
+         * The resumption master secrets must always stay secret, otherwise an attacker could resumpt a session.
+         */
+        | (Ex rms #x. RevealPSK(actor, rms)@x)
+        | (Ex rms #x. RevealPSK(peer, rms)@x)
+        /**
+         * The private parts of the key schedule related to the write key must stay secret, otherwise the attacker could learn the key.
+         */
+        | (Ex someTid someActor #x. RevealKemEphermeral(someTid, someActor, publicKemKey)@x )
+        
+        | (role = 'server' & not (Ex key #x #y. ServerReceivedKey(tid, actor, key)@x & GoodKey(key)@y))
+        "
+
+lemma server_message_secrecy:
+    "All tid actor peer auth message publicKemKey pas writeKey sharedKemKey #s #t #u #w.
+        SendData(tid, actor, peer, auth, message, writeKey)@s &
+        WriteKeyDerivation(tid, actor, peer, writeKey, publicKemKey, sharedKemKey)@t &
+        Instance(tid, actor, 'server')@t &
+        CIdentityPost(tid, actor, 'server', <<peer, <pas, 'auth'>>>)@w
+        GoodKey(publicKemKey)@u
+    ==> not (Ex #x. K(message)@x)
+        | (Ex #x. RevLtk(peer)@x & #x < #s)
+        | (Ex rms #x. RevealPSK(actor, rms)@x)
+        | (Ex rms #x. RevealPSK(peer, rms)@x)
+        | (Ex someTid someActor #x. RevealKemEphermeral(someTid, someActor, publicKemKey)@x )"
+
+
+lemma handshake_message_secrecy [hide_lemma=eku_derived_secrets_and_keys_secrecy,hide_lemma=eku_main_secret_secrecy,hide_lemma=eku_key_agreement,hide_lemma=sig_origin,hide_lemma=posths_rms_weak,hide_lemma=auth_psk,hide_lemma=matching_sessions,hide_lemma=posths_rms,hide_lemma=mutual_entity_authentication,hide_lemma=mutual_transcript_agreement,hide_lemma=injective_mutual_entity_authentication]:
+    "All tid actor peer message writeKey someAuth publicKemKey sharedKemKey #s #t.
+        SendData(tid, actor, peer, <someAuth, 'auth'>, message, writeKey)@s &
+        HandshakeWriteKeyDerivation(tid, actor, peer, writeKey, publicKemKey, sharedKemKey)@t &
+        not ((Ex someTid someIdentity #x. ExtendedKeyUpdateRequestClient(someTid, someIdentity)@x) 
+            | (Ex someTid someIdentity #x. ExtendedKeyUpdateRequestServer(someTid, someIdentity)@x))
+    ==> not (Ex #x. K(message)@x)
+        | (Ex #x. RevLtk(peer)@x & #x < #s)
+        | (Ex rms #x. RevealPSK(actor, rms)@x)
+        | (Ex rms #x. RevealPSK(peer, rms)@x)
+        | (Ex someTid someActor #x. RevealKemEphermeral(someTid, someActor, publicKemKey)@x )"

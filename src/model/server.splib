@@ -39,6 +39,7 @@ rule start_server:
             '0',
             '0',
             ExtendedKeyUpdateNotRunning(),
+            ExtendedKeyUpdateNotRunning(),
             PostHandshakeAuthenticationNotRunning()
         )
     ]
@@ -91,13 +92,15 @@ rule recv_client_hello:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running,
+            ExtendedKeyUpdateNotRunning(),
+            ExtendedKeyUpdateNotRunning(),
             p_phs_auth_running
         )
     ]
     --[
         S0(~tid),
-        Neq($g1, $g2)
+        Neq($g1, $g2),
+        ServerReceivedKey(~tid, $S, opaque)
     ]->
     [
         ServerState(
@@ -131,7 +134,8 @@ rule recv_client_hello:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running,
+            ExtendedKeyUpdateNotRunning(),
+            ExtendedKeyUpdateNotRunning(),
             p_phs_auth_running
         )
     ]
@@ -185,7 +189,8 @@ rule hello_retry_request:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running,
+            ExtendedKeyUpdateNotRunning(),
+            ExtendedKeyUpdateNotRunning(),
             p_phs_auth_running
         )
     ]
@@ -227,7 +232,8 @@ rule hello_retry_request:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running,
+            ExtendedKeyUpdateNotRunning(),
+            ExtendedKeyUpdateNotRunning(),
             p_phs_auth_running
         )
     ]
@@ -276,7 +282,8 @@ rule server_hello:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running,
+            ExtendedKeyUpdateNotRunning(),
+            ExtendedKeyUpdateNotRunning(),
             p_phs_auth_running
         ),
         Fr(~y),
@@ -322,11 +329,11 @@ rule server_hello:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running,
+            ExtendedKeyUpdateNotRunning(),
+            ExtendedKeyUpdateNotRunning(),
             p_phs_auth_running
         ),
-        MessageOut(message),
-        !KEMEphermeralKey(~tid, $S, p_gx, ~k)
+        MessageOut(message)
     ]
 
 rule server_gen_keys:
@@ -368,7 +375,8 @@ rule server_gen_keys:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running,
+            ExtendedKeyUpdateNotRunning(),
+            ExtendedKeyUpdateNotRunning(),
             p_phs_auth_running
        )
     ]
@@ -411,7 +419,8 @@ rule server_gen_keys:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running,
+            ExtendedKeyUpdateNotRunning(),
+            ExtendedKeyUpdateNotRunning(),
             p_phs_auth_running
         )
     ]
@@ -453,7 +462,8 @@ rule encrypted_extensions:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running,
+            ExtendedKeyUpdateNotRunning(),
+            ExtendedKeyUpdateNotRunning(),
             p_phs_auth_running
         )
     ]
@@ -493,7 +503,8 @@ rule encrypted_extensions:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running,
+            ExtendedKeyUpdateNotRunning(),
+            ExtendedKeyUpdateNotRunning(),
             p_phs_auth_running
         ),
         MessageOut(senc{message}p_hs_keys)
@@ -535,7 +546,8 @@ rule skip_certificate_request:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running,
+            ExtendedKeyUpdateNotRunning(),
+            ExtendedKeyUpdateNotRunning(),
             p_phs_auth_running
         )
     ]
@@ -575,7 +587,8 @@ rule skip_certificate_request:
             p_ems,
             p_rms,
             cert_req,
-            p_extended_key_update_running,
+            ExtendedKeyUpdateNotRunning(),
+            ExtendedKeyUpdateNotRunning(),
             p_phs_auth_running
         )
     ]
@@ -620,7 +633,8 @@ rule certificate_request:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running,
+            ExtendedKeyUpdateNotRunning(),
+            ExtendedKeyUpdateNotRunning(),
             p_phs_auth_running
         )
     ]
@@ -660,7 +674,8 @@ rule certificate_request:
             p_ems,
             p_rms,
             cert_req,
-            p_extended_key_update_running,
+            ExtendedKeyUpdateNotRunning(),
+            ExtendedKeyUpdateNotRunning(),
             p_phs_auth_running
         ),
         MessageOut(senc{message}p_hs_keys)
@@ -690,6 +705,7 @@ rule server_auth:
         auth_status = <'auth', '0'>
     in
     [
+        Fr(~newSendStreamId),
         ServerState(
             ~tid,
             'S2d',
@@ -721,7 +737,8 @@ rule server_auth:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running,
+            ExtendedKeyUpdateNotRunning(),
+            ExtendedKeyUpdateNotRunning(),
             p_phs_auth_running
         ),
         !Ltk($S, ~ltkS)
@@ -731,7 +748,9 @@ rule server_auth:
         Instance(~tid, $S, 'server'),
         Eq(p_psk_ke_mode, 'na'),
         UseLtk(~ltkS, signature),
-        RTranscript(~tid, $S, 'server', <messages>)
+        RTranscript(~tid, $S, 'server', <messages>),
+        WriteKeyDerivation(~tid, $S, $C, serverApplicationTrafficKey, p_gx, p_gxy),
+        HandshakeWriteKeyDerivation(~tid, $S, $C, serverApplicationTrafficKey, p_gx, p_gxy)
     ]->
     [
         ServerState(
@@ -765,10 +784,11 @@ rule server_auth:
             earlyMasterSecret,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running,
+            ExtendedKeyUpdateNotRunning(),
+            ExtendedKeyUpdateNotRunning(),
             p_phs_auth_running
         ),
-        SendStream(~tid, $S, $C, auth_status, serverApplicationTrafficKey),
+        SendStream(~tid, ~newSendStreamId, $S, $C, auth_status, serverApplicationTrafficKey),
         MessageOut(senc{<certificateMessage,certificateVerifyMessage,finishedMessage>}p_hs_keys)
     ]
 
@@ -783,6 +803,7 @@ rule recv_client_auth:
         serverApplicationTrafficKey = Expand(p_sats, <'TLS13applicationdatakeyexpansion_key', '0'>, '32')
     in
     [
+        Fr(~newRecvStreamId),
         ServerState(
             ~tid,
             'S3',
@@ -814,7 +835,8 @@ rule recv_client_auth:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running,
+            ExtendedKeyUpdateNotRunning(),
+            ExtendedKeyUpdateNotRunning(),
             p_phs_auth_running
         ),
         F_MessageIn(senc{receivedFinished}p_hs_keyc)
@@ -864,10 +886,11 @@ rule recv_client_auth:
             p_ems,
             resumptionMasterSecret,
             p_cert_req,
-            p_extended_key_update_running,
+            ExtendedKeyUpdateNotRunning(),
+            ExtendedKeyUpdateNotRunning(),
             p_phs_auth_running
         ),
-        RecvStream(~tid, $S, $C, p_auth_status, clientApplicationTrafficKey)
+        RecvStream(~tid, ~newRecvStreamId, $S, $C, p_auth_status, clientApplicationTrafficKey)
     ]
 
 rule recv_client_auth_cert:
@@ -896,6 +919,8 @@ rule recv_client_auth_cert:
         app_keys = Expand(p_sats, <'TLS13applicationdatakeyexpansion_key', '0'>, '32')
     in
     [
+        Fr(~newSendStreamId),
+        Fr(~newRecvStreamId),
         ServerState(
             ~tid,
             'S3',
@@ -927,11 +952,12 @@ rule recv_client_auth_cert:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running,
+            ExtendedKeyUpdateNotRunning(),
+            ExtendedKeyUpdateNotRunning(),
             p_phs_auth_running
         ),
         !Pk($C, pk(~ltkC)),
-        SendStream(~tid, $S, $C, p_auth_status, app_keys),
+        SendStream(~tid, ~sendStreamId, $S, $C, p_auth_status, app_keys),
         F_MessageIn(senc{receivedMessage}p_hs_keyc)
     ]
     --[
@@ -980,11 +1006,12 @@ rule recv_client_auth_cert:
             p_ems,
             rms,
             cert_req,
-            p_extended_key_update_running,
+            ExtendedKeyUpdateNotRunning(),
+            ExtendedKeyUpdateNotRunning(),
             p_phs_auth_running
         ),
-        SendStream(~tid, $S, $C, auth_status, app_keys),
-        RecvStream(~tid, $S, $C, auth_status, app_keyc)
+        SendStream(~tid, ~newSendStreamId, $S, $C, auth_status, app_keys),
+        RecvStream(~tid, ~newRecvStreamId, $S, $C, auth_status, app_keyc)
     ]
 
 rule new_session_ticket:
@@ -996,6 +1023,7 @@ rule new_session_ticket:
         message = NewSessionTicket($ticket_lifetime, ~ticket_age_add, ~ticket, ticket_extension)
     in
     [
+        Fr(~newSendStreamId),
         ServerState(
             ~tid,
             'S4',
@@ -1027,10 +1055,11 @@ rule new_session_ticket:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running,
+            ExtendedKeyUpdateNotRunning(),
+            ExtendedKeyUpdateNotRunning(),
             p_phs_auth_running
         ),
-        SendStream(~tid, $S, $C, p_auth_status, serverApplicationTrafficKey),
+        SendStream(~tid, ~sendStreamId, $S, $C, p_auth_status, serverApplicationTrafficKey),
         Fr(~ticket),
         Fr(~ticket_age_add)
     ]
@@ -1072,10 +1101,11 @@ rule new_session_ticket:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running,
+            ExtendedKeyUpdateNotRunning(),
+            ExtendedKeyUpdateNotRunning(),
             p_phs_auth_running
         ),
-        SendStream(~tid, $S, $C, p_auth_status, serverApplicationTrafficKey),
+        SendStream(~tid, ~newSendStreamId, $S, $C, p_auth_status, serverApplicationTrafficKey),
         !ServerPSK($S, $C, p_rms, p_auth_status, message, 'res'),
         F_SecretPSK($S, p_rms),
         MessageOut(senc{message}serverApplicationTrafficKey)

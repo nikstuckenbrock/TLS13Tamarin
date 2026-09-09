@@ -1,0 +1,189 @@
+// Client initiates and gets request from server, then processes server
+// verwirft eigenen request
+rule extended_key_udpate_client_aborts_server_wins:
+let
+    p_g = $r_negotiated_group
+    r_key_share_entry = KeyShareEntry(p_g, receivedOpaque)
+    receivedRequest = Handshake(HandshakeMessageTypeExtendedKeyUpdate(), ExtendedKeyUpdateRequest(r_key_share_entry))
+in
+    [
+        Fr(~ekuId),
+        Fr(~newRecvStreamId),
+        Fr(~newSendStreamId),
+        F_MessageIn(senc{receivedRequest}p_app_keys),
+        RecvStream(~tid, ~recvStreamId, $C, $S, p_auth_status, p_app_keys),
+        SendStream(~tid, ~sendStreamId, $C, $S, p_auth_status, p_app_keyc),
+        C4_Extended_Key_Update(~tid, ~ekuIdOld, 'EKU0', $C, $S, ~x, opaque, <request>),
+        ClientState(
+            ~tid,
+            'C4',
+            $C,
+            $S,
+            p_res_psk,
+            p_messages,
+            p_nc,
+            p_ns,
+            p_g,
+            p_sg,
+            p_hrr,
+            p_x,
+            p_y,
+            p_gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            p_hs,
+            p_ms,
+            p_cats,
+            p_sats,
+            p_hs_keyc,
+            p_hs_keys,
+            p_auth_status,
+            p_ems,
+            p_rms,
+            p_cert_req,
+            ExtendedKeyUpdateRunning(),
+            ~ekuIdOld,
+            PostHandshakeAuthenticationNotRunning()
+        )[no_precomp]
+    ]
+    --[
+        ExtendedKeyUpdateRaceConditionServerWins()
+    ]->
+    [
+        C4_Extended_Key_Update(~tid, ~ekuId, 'EKU0', $C, $S, '0', receivedOpaque, <receivedRequest>),
+        RecvStream(~tid, ~newRecvStreamId, $C, $S, p_auth_status, p_app_keys),
+        SendStream(~tid, ~newSendStreamId, $C, $S, p_auth_status, p_app_keyc),
+        ClientState(
+            ~tid,
+            'C4',
+            $C,
+            $S,
+            p_res_psk,
+            p_messages,
+            p_nc,
+            p_ns,
+            p_g,
+            p_sg,
+            p_hrr,
+            p_x,
+            p_y,
+            p_gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            p_hs,
+            p_ms,
+            p_cats,
+            p_sats,
+            p_hs_keyc,
+            p_hs_keys,
+            p_auth_status,
+            p_ems,
+            p_rms,
+            p_cert_req,
+            ExtendedKeyUpdateRunning(),
+            ~ekuId,
+            PostHandshakeAuthenticationNotRunning()
+        )
+    ]
+
+rule extended_key_update_server_aborts_client_wins:
+let
+    p_g = $negotiated_group
+    c_key_share_entry = KeyShareEntry(p_g, receivedOpaque)
+    receivedRequest = Handshake(HandshakeMessageTypeExtendedKeyUpdate(), ExtendedKeyUpdateRequest(c_key_share_entry))
+in
+    [
+        Fr(~ekuId),
+        Fr(~newRecvStreamId),
+        Fr(~newSendStreamId),
+        F_MessageIn(senc{receivedRequest}p_app_keyc),
+        S4_Extended_Key_Update(~tid, ~ekuIdOld, 'EKU0', $S, $C, ~x, opaque, <request>),
+        RecvStream(~tid, ~recvStreamId, $S, $C, p_auth_status, p_app_keyc),
+        SendStream(~tid, ~sendStreamId, $S, $C, p_auth_status, p_app_keys),
+        ServerState(
+            ~tid,
+            'S4',
+            $S,
+            $C,
+            p_res_psk,
+            p_messages,
+            p_nc,
+            p_ns,
+            p_g,
+            p_sg,
+            p_hrr,
+            p_x,
+            p_y,
+            p_gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            p_hs,
+            p_ms,
+            p_cats,
+            p_sats,
+            p_hs_keyc,
+            p_hs_keys,
+            p_auth_status,
+            p_ems,
+            p_rms,
+            p_cert_req,
+            ExtendedKeyUpdateRunning(),
+            ~ekuIdOld,
+            PostHandshakeAuthenticationNotRunning()
+        )[no_precomp]
+    ]
+    --[
+        ExtendedKeyUpdateRaceConditionClientWins()
+    ]->
+    [
+        S4_Extended_Key_Update(~tid, ~ekuId, 'EKU0', $S, $C, '0', receivedOpaque, <receivedRequest>),
+        ServerState(
+            ~tid,
+            'S4',
+            $S,
+            $C,
+            p_res_psk,
+            p_messages,
+            p_nc,
+            p_ns,
+            p_g,
+            p_sg,
+            p_hrr,
+            p_x,
+            p_y,
+            p_gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            p_hs,
+            p_ms,
+            p_cats,
+            p_sats,
+            p_hs_keyc,
+            p_hs_keys,
+            p_auth_status,
+            p_ems,
+            p_rms,
+            p_cert_req,
+            ExtendedKeyUpdateRunning(),
+            ~ekuId, 
+            PostHandshakeAuthenticationNotRunning()
+        )[no_precomp],
+        RecvStream(~tid, ~newRecvStreamId, $S, $C, p_auth_status, p_app_keyc),
+        SendStream(~tid, ~newSendStreamId, $S, $C, p_auth_status, p_app_keys)
+    ]

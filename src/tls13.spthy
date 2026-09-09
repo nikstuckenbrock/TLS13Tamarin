@@ -43,6 +43,8 @@ rule message_in_to_in:
 
 #ifdef extendedKeyUpdate
 #include "model/extendedKeyUpdate.splib"
+#include "model/extendedKeyUpdate/extendedKeyUpdate.splib"
+#include "model/extendedKeyUpdate/raceCondition.splib"
 #else
 #include "model/keyUpdate.splib"
 #endif

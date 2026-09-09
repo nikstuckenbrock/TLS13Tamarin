@@ -1,24 +1,22 @@
 tactic: uniquenessClient
 presort: i
 prio:
-    regex "\(#i < #j\)"
-prio:
     regex "ClientState"
 prio:
     regex "ServerState"
+prio:
+    regex "\(#i < #j\)"
 deprio:
     regex "splitEqs"
 
 tactic: uniquenessServer
 presort: i
 prio:
-    regex "\(#i < #j\)"
-prio:
-    regex "ServerState\(~tid, 'S0'"
-prio:
     regex "ServerState"
 prio:
     regex "ClientState"
+prio:
+    regex "\(#i < #j\)"
 deprio:
     regex "splitEqs"
 

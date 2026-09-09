@@ -63,7 +63,7 @@ rule CTValues[color=4d587a]:
     -->
     [!CTValues(~ct)]
 
-#ifdef not reachability
+//#ifdef not reachability
 rule attKeyGen[color=82a5ac]:
     [ Fr(~sk) ]
     --[ GoodKey(kem_pk(~sk)) ]->
@@ -83,7 +83,7 @@ rule attComputingDecaps[color=93b2b1]:
     [In(ct), In(seck), !KeyValues(k)]
     --[Decaps(k, ct, kem_pk(seck), seck), AttDecaps(k, ct, kem_pk(seck), seck)]->
     [Out(k)]
-#endif
+//#endif
 
 #ifdef bindktoct & not MAL & not reachability
 restriction k_bind_ct:

@@ -5,7 +5,8 @@ rule update_req_client:
         message = KeyUpdate(KeyUpdateUpdateRequested())
     in
     [
-        SendStream(~tid, $C, $S, p_auth_status, p_app_keyc),
+        Fr(~newSendStreamId),
+        SendStream(~tid, ~sendStreamId, $C, $S, p_auth_status, p_app_keyc),
         ClientState(
             ~tid,
             'C4',
@@ -37,7 +38,8 @@ rule update_req_client:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running,
+            ExtendedKeyUpdateNotRunning(),
+            ExtendedKeyUpdateNotRunning(),
             p_phs_auth_running
         )
     ]
@@ -48,7 +50,7 @@ rule update_req_client:
     ]->
     [
         MessageOut(senc{message}p_app_keyc),
-        SendStream(~tid, $C, $S, p_auth_status, app_keyc),
+        SendStream(~tid, ~newSendStreamId, $C, $S, p_auth_status, app_keyc),
         ClientState(
             ~tid,
             'C4',
@@ -80,7 +82,8 @@ rule update_req_client:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running,
+            ExtendedKeyUpdateNotRunning(),
+            ExtendedKeyUpdateNotRunning(),
             p_phs_auth_running
         )
     ]
@@ -97,6 +100,8 @@ rule update_recv_server:
         message = KeyUpdate(KeyUpdateUpdateNotRequested())
     in
     [
+        Fr(~newSendStreamId),
+        Fr(~newRecvStreamId),
         ServerState(
             ~tid,
             'S4',
@@ -128,11 +133,12 @@ rule update_recv_server:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running,
+            ExtendedKeyUpdateNotRunning(),
+            ExtendedKeyUpdateNotRunning(),
             p_phs_auth_running
         ),
-        RecvStream(~tid, $S, $C, p_auth_status, p_app_keyc),
-        SendStream(~tid, $S, $C, p_auth_status, p_app_keys),
+        RecvStream(~tid, ~recvStreamId, $S, $C, p_auth_status, p_app_keyc),
+        SendStream(~tid, ~sendStreamId, $S, $C, p_auth_status, p_app_keys),
         F_MessageIn(senc{receivedMessage}p_app_keyc)
     ]
     --[
@@ -141,8 +147,8 @@ rule update_recv_server:
         RPostHS(~tid, $S, 'server', <p_hs, p_rms, $C, p_auth_status, p_messages>)
     ]->
     [
-        RecvStream(~tid, $S, $C, p_auth_status, app_keyc),
-        SendStream(~tid, $S, $C, p_auth_status, app_keys),
+        RecvStream(~tid, ~newRecvStreamId, $S, $C, p_auth_status, app_keyc),
+        SendStream(~tid, ~newSendStreamId, $S, $C, p_auth_status, app_keys),
         MessageOut(senc{message}p_app_keys),
         ServerState(
             ~tid,
@@ -175,7 +181,8 @@ rule update_recv_server:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running,
+            ExtendedKeyUpdateNotRunning(),
+            ExtendedKeyUpdateNotRunning(),
             p_phs_auth_running
         )
     ]
@@ -188,7 +195,8 @@ rule update_fin_client:
         receivedMessage = KeyUpdate(KeyUpdateUpdateNotRequested())
     in
     [
-        RecvStream(~tid, $C, $S, p_auth_status, p_app_keys),
+        Fr(~newRecvStreamId),
+        RecvStream(~tid, ~recvStreamId, $C, $S, p_auth_status, p_app_keys),
         F_MessageIn(senc{receivedMessage}p_app_keys),
         ClientState(
             ~tid,
@@ -221,7 +229,8 @@ rule update_fin_client:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running,
+            ExtendedKeyUpdateNotRunning(),
+            ExtendedKeyUpdateNotRunning(),
             p_phs_auth_running
         )
     ]
@@ -231,7 +240,7 @@ rule update_fin_client:
         RPostHS(~tid, $C, 'client', <p_hs, p_rms, $S, p_auth_status, p_messages>)
     ]->
     [
-        RecvStream(~tid, $C, $S, p_auth_status, app_keys),
+        RecvStream(~tid, ~newRecvStreamId, $C, $S, p_auth_status, app_keys),
         ClientState(
             ~tid,
             'C4',
@@ -263,7 +272,8 @@ rule update_fin_client:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running,
+            ExtendedKeyUpdateNotRunning(),
+            ExtendedKeyUpdateNotRunning(),
             p_phs_auth_running
         )
     ]
@@ -275,7 +285,7 @@ rule update_req_server:
         message = KeyUpdate(KeyUpdateUpdateRequested())
     in
     [
-        SendStream(~tid, $S, $C, p_auth_status, p_app_keys),
+        SendStream(~tid, ~sendStreamId, $S, $C, p_auth_status, p_app_keys),
         ServerState(
             ~tid,
             'S4',
@@ -307,7 +317,8 @@ rule update_req_server:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running,
+            ExtendedKeyUpdateNotRunning(),
+            ExtendedKeyUpdateNotRunning(),
             p_phs_auth_running
         )
     ]
@@ -349,7 +360,8 @@ rule update_req_server:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running,
+            ExtendedKeyUpdateNotRunning(),
+            ExtendedKeyUpdateNotRunning(),
             p_phs_auth_running
         )
     ]
@@ -366,8 +378,10 @@ rule update_recv_client:
         message = KeyUpdate(KeyUpdateUpdateNotRequested())
     in
     [
-        RecvStream(~tid, $C, $S, p_auth_status, p_app_keys),
-        SendStream(~tid, $C, $S, p_auth_status, p_app_keyc),
+        Fr(~newSendStreamId),
+        Fr(~newRecvStreamId),
+        RecvStream(~tid, ~recvStreamId, $C, $S, p_auth_status, p_app_keys),
+        SendStream(~tid, ~sendStreamId, $C, $S, p_auth_status, p_app_keyc),
         F_MessageIn(senc{receivedMessage}p_app_keys),
         ClientState(
             ~tid,
@@ -400,7 +414,8 @@ rule update_recv_client:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running,
+            ExtendedKeyUpdateNotRunning(),
+            ExtendedKeyUpdateNotRunning(),
             p_phs_auth_running
         )
     ]
@@ -410,8 +425,8 @@ rule update_recv_client:
         RPostHS(~tid, $C, 'client', <p_hs, p_rms, $S, p_auth_status, p_messages>)
     ]->
     [
-        RecvStream(~tid, $C, $S, p_auth_status, app_keys),
-        SendStream(~tid, $C, $S, p_auth_status, app_keyc),
+        RecvStream(~tid, ~newRecvStreamId, $C, $S, p_auth_status, app_keys),
+        SendStream(~tid, ~newSendStreamId, $C, $S, p_auth_status, app_keyc),
         MessageOut(senc{message}p_app_keyc),
         ClientState(
             ~tid,
@@ -444,7 +459,8 @@ rule update_recv_client:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running,
+            ExtendedKeyUpdateNotRunning(),
+            ExtendedKeyUpdateNotRunning(),
             p_phs_auth_running
         )
     ]
@@ -457,8 +473,9 @@ rule update_fin_server:
         app_keyc = Expand(cats, <'TLS13applicationdatakeyexpansion_key', '0'>, '32')
     in
     [
+        Fr(~newRecvStreamId),
         F_MessageIn(senc{receivedMessage}p_app_keyc),
-        RecvStream(~tid, $S, $C, p_auth_status, p_app_keyc),
+        RecvStream(~tid, ~recvStreamId, $S, $C, p_auth_status, p_app_keyc),
         ServerState(
             ~tid,
             'S4',
@@ -490,7 +507,8 @@ rule update_fin_server:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running,
+            ExtendedKeyUpdateNotRunning(),
+            ExtendedKeyUpdateNotRunning(),
             p_phs_auth_running
         )
     ]
@@ -500,7 +518,7 @@ rule update_fin_server:
         RPostHS(~tid, $S, 'server', <p_hs, p_rms, $C, p_auth_status, p_messages>)
     ]->
     [
-        RecvStream(~tid, $S, $C, p_auth_status, app_keyc),
+        RecvStream(~tid, ~newRecvStreamId, $S, $C, p_auth_status, app_keyc),
         ServerState(
             ~tid,
             'S4',
@@ -532,7 +550,8 @@ rule update_fin_server:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running,
+            ExtendedKeyUpdateNotRunning(),
+            ExtendedKeyUpdateNotRunning(),
             p_phs_auth_running
         )
     ]

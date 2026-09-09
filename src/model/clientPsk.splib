@@ -79,6 +79,7 @@ rule client_hello_psk:
             '0',
             '0',
             ExtendedKeyUpdateNotRunning(),
+            ExtendedKeyUpdateNotRunning(),
             PostHandshakeAuthenticationNotRunning()
         ),
         F_CachePSK(~nc, $S, res_psk, auth_status, <'4', $ticket_lifetime, ticket_age_add, ticket, <<'46',$max_early_data_size>> >,psk_type),
@@ -170,7 +171,8 @@ rule recv_hello_retry_request_psk:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running,
+            ExtendedKeyUpdateNotRunning(),
+            ExtendedKeyUpdateNotRunning(),
             p_phs_auth_running
         ),
         F_CachePSK(~tid, $S, p_res_psk, p_auth_status, <'4', $ticket_lifetime, ticket_age_add, ticket,<<'46',$max_early_data_size>> >,psk_type),
@@ -218,7 +220,8 @@ rule recv_hello_retry_request_psk:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running,
+            ExtendedKeyUpdateNotRunning(),
+            ExtendedKeyUpdateNotRunning(),
             p_phs_auth_running
         )
     ]
@@ -267,7 +270,8 @@ rule recv_server_hello_psk:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running,
+            ExtendedKeyUpdateNotRunning(),
+            ExtendedKeyUpdateNotRunning(),
             p_phs_auth_running
         ),
         F_MessageIn(message)
@@ -310,7 +314,8 @@ rule recv_server_hello_psk:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running,
+            ExtendedKeyUpdateNotRunning(),
+            ExtendedKeyUpdateNotRunning(),
             p_phs_auth_running
         )
     ]
@@ -361,7 +366,8 @@ rule recv_server_hello_psk_dhe:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running,
+            ExtendedKeyUpdateNotRunning(),
+            ExtendedKeyUpdateNotRunning(),
             p_phs_auth_running
         ),
         !KeyValues(~k),
@@ -407,7 +413,8 @@ rule recv_server_hello_psk_dhe:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running,
+            ExtendedKeyUpdateNotRunning(),
+            ExtendedKeyUpdateNotRunning(),
             p_phs_auth_running
         )
     ]
@@ -425,6 +432,7 @@ rule recv_server_auth_psk:
         ems = Expand(p_ms, <'TLS13exportermastersecret', <h(messages)>>, '32')
     in
     [
+        Fr(~recvStreamId),
         ClientState(
             ~tid,
             'C2d',
@@ -456,7 +464,8 @@ rule recv_server_auth_psk:
             p_ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running,
+            ExtendedKeyUpdateNotRunning(),
+            ExtendedKeyUpdateNotRunning(),
             p_phs_auth_running
         ),
         F_MessageIn(senc{message}p_hs_keys)
@@ -504,8 +513,9 @@ rule recv_server_auth_psk:
             ems,
             p_rms,
             p_cert_req,
-            p_extended_key_update_running,
+            ExtendedKeyUpdateNotRunning(),
+            ExtendedKeyUpdateNotRunning(),
             p_phs_auth_running
         ),
-        RecvStream(~tid, $C, $S, p_auth_status, app_keys)
+        RecvStream(~tid, ~recvStreamId, $C, $S, p_auth_status, app_keys)
     ]

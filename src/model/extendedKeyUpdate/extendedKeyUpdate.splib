@@ -1,4 +1,4 @@
-rule extended_key_update_request_client[color=#340068]:
+rule extended_key_udpate_request_server[color=#EA3788]:
     let
         p_g = $negotiated_group
         opaque = kem_pk(~x)
@@ -9,7 +9,104 @@ rule extended_key_update_request_client[color=#340068]:
         Fr(~x),
         Fr(~ekuId),
         Fr(~newRecvStreamId),
-        SendStream(~tid, ~recvStreamId, $C, $S, p_auth_status, applicationTrafficKeyClient),
+        SendStream(~tid, ~recvStreamId, $S, $C, p_auth_status, applicationTrafficKeyServer),
+        ServerState(
+            ~tid,
+            'S4',
+            $S,
+            $C,
+            p_res_psk,
+            p_messages,
+            p_nc,
+            p_ns,
+            p_g,
+            p_sg,
+            p_hrr,
+            p_x,
+            p_y,
+            p_gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            p_hs,
+            p_ms,
+            p_cats,
+            p_sats,
+            p_hs_keyc,
+            p_hs_keys,
+            p_auth_status,
+            p_ems,
+            p_rms,
+            p_cert_req,
+            ExtendedKeyUpdateNotRunning(),
+            ExtendedKeyUpdateNotRunning(),
+            PostHandshakeAuthenticationNotRunning()
+        )[no_precomp]
+    ]
+    --[
+        ExtendedKeyUpdateRequestServer(~tid, $S),
+        Instance(~tid, $S, 'server'),
+        GoodKey(opaque),
+        GenKemEphemeral(~tid, $S, ~x)
+    ]->
+    [
+        S4_Extended_Key_Update(~tid, ~ekuId, 'EKU0', $S, $C, ~x, opaque, <request>),
+        !KEMEphermeralKey(~tid, $S, opaque, ~x),
+        MessageOut(senc{request}applicationTrafficKeyServer),
+        SendStream(~tid, ~newRecvStreamId, $S, $C, p_auth_status, applicationTrafficKeyServer),
+        ServerState(
+            ~tid,
+            'S4',
+            $S,
+            $C,
+            p_res_psk,
+            p_messages,
+            p_nc,
+            p_ns,
+            p_g,
+            p_sg,
+            p_hrr,
+            p_x,
+            p_y,
+            p_gx,
+            p_gy,
+            p_gxy,
+            p_psk_ke_mode,
+            p_psk_id,
+            p_edi,
+            p_es,
+            p_hs,
+            p_ms,
+            p_cats,
+            p_sats,
+            p_hs_keyc,
+            p_hs_keys,
+            p_auth_status,
+            p_ems,
+            p_rms,
+            p_cert_req,
+            ExtendedKeyUpdateRunning(),
+            ~ekuId,
+            PostHandshakeAuthenticationNotRunning()
+        )[no_precomp]
+    ]
+
+rule extended_key_update_request_server_receive[color=#340068]:
+    let
+        p_g = $negotiated_group
+        key_share_entry = KeyShareEntry(p_g, opaque)
+        request = Handshake(HandshakeMessageTypeExtendedKeyUpdate(), ExtendedKeyUpdateRequest(key_share_entry))
+    in
+    [
+        Fr(~ekuId),
+        Fr(~newRecvStreamId),
+        Fr(~newSendStreamId),
+        F_MessageIn(senc{request}p_app_keys),
+        RecvStream(~tid, ~recvStreamId, $C, $S, p_auth_status, p_app_keys),
+        SendStream(~tid, ~sendStreamId, $C, $S, p_auth_status, p_app_keyc),
         ClientState(
             ~tid,
             'C4',
@@ -47,16 +144,14 @@ rule extended_key_update_request_client[color=#340068]:
         )[no_precomp]
     ]
     --[
-        ExtendedKeyUpdateRequestClient(~tid, $C),
-        Instance(~tid, $C, 'client'),
-        GoodKey(opaque),
-        GenKemEphemeral(~tid, $C, ~x)
+        ExtendedKeyUpdateRequestServerReceive(~tid, $C),
+        ExtendedKeyUpdateRequestServerReceiveDetails(~tid, $C, ~ekuId, p_app_keyc, p_app_keys),
+        Instance(~tid, $C, 'client')
     ]->
     [
-        C4_Extended_Key_Update(~tid, ~ekuId, 'EKU0', $C, $S, ~x, opaque, <request>),
-        !KEMEphermeralKey(~tid, $C, opaque, ~x),
-        MessageOut(senc{request}applicationTrafficKeyClient),
-        SendStream(~tid, ~newRecvStreamId, $C, $S, p_auth_status, applicationTrafficKeyClient),
+        C4_Extended_Key_Update(~tid, ~ekuId, 'EKU0', $C, $S, '0', opaque, <request>),
+        RecvStream(~tid, ~newRecvStreamId, $C, $S, p_auth_status, p_app_keys),
+        SendStream(~tid, ~newSendStreamId, $C, $S, p_auth_status, p_app_keyc),
         ClientState(
             ~tid,
             'C4',
@@ -94,102 +189,7 @@ rule extended_key_update_request_client[color=#340068]:
         )[no_precomp]
     ]
 
-rule extended_key_update_request_client_receive[color=#EA3788]:
-    let
-        p_g = $negotiated_group
-        key_share_entry = KeyShareEntry(p_g, opaque)
-        request = Handshake(HandshakeMessageTypeExtendedKeyUpdate(), ExtendedKeyUpdateRequest(key_share_entry))
-    in
-    [
-        Fr(~ekuId),
-        Fr(~newRecvStreamId),
-        Fr(~newSendStreamId),
-        F_MessageIn(senc{request}p_app_keyc),
-        RecvStream(~tid, ~recvStreamId, $S, $C, p_auth_status, p_app_keyc),
-        SendStream(~tid, ~sendStreamId, $S, $C, p_auth_status, p_app_keys),
-        ServerState(
-            ~tid,
-            'S4',
-            $S,
-            $C,
-            p_res_psk,
-            p_messages,
-            p_nc,
-            p_ns,
-            p_g,
-            p_sg,
-            p_hrr,
-            p_x,
-            p_y,
-            p_gx,
-            p_gy,
-            p_gxy,
-            p_psk_ke_mode,
-            p_psk_id,
-            p_edi,
-            p_es,
-            p_hs,
-            p_ms,
-            p_cats,
-            p_sats,
-            p_hs_keyc,
-            p_hs_keys,
-            p_auth_status,
-            p_ems,
-            p_rms,
-            p_cert_req,
-            ExtendedKeyUpdateNotRunning(),
-            ExtendedKeyUpdateNotRunning(),
-            PostHandshakeAuthenticationNotRunning()
-        )[no_precomp]
-    ]
-    --[
-        ExtendedKeyUpdateRequestClientReceive(~tid, $S),
-        ExtendedKeyUpdateRequestClientReceiveDetails(~tid, $S, ~ekuId, p_app_keys, p_app_keyc),
-        Instance(~tid, $S, 'server')
-    ]->
-    [
-        S4_Extended_Key_Update(~tid, ~ekuId, 'EKU0', $S, $C, '0', opaque, <request>),
-        ServerState(
-            ~tid,
-            'S4',
-            $S,
-            $C,
-            p_res_psk,
-            p_messages,
-            p_nc,
-            p_ns,
-            p_g,
-            p_sg,
-            p_hrr,
-            p_x,
-            p_y,
-            p_gx,
-            p_gy,
-            p_gxy,
-            p_psk_ke_mode,
-            p_psk_id,
-            p_edi,
-            p_es,
-            p_hs,
-            p_ms,
-            p_cats,
-            p_sats,
-            p_hs_keyc,
-            p_hs_keys,
-            p_auth_status,
-            p_ems,
-            p_rms,
-            p_cert_req,
-            ExtendedKeyUpdateRunning(),
-            ~ekuId, 
-            PostHandshakeAuthenticationNotRunning()
-        )[no_precomp],
-        RecvStream(~tid, ~newRecvStreamId, $S, $C, p_auth_status, p_app_keyc),
-        SendStream(~tid, ~newSendStreamId, $S, $C, p_auth_status, p_app_keys)
-    ]
-
-rule extended_key_update_response_server[color=#EA3788]:
+rule extended_key_update_response_client[color=#340068]:
     let
         p_g = $negotiated_group
         key_share_entry = KeyShareEntry(p_g, ~ct)
@@ -216,14 +216,14 @@ rule extended_key_update_response_server[color=#EA3788]:
         !CTValues(~ct),
         Fr(~newSendStreamId),
         Fr(~newRecvStreamId),
-        SendStream(~tid, ~sendStreamId, $S, $C, p_auth_status, p_app_keys),
-        RecvStream(~tid, ~recvStreamId, $S, $C, p_auth_status, p_app_keyc),
-        S4_Extended_Key_Update(~tid, ~ekuIdOld, 'EKU0', $S, $C, '0', opaque, <request>),
-        ServerState(
+        SendStream(~tid, ~sendStreamId, $C, $S, p_auth_status, p_app_keyc),
+        RecvStream(~tid, ~recvStreamId, $C, $S, p_auth_status, p_app_keys),
+        C4_Extended_Key_Update(~tid, ~ekuIdOld, 'EKU0', $C, $S, '0', opaque, <request>),
+        ClientState(
             ~tid,
-            'S4',
-            $S,
+            'C4',
             $C,
+            $S,
             p_res_psk,
             p_messages,
             p_nc,
@@ -256,28 +256,28 @@ rule extended_key_update_response_server[color=#EA3788]:
         )[no_precomp]
     ]
     --[
-        ExtendedKeyUpdateResponseServer(~tid, $S),
-        ExtendedKeyUpdateResponseServerDetails(~tid, $S, ~ekuIdOld, p_app_keys, p_app_keyc),
-        Instance(~tid, $S, 'server'),
+        ExtendedKeyUpdateResponseClient(~tid, $C),
+        ExtendedKeyUpdateResponseClientDetails(),
+        Instance(~tid, $C, 'client'),
         Encaps(~k, ~ct, opaque),
-        SessionKey(~tid, $S, $C, auth_status, <server_application_traffic_key, client_application_traffic_key>),
-        EKUDerivate(~tid, main_secret_n_1, client_application_traffic_secret_n_1, server_application_traffice_secret_n_1, exporter_secret_n_1, resumption_main_secret_n_1, client_application_traffic_key, server_application_traffic_key),
-        EKUMainSecret(~tid, $S, opaque, p_ms, main_secret_n_1),
-        EKUWriteKeyDerivation(~tid, $S, $C, server_application_traffic_key, opaque, ~k),
-        WriteKeyDerivation(~tid, $S, $C, server_application_traffic_key, opaque, ~k),
-        EKUReadKeyDerivation(~tid, $S, $C, client_application_traffic_key, opaque, ~k),
-        ReadKeyDerivation(~tid, $S, $C, client_application_traffic_key, opaque, ~k)
+        SessionKey(~tid, $C, $S, auth_status, <client_application_traffic_key, server_application_traffic_key>),
+        EKUDerivate(~tid, main_secret_n_1, server_application_traffice_secret_n_1, client_application_traffic_secret_n_1, exporter_secret_n_1, resumption_main_secret_n_1, server_application_traffic_key, client_application_traffic_key),
+        EKUMainSecret(~tid, $C, opaque, p_ms, main_secret_n_1),
+        EKUWriteKeyDerivation(~tid, $C, $S, client_application_traffic_key, opaque, ~k),
+        WriteKeyDerivation(~tid, $C, $S, client_application_traffic_key, opaque, ~k),
+        EKUReadKeyDerivation(~tid, $C, $S, server_application_traffic_key, opaque, ~k),
+        ReadKeyDerivation(~tid, $C, $S, server_application_traffic_key, opaque, ~k)
     ]->
     [
-        S4_Extended_Key_Update(~tid, ~ekuId, 'EKU1', $S, $C, ~y, client_application_traffic_key, <request, response>),
-        MessageOut(senc{response}p_app_keys),
-        SendStream(~tid, ~newSendStreamId, $S, $C, auth_status, server_application_traffic_key),
-        RecvStream(~tid, ~newRecvStreamId, $S, $C, auth_status, p_app_keyc),
-        ServerState(
+        C4_Extended_Key_Update(~tid, ~ekuId, 'EKU1', $C, $S, ~y, server_application_traffic_key, <request, response>),
+        MessageOut(senc{response}p_app_keyc),
+        SendStream(~tid, ~newSendStreamId, $C, $S, auth_status, client_application_traffic_key),
+        RecvStream(~tid, ~newRecvStreamId, $C, $S, auth_status, p_app_keys),
+        ClientState(
             ~tid,
-            'S4',
-            $S,
+            'C4',
             $C,
+            $S,
             p_res_psk,
             p_messages,
             p_nc,
@@ -305,12 +305,12 @@ rule extended_key_update_response_server[color=#EA3788]:
             resumption_main_secret_n_1,
             p_cert_req,
             ExtendedKeyUpdateRunning(),
-            ~ekuId, 
+            ~ekuId,
             PostHandshakeAuthenticationNotRunning()
         )[no_precomp]
     ]
 
-rule extended_key_update_response_server_receive[color=#340068]:
+rule extended_key_update_response_client_receive[color=#EA3788]:
     let
         p_g = $g
         key_share_entry = KeyShareEntry(p_g, gy)
@@ -319,14 +319,14 @@ rule extended_key_update_response_server_receive[color=#340068]:
     [
         Fr(~ekuId),
         Fr(~newRecvStreamId),
-        C4_Extended_Key_Update(~tid, ~ekuIdOld, 'EKU0', $C, $S, ~x, gx, <request>),
-        F_MessageIn(senc{response}p_app_keys),
-        RecvStream(~tid, ~recvStreamId, $C, $S, p_auth_status, p_app_keys),
-        ClientState(
+        S4_Extended_Key_Update(~tid, ~ekuIdOld, 'EKU0', $S, $C, ~x, gx, <request>),
+        F_MessageIn(senc{response}p_app_keyc),
+        RecvStream(~tid, ~recvStreamId, $S, $C, p_auth_status, p_app_keyc),
+        ServerState(
             ~tid,
-            'C4',
-            $C,
+            'S4',
             $S,
+            $C,
             p_res_psk,
             p_messages,
             p_nc,
@@ -359,17 +359,17 @@ rule extended_key_update_response_server_receive[color=#340068]:
         )[no_precomp]
     ]
     --[
-        ExtendedKeyUpdateResponseServerReceive(~tid, $C),
-        Instance(~tid, $C, 'client')
+        ExtendedKeyUpdateResponseClientReceive(~tid, $S),
+        Instance(~tid, $S, 'server')
     ]->
     [
-        C4_Extended_Key_Update(~tid, ~ekuId, 'EKU1', $C, $S, ~x, gy, <request, response>),
-        RecvStream(~tid, ~newRecvStreamId, $C, $S, p_auth_status, p_app_keys),
-        ClientState(
+        S4_Extended_Key_Update(~tid, ~ekuId, 'EKU1', $S, $C, ~x, gy, <request, response>),
+        RecvStream(~tid, ~newRecvStreamId, $S, $C, p_auth_status, p_app_keyc),
+        ServerState(
             ~tid,
-            'C4',
-            $C,
+            'S4',
             $S,
+            $C,
             p_res_psk,
             p_messages,
             p_nc,
@@ -402,7 +402,7 @@ rule extended_key_update_response_server_receive[color=#340068]:
         )[no_precomp]
     ]
 
-rule extended_key_update_finish_client[color=#340068]:
+rule extended_key_udpate_finish_server[color=#EA3788]:
     let
         p_g = $g
         finish = Handshake(HandshakeMessageTypeExtendedKeyUpdate(), ExtendedKeyUpdateFinish())
@@ -425,14 +425,14 @@ rule extended_key_update_finish_client[color=#340068]:
         Fr(~newSendStreamId),
         Fr(~newRecvStreamId),
         !KeyValues(~k),
-        C4_Extended_Key_Update(~tid, ~ekuIdOld, 'EKU1', $C, $S, ~x, gy, <request, response>),
-        SendStream(~tid, ~sendStreamId, $C, $S, p_auth_status, applicationTrafficKeyClient),
-        RecvStream(~tid, ~recvStreamId, $C, $S, p_auth_status, p_app_keys),
-        ClientState(
+        S4_Extended_Key_Update(~tid, ~ekuIdOld, 'EKU1', $S, $C, ~x, gy, <request, response>),
+        SendStream(~tid, ~sendStreamId, $S, $C, p_auth_status, applicationTrafficKeyServer),
+        RecvStream(~tid, ~recvStreamId, $S, $C, p_auth_status, p_app_keyc),
+        ServerState(
             ~tid,
-            'C4',
-            $C,
+            'S4',
             $S,
+            $C,
             p_res_psk,
             p_messages,
             p_nc,
@@ -465,24 +465,24 @@ rule extended_key_update_finish_client[color=#340068]:
         )[no_precomp]
     ]
     --[
-        ExtendedKeyUpdateFinishClient(~tid, $C),
-        ExtendedKeyUpdateFinishClientDetails(~tid, ~ekuIdOld, 'EKU1', $C, $S, ~x, gy, '0', <request, response>),
+        ExtendedKeyUpdateFinishServer(~tid, $S),
+        ExtendedKeyUpdateFinishServerDetails(~tid, ~ekuIdOld, 'EKU1', $S, $C, ~x, gy, '0', <request, response>),
         Decaps(~k, gy, kem_pk(~x), ~x),
-        Instance(~tid, $C, 'client'),
-        SessionKey(~tid, $C, $S, auth_status, <client_application_traffic_key, server_application_traffic_key>),
-        EKUWriteKeyDerivation(~tid, $C, $S, client_application_traffic_key, kem_pk(~x), ~k),
-        EKUReadKeyDerivation(~tid, $C, $S, server_application_traffic_key, kem_pk(~x), ~k),
-        EKUMainSecret(~tid, $C, kem_pk(~x), p_ms, main_secret_n_1)
+        Instance(~tid, $S, 'server'),
+        SessionKey(~tid, $S, $C, auth_status, <server_application_traffic_key, client_application_traffic_key>),
+        EKUWriteKeyDerivation(~tid, $S, $C, server_application_traffic_key, kem_pk(~x), ~k),
+        EKUReadKeyDerivation(~tid, $S, $C, client_application_traffic_key, kem_pk(~x), ~k),
+        EKUMainSecret(~tid, $S, kem_pk(~x), p_ms, main_secret_n_1)
     ]->
     [
-        SendStream(~tid, ~newSendStreamId, $C, $S, auth_status, client_application_traffic_key),
-        RecvStream(~tid, ~newRecvStreamId, $C, $S, auth_status, server_application_traffic_key),
-        MessageOut(senc{finish}applicationTrafficKeyClient),
-        ClientState(
+        SendStream(~tid, ~newSendStreamId, $S, $C, auth_status, server_application_traffic_key),
+        RecvStream(~tid, ~newRecvStreamId, $S, $C, auth_status, client_application_traffic_key),
+        MessageOut(senc{finish}applicationTrafficKeyServer),
+        ServerState(
             ~tid,
-            'C4',
-            $C,
+            'S4',
             $S,
+            $C,
             p_res_psk,
             p_messages,
             p_nc,
@@ -515,21 +515,20 @@ rule extended_key_update_finish_client[color=#340068]:
         )[no_precomp]
     ]
 
-rule extended_key_update_finish_client_receive[color=#EA3788]:
+rule extended_key_udpate_finish_server_receive[color=#340068]:
     let
         p_g = $g
         finish = Handshake(HandshakeMessageTypeExtendedKeyUpdate(), ExtendedKeyUpdateFinish())
     in
     [
         Fr(~newRecvStreamId),
-        RecvStream(~tid, ~recvStreamId, $S, $C, p_auth_status, p_app_keyc),
-        F_MessageIn(senc{finish}p_app_keyc),
-        S4_Extended_Key_Update(~tid, ~ekuIdOld, 'EKU1', $S, $C, y, new_receive_key, <request, response>),
-        ServerState(
-            ~tid,
-            'S4',
-            $S,
+        RecvStream(~tid, ~recvStreamId, $C, $S, p_auth_status, p_app_keys),
+        F_MessageIn(senc{finish}p_app_keys),
+        C4_Extended_Key_Update(~tid, ~ekuIdOld, 'EKU1', $C, $S, y, new_receive_key, <request, respone>),
+        ClientState(~tid,
+            'C4',
             $C,
+            $S,
             p_res_psk,
             p_messages,
             p_nc,
@@ -562,15 +561,15 @@ rule extended_key_update_finish_client_receive[color=#EA3788]:
         )[no_precomp]
     ]
     --[
-        ExtendedKeyUpdateFinishClientReceive(~tid, $S)
+        ExtendedKeyUpdateFinishServerReceive(~tid, $C)
     ]->
     [
-        RecvStream(~tid, ~newRecvStreamId, $S, $C, p_auth_status, new_receive_key),
-        ServerState(
+        RecvStream(~tid, ~newRecvStreamId, $C, $S, p_auth_status, new_receive_key),
+        ClientState(
             ~tid,
-            'S4',
-            $S,
+            'C4',
             $C,
+            $S,
             p_res_psk,
             p_messages,
             p_nc,
@@ -600,9 +599,5 @@ rule extended_key_update_finish_client_receive[color=#EA3788]:
             ExtendedKeyUpdateNotRunning(),
             ExtendedKeyUpdateNotRunning(),
             PostHandshakeAuthenticationNotRunning()
-        )[no_precomp]
+        )
     ]
-
-// note: some mechanism to ensure there is only one key update at once,
-// maybe other things interact with running eku
-// note: add reveal rules for dhexp
