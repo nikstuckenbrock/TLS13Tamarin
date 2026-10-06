@@ -292,7 +292,7 @@ lemma server_message_secrecy:
         SendData(tid, actor, peer, auth, message, writeKey)@s &
         WriteKeyDerivation(tid, actor, peer, writeKey, publicKemKey, sharedKemKey)@t &
         Instance(tid, actor, 'server')@t &
-        CIdentityPost(tid, actor, 'server', <<peer, <pas, 'auth'>>>)@w
+        CIdentityPost(tid, actor, 'server', <<peer, <pas, 'auth'>>>)@w &
         GoodKey(publicKemKey)@u
     ==> not (Ex #x. K(message)@x)
         | (Ex #x. RevLtk(peer)@x & #x < #s)
@@ -300,13 +300,32 @@ lemma server_message_secrecy:
         | (Ex rms #x. RevealPSK(peer, rms)@x)
         | (Ex someTid someActor #x. RevealKemEphermeral(someTid, someActor, publicKemKey)@x )"
 
+lemma test [use_induction,reuse]:
+    "All tid identity #s.
+        ExtendedKeyUpdateRequestClient(tid, identity)@s
+    ==> (Ex #t. C3(tid)@t & #t < #s)
+        | (Ex #t. C3_cert(tid)@t & #t < #s)
+        | (Ex #t. S2d(tid)@t & #t < #s)
+        | (Ex #t. S2d_PSK(tid)@t & #t < #s)"
+
+lemma send_stream_source_is_handshake [use_induction,reuse]:
+    "All tid actor peer someAuth message writeKey #s.
+        SendData(tid, actor, peer, someAuth, message, writeKey)@s
+    ==> (Ex #t. C3(tid)@t & #t < #s)
+        | (Ex #t. C3_cert(tid)@t & #t < #s)
+        | (Ex #t. S2d(tid)@t & #t < #s)
+        | (Ex #t. S2d_PSK(tid)@t & #t < #s)"
+
+// mehr infos in die states
 
 lemma handshake_message_secrecy [hide_lemma=eku_derived_secrets_and_keys_secrecy,hide_lemma=eku_main_secret_secrecy,hide_lemma=eku_key_agreement,hide_lemma=sig_origin,hide_lemma=posths_rms_weak,hide_lemma=auth_psk,hide_lemma=matching_sessions,hide_lemma=posths_rms,hide_lemma=mutual_entity_authentication,hide_lemma=mutual_transcript_agreement,hide_lemma=injective_mutual_entity_authentication]:
     "All tid actor peer message writeKey someAuth publicKemKey sharedKemKey #s #t.
-        SendData(tid, actor, peer, <someAuth, 'auth'>, message, writeKey)@s &
+        SendData(tid, actor, peer, someAuth, message, writeKey)@s &
         HandshakeWriteKeyDerivation(tid, actor, peer, writeKey, publicKemKey, sharedKemKey)@t &
-        not ((Ex someTid someIdentity #x. ExtendedKeyUpdateRequestClient(someTid, someIdentity)@x) 
-            | (Ex someTid someIdentity #x. ExtendedKeyUpdateRequestServer(someTid, someIdentity)@x))
+        ( Instance(tid, actor, 'client')@s
+        | (Ex someTid #u. GoodKey(publicKemKey)@u &
+          Start(someTid, peer, 'client')@u
+        ))
     ==> not (Ex #x. K(message)@x)
         | (Ex #x. RevLtk(peer)@x & #x < #s)
         | (Ex rms #x. RevealPSK(actor, rms)@x)
