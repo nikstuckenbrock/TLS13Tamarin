@@ -199,6 +199,7 @@ rule client_auth_post:
     in
     [
         Fr(~newSendStreamId),
+        Fr(~newRecvStreamId),
         ClientState(
             ~tid,
             'C4',
@@ -235,6 +236,7 @@ rule client_auth_post:
             PostHandshakeAuthenticationRunning()
         ),
         SendStream(~tid, ~sendStreamId, $C, $S, p_auth_status, app_keyc),
+        RecvStream(~tid, ~recvStreamId, $C, $S, p_auth_status, app_keys),
         !Ltk($C, ~ltkC),
         L_ClientCertReq(~tid, $C, $S, certificate_request_context)
     ]
@@ -283,6 +285,7 @@ rule client_auth_post:
             PostHandshakeAuthenticationNotRunning()
         ),
         SendStream(~tid, ~newSendStreamId, $C, $S, auth_status, app_keyc),
+        RecvStream(~tid, ~newRecvStreamId, $C, $S, auth_status, app_keys),
         MessageOut(senc{messagesOut}app_keyc)
     ]
 
@@ -306,6 +309,7 @@ rule recv_client_auth_post:
     in
     [
         Fr(~newRecvStreamId),
+        Fr(~newSendStreamId),
         ServerState(
             ~tid,
             'S4',
@@ -342,6 +346,7 @@ rule recv_client_auth_post:
             PostHandshakeAuthenticationRunning()
         ),
         RecvStream(~tid, ~recvStreamId, $S, $C, p_auth_status, app_keyc),
+        SendStream(~tid, ~sendStreamId, $S, $C, p_auth_status, app_keys),
         !Pk($C, pk(~ltkC)),
         L_ServerCertReq(~tid, $S, $C, ~cert_req_ctxt),
         F_MessageIn(senc{receivedMessage}app_keyc)
@@ -394,5 +399,6 @@ rule recv_client_auth_post:
             ExtendedKeyUpdateNotRunning(),
             PostHandshakeAuthenticationNotRunning()
         ),
-        RecvStream(~tid, ~newRecvStreamId, $S, $C, auth_status, app_keyc)
+        RecvStream(~tid, ~newRecvStreamId, $S, $C, auth_status, app_keyc),
+        SendStream(~tid, ~newSendStreamId, $S, $C, auth_status, app_keys)
     ]

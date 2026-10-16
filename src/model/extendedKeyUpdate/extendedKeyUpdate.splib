@@ -208,6 +208,8 @@ rule extended_key_update_response_client[color=#340068]:
         server_application_traffic_key = Expand(server_application_traffice_secret_n_1, <'32', 'TLS13applicationdatakeyexpansion_key', '0'>, '32')
 
         auth_status = <'0', '0'>
+
+        messages = <p_messages, request, response>
     in
     [
         Fr(~y),
@@ -279,7 +281,7 @@ rule extended_key_update_response_client[color=#340068]:
             $C,
             $S,
             p_res_psk,
-            p_messages,
+            messages,
             p_nc,
             p_ns,
             p_g,
@@ -420,6 +422,8 @@ rule extended_key_udpate_finish_server[color=#EA3788]:
         server_application_traffic_key = Expand(server_application_traffice_secret_n_1, <'32', 'TLS13applicationdatakeyexpansion_key', '0'>, '32')
 
         auth_status = <'0', '0'>
+
+        messages = <p_messages, request, response>
     in
     [
         Fr(~newSendStreamId),
@@ -484,7 +488,7 @@ rule extended_key_udpate_finish_server[color=#EA3788]:
             $S,
             $C,
             p_res_psk,
-            p_messages,
+            messages,
             p_nc,
             p_ns,
             p_g,
